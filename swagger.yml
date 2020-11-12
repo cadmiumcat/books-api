@@ -1,0 +1,21 @@
+swagger: "2.0"
+info:
+  title: "Skills API"
+  version: "v1"
+paths:
+  /library:
+    get:
+      summary: "List all books"
+      responses:
+        200:
+          description: "An array of books"
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Book'
+definitions:
+  Book:
+    type: object
+    properties:
+      title:
+        type: string
