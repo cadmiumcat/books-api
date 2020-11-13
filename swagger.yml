@@ -6,16 +6,109 @@ paths:
   /library:
     get:
       summary: "List all books"
+      description: "List all books in the library"
+      produces:
+        - application/json
       responses:
         200:
-          description: "An array of books"
+          description: "Succesfully returned list of books"
           schema:
-            type: array
-            items:
-              $ref: '#/definitions/Book'
+            $ref: '#/definitions/Library'
+      deprecated: false
+    post:
+      summary: "Add a book to the library"
+      description: "Adds a new book to the library"
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: Book
+          schema:
+            $ref: '#/definitions/Book'
+      responses:
+        200:
+          description: "Succesfully added book to the library"
+          schema:
+            $ref: '#/definitions/Book'
+      deprecated: false
+  /library/{id}:
+    get:
+      summary: "Find book by ID"
+      description: "List the book matching the ID provided"
+      parameters:
+        - name: id
+          in: path
+          description: "ID of book to locate"
+          required: true
+          type: integer
+      responses:
+        200:
+          description: "Succesful operation"
+          schema:
+            $ref: '#/definitions/Book'
+      deprecated: false
+  /library/{id}/checkout:
+    post:
+      summary: "Checkout book"
+      responses:
+
+
+      deprecated: false
+    put:
+      summary: "Check in book"
+      responses:
+
+
+      deprecated: false
+
 definitions:
+  Title:
+    type: string
+    description: "Book title"
+  id:
+    type: integer
+    description: "Book id"
+  Who:
+    type: string
+    description: "Name of user checking book out/in"
+  Time:
+    type: string
+  Review:
+    type: integer
+    description: "Review of the book (1-5)"
   Book:
     type: object
+    required:
+      - "Title"
     properties:
-      title:
-        type: string
+      Title:
+        $ref: '#/definitions/Title'
+      id:
+        $ref: '#/definitions/id'
+    example:
+      Title: "I know why the caged bird sings"
+      id: 5
+  Library:
+    type: array
+    description: "All books stored in the library"
+    items: {
+      $ref: '#/definitions/Book'
+    }
+    example:
+      - Title: "I know why the caged bird sings"
+        id: 5
+      - Title: "Girl, Woman, Other"
+        id: 6
+  Checkout:
+    type: object
+    properties:
+      Who:
+        $ref: '#/definitions/Who'
+      TimeOut:
+        $ref: '#/definitions/Time'
+      Timein:
+        $ref: '#/definitions/Time'
+      Review:
+        $ref: '#/definitions/Review'
