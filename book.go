@@ -36,9 +36,9 @@ func init() {
 }
 
 func get(id string) (book *Book) {
-	for _, l := range lib {
+	for i, l := range lib {
 		if l.Self.ID == id {
-			book = &l
+			book = &lib[i]
 			break
 		}
 	}
