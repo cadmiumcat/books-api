@@ -51,8 +51,8 @@ paths:
       deprecated: false
   /library/{id}/checkout:
     post:
-      summary: "Checkout book with given id"
-      description: "A User can Checkout a book with given id"
+      summary: "Checkout book with given ID"
+      description: "A User can Checkout a book with given ID"
       parameters:
         - name: id
           in: path
@@ -76,8 +76,8 @@ paths:
                 $ref: '#/definitions/Who'
       deprecated: false
     put:
-      summary: "Checkin book with given id"
-      description: "A User can Checkin a book with given id"
+      summary: "Checkin book with given ID"
+      description: "A User can Checkin a book with given ID"
       parameters:
         - name: id
           in: path
@@ -104,19 +104,20 @@ definitions:
   Title:
     type: string
     description: "Book title"
+    example: "The handmaid's tail"
   id:
     type: integer
-    description: "Book id"
+    description: "Book ID"
   Who:
     type: string
     description: "Name of user checking book out/in"
+    example: "bookworm"
   Time:
     type: string
   Review:
     type: integer
     description: "Review of the book (1-5)"
-    example:
-      2
+    example: 2
   Checkout:
     type: object
     required:
