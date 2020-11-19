@@ -153,7 +153,9 @@ definitions:
         }
     example:
       Title: "I know why the caged bird sings"
-      id: 5
+      Self:
+        - HRef: "amazon.com"
+          id: 5
   Library:
     type: object
     description: "All books stored in the library"
