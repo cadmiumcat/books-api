@@ -129,8 +129,8 @@ func checkinBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := checkout(book, co.Who); err != nil {
-		log.Println("could not check out book: [%s]", err.Error)
+	if err := checkin(book, co.Review); err != nil {
+		log.Println(fmt.Sprintf("could not check in book: [%s]", err.Error()))
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
