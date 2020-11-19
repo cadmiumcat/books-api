@@ -3,14 +3,16 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/eldeal/skills/config"
+	"github.com/gorilla/mux"
 	"io/ioutil"
 	"log"
 	"net/http"
-
-	"github.com/gorilla/mux"
 )
 
 func main() {
+	// Get Config
+	cfg, _ := config.Get()
 
 	r := mux.NewRouter()
 
@@ -21,7 +23,7 @@ func main() {
 	r.HandleFunc("/library/{id}/checkout", checkoutBook).Methods("POST")
 	r.HandleFunc("/library/{id}/checkout", checkinBook).Methods("PUT")
 
-	http.ListenAndServe(":8080", r)
+	http.ListenAndServe(cfg.BindAddr, r)
 }
 
 func createBook(w http.ResponseWriter, r *http.Request) {
