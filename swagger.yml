@@ -28,7 +28,7 @@ definitions:
       - id
       - title
       - author
-      - links.self
+      - links
     properties:
       id:
         description: "Unique book id"
