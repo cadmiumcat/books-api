@@ -17,7 +17,7 @@ func Get() (*Configuration, error) {
 	}
 
 	cfg = &Configuration{
-		BindAddr: ":22400",
+		BindAddr: ":8080",
 	}
 
 	return cfg, envconfig.Process("", cfg)
