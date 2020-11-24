@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
   title: "Skills API"
-  version: "v1"
+  version: "1.0.0"
 paths:
   /library:
     get:
@@ -11,7 +11,7 @@ paths:
         - application/json
       responses:
         200:
-          description: "Succesfully returned list of books"
+          description: "Successfully returned list of books"
           schema:
             $ref: '#/definitions/Library'
       deprecated: false
@@ -29,7 +29,7 @@ paths:
             $ref: '#/definitions/Book'
       responses:
         200:
-          description: "Succesfully added book to the library"
+          description: "Successfully added book to the library"
           schema:
             $ref: '#/definitions/Book'
       deprecated: false
@@ -45,12 +45,12 @@ paths:
           type: integer
       responses:
         200:
-          description: "Succesful operation"
+          description: "Successful operation"
           schema:
             $ref: '#/definitions/Book'
       deprecated: false
   /library/{id}/checkout:
-    post:
+    put:
       summary: "Checkout book with given ID"
       description: "A User can Checkout a book with given ID"
       parameters:
@@ -68,13 +68,14 @@ paths:
                 $ref: '#/definitions/Who'
       responses:
         200:
-          description: "Succesful operation"
+          description: "Successful operation"
           schema:
             type: object
             properties:
               Who:
                 $ref: '#/definitions/Who'
       deprecated: false
+  /library/{id}/checkin:
     put:
       summary: "Checkin book with given ID"
       description: "A User can Checkin a book with given ID"
@@ -93,7 +94,7 @@ paths:
                 $ref: '#/definitions/Review'
       responses:
         200:
-          description: "Succesful operation"
+          description: "Successful operation"
           schema:
             type: object
             properties:
