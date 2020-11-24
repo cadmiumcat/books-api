@@ -102,7 +102,7 @@ func checkoutBook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := checkout(book, co.Who); err != nil {
-		log.Println(fmt.Sprintf("failed to retrieve configuration. [%s]", err.Error()))
+		log.Println(fmt.Sprintf("could not check out book: [%s]", err.Error()))
 		http.Error(w, "invalid checkout details provided", http.StatusBadRequest)
 		return
 	}
