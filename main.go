@@ -2,19 +2,19 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/eldeal/skills/config"
 	"github.com/gorilla/mux"
 	"io/ioutil"
-	"log"
 	"net/http"
+
+	"github.com/ONSdigital/log.go/log"
 )
 
 func main() {
 	// Get Config
 	cfg, err := config.Get()
 	if err != nil {
-		log.Println(fmt.Sprintf("error retrieving the configuration: [%s]", err.Error))
+		log.Event(nil, "error retrieving the configuration", log.FATAL, log.Error(err))
 	}
 
 	r := mux.NewRouter()
@@ -81,6 +81,7 @@ func getBook(w http.ResponseWriter, r *http.Request) {
 }
 
 func checkoutBook(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	book := get(mux.Vars(r)["id"])
 	if book == nil {
 		bookNotFound(w)
@@ -102,7 +103,7 @@ func checkoutBook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := checkout(book, co.Who); err != nil {
-		log.Println(fmt.Sprintf("could not check out book: [%s]", err.Error()))
+		log.Event(ctx, "could not check out book", log.ERROR, log.Error(err))
 		http.Error(w, "invalid checkout details provided", http.StatusBadRequest)
 		return
 	}
@@ -114,6 +115,7 @@ func checkoutBook(w http.ResponseWriter, r *http.Request) {
 }
 
 func checkinBook(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	b, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
@@ -135,7 +137,7 @@ func checkinBook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := checkin(book, co.Review); err != nil {
-		log.Println(fmt.Sprintf("could not check in book: [%s]", err.Error()))
+		log.Event(ctx, "could not check in book", log.ERROR, log.Error(err))
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
