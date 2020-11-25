@@ -18,8 +18,8 @@ func main() {
 	r.HandleFunc("/library", listBooks).Methods("GET")
 	r.HandleFunc("/library/{id}", getBook).Methods("GET")
 
-	r.HandleFunc("/library/{id}/checkout", checkoutBook).Methods("POST")
-	r.HandleFunc("/library/{id}/checkout", checkinBook).Methods("PUT")
+	r.HandleFunc("/library/{id}/checkout", checkoutBook).Methods("PUT")
+	r.HandleFunc("/library/{id}/checkin", checkinBook).Methods("PUT")
 
 	http.ListenAndServe(":8080", r)
 }
