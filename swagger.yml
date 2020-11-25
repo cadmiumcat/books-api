@@ -21,6 +21,27 @@ paths:
           schema:
             $ref: "#/definitions/Book"
       deprecated: false
+  /books:
+    get:
+      summary: "Returns a list of all books"
+      description: "Returns a list of all books and the total number of books"
+      responses:
+        200:
+          description: "Successfully returned a list of all books"
+          schema:
+            type: object
+            required:
+              - total_count
+              - items
+            properties:
+              total_count:
+                description: "Total number of books in the list"
+                type: integer
+              items:
+                description: "list of books"
+                type: array
+                items:
+                  $ref: "#/definitions/Book"
 definitions:
   Book:
     type: object
