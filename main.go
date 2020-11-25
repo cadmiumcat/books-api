@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/mux"
 	"io/ioutil"
 	"net/http"
+	"os"
 
 	"github.com/ONSdigital/log.go/log"
 )
@@ -15,6 +16,7 @@ func main() {
 	cfg, err := config.Get()
 	if err != nil {
 		log.Event(nil, "error retrieving the configuration", log.FATAL, log.Error(err))
+		os.Exit(1)
 	}
 
 	r := mux.NewRouter()
