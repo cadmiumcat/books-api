@@ -42,6 +42,32 @@ paths:
                 type: array
                 items:
                   $ref: "#/definitions/Book"
+    post:
+      summary: "Adds a new book"
+      description: "Add a new book to the list"
+      parameters:
+        - name: Books
+          in: body
+          schema:
+            type: object
+            required:
+              - title
+              - author
+            properties:
+              title:
+                description: "Name of the book"
+                type: string
+              author:
+                description: "Author of the book"
+                type: string
+              synopsis:
+                description: "Brief summary of the book"
+                type: string
+      responses:
+        200:
+          description: "Successfully added book"
+          schema:
+            $ref: "#/definitions/Book"
 definitions:
   Book:
     type: object
