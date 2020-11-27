@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
-  title: Books
-  version: 1.1.0
+  title: "Books"
+  version: "1.1.0"
 paths:
   /books/{id}:
     get:
