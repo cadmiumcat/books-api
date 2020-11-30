@@ -2,16 +2,18 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/ONSdigital/log.go/log"
 	"github.com/eldeal/skills/config"
 	"github.com/gorilla/mux"
 	"io/ioutil"
 	"net/http"
 	"os"
-
-	"github.com/ONSdigital/log.go/log"
 )
 
+const serviceName = "books-api"
+
 func main() {
+	log.Namespace = serviceName
 	// Get Config
 	cfg, err := config.Get()
 	if err != nil {
