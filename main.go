@@ -2,15 +2,24 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"log"
-	"net/http"
-
+	"github.com/ONSdigital/log.go/log"
+	"github.com/eldeal/skills/config"
 	"github.com/gorilla/mux"
+	"io/ioutil"
+	"net/http"
+	"os"
 )
 
+const serviceName = "books-api"
+
 func main() {
+	log.Namespace = serviceName
+	// Get Config
+	cfg, err := config.Get()
+	if err != nil {
+		log.Event(nil, "error retrieving the configuration", log.FATAL, log.Error(err))
+		os.Exit(1)
+	}
 
 	r := mux.NewRouter()
 
@@ -21,7 +30,7 @@ func main() {
 	r.HandleFunc("/library/{id}/checkout", checkoutBook).Methods("PUT")
 	r.HandleFunc("/library/{id}/checkin", checkinBook).Methods("PUT")
 
-	http.ListenAndServe(":8080", r)
+	http.ListenAndServe(cfg.BindAddr, r)
 }
 
 func createBook(w http.ResponseWriter, r *http.Request) {
@@ -76,6 +85,7 @@ func getBook(w http.ResponseWriter, r *http.Request) {
 }
 
 func checkoutBook(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	book := get(mux.Vars(r)["id"])
 	if book == nil {
 		bookNotFound(w)
@@ -97,7 +107,7 @@ func checkoutBook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := checkout(book, co.Who); err != nil {
-		log.Println(fmt.Sprintf("could not check out book: [%s]", err.Error()))
+		log.Event(ctx, "could not check out book", log.ERROR, log.Error(err))
 		http.Error(w, "invalid checkout details provided", http.StatusBadRequest)
 		return
 	}
@@ -109,6 +119,7 @@ func checkoutBook(w http.ResponseWriter, r *http.Request) {
 }
 
 func checkinBook(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	b, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
@@ -130,7 +141,7 @@ func checkinBook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := checkin(book, co.Review); err != nil {
-		log.Println(fmt.Sprintf("could not check in book: [%s]", err.Error()))
+		log.Event(ctx, "could not check in book", log.ERROR, log.Error(err))
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
