@@ -1,4 +1,4 @@
-module github.com/eldeal/skills
+module github.com/cadmiumcat/books-api
 
 go 1.15
 

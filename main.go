@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"github.com/ONSdigital/log.go/log"
-	"github.com/eldeal/skills/config"
+	"github.com/cadmiumcat/books-api/config"
 	"github.com/gorilla/mux"
 	"io/ioutil"
 	"net/http"
