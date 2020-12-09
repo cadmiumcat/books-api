@@ -13,8 +13,9 @@ func readFailed(w http.ResponseWriter, err error) {
 }
 
 func bookNotFound(w http.ResponseWriter, id string) {
-	log.Event(nil, fmt.Sprintf("book with id=%s not found in list", id), log.INFO)
-	http.Error(w, fmt.Sprintf("book id %q not found", id), http.StatusNotFound)
+	msg := fmt.Sprintf("book id %q not found", id)
+	log.Event(nil, msg, log.INFO)
+	http.Error(w, msg, http.StatusNotFound)
 }
 
 func unmarshalFailed(w http.ResponseWriter, err error) {
