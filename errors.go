@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/ONSdigital/log.go/log"
@@ -11,9 +12,9 @@ func readFailed(w http.ResponseWriter, err error) {
 	http.Error(w, "cannot read request body", http.StatusInternalServerError)
 }
 
-func bookNotFound(w http.ResponseWriter) {
-	log.Event(nil, "book not found in list", log.INFO)
-	http.Error(w, "book not found", http.StatusNotFound)
+func bookNotFound(w http.ResponseWriter, id string) {
+	log.Event(nil, fmt.Sprintf("book with id=%s not found in list", id), log.INFO)
+	http.Error(w, fmt.Sprintf("book id %q not found", id), http.StatusNotFound)
 }
 
 func unmarshalFailed(w http.ResponseWriter, err error) {

@@ -70,7 +70,7 @@ func getBook(w http.ResponseWriter, r *http.Request) {
 
 	book := get(id)
 	if book == nil {
-		bookNotFound(w)
+		bookNotFound(w, id)
 		return
 	}
 
@@ -86,9 +86,10 @@ func getBook(w http.ResponseWriter, r *http.Request) {
 
 func checkoutBook(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	book := get(mux.Vars(r)["id"])
+	id := mux.Vars(r)["id"]
+	book := get(id)
 	if book == nil {
-		bookNotFound(w)
+		bookNotFound(w, id)
 		return
 	}
 
@@ -134,9 +135,10 @@ func checkinBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	book := get(mux.Vars(r)["id"])
+	id := mux.Vars(r)["id"]
+	book := get(id)
 	if book == nil {
-		bookNotFound(w)
+		bookNotFound(w, id)
 		return
 	}
 
