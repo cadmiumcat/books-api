@@ -1,6 +1,6 @@
 module github.com/eldeal/skills
 
-go 1.13
+go 1.15
 
 require (
 	github.com/ONSdigital/log.go v1.0.1
