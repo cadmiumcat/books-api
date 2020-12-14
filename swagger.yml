@@ -1,181 +1,104 @@
 swagger: "2.0"
 info:
-  title: "Skills API"
-  version: "1.0.0"
+  title: "Books"
+  version: "1.1.0"
 paths:
-  /library:
+  /books/{id}:
     get:
-      summary: "List all books"
-      description: "List all books in the library"
+      summary: "Return book's details"
+      description: "Returns book's details for given id"
       produces:
         - application/json
+      parameters:
+        - in: path
+          name: id
+          description: "Unique book id"
+          type: integer
+          required: true
       responses:
         200:
-          description: "Successfully returned list of books"
+          description: "Successfully returned a book"
           schema:
-            $ref: '#/definitions/Library'
+            $ref: "#/definitions/Book"
       deprecated: false
+  /books:
+    get:
+      summary: "Returns a list of all books"
+      description: "Returns a list of all books and the total number of books"
+      responses:
+        200:
+          description: "Successfully returned a list of all books"
+          schema:
+            type: object
+            required:
+              - total_count
+              - items
+            properties:
+              total_count:
+                description: "Total number of books in the list"
+                type: integer
+              items:
+                description: "list of books"
+                type: array
+                items:
+                  $ref: "#/definitions/Book"
     post:
-      summary: "Add a book to the library"
-      description: "Adds a new book to the library"
-      consumes:
-        - application/json
-      produces:
-        - application/json
+      summary: "Adds a new book"
+      description: "Add a new book to the list"
       parameters:
-        - in: body
-          name: Book
-          schema:
-            $ref: '#/definitions/Book'
-      responses:
-        200:
-          description: "Successfully added book to the library"
-          schema:
-            $ref: '#/definitions/Book'
-      deprecated: false
-  /library/{id}:
-    get:
-      summary: "Find book by ID"
-      description: "List the book matching the ID provided"
-      parameters:
-        - name: id
-          in: path
-          description: "ID of book to locate"
-          required: true
-          type: integer
-      responses:
-        200:
-          description: "Successful operation"
-          schema:
-            $ref: '#/definitions/Book'
-      deprecated: false
-  /library/{id}/checkout:
-    put:
-      summary: "Checkout book with given ID"
-      description: "A User can Checkout a book with given ID"
-      parameters:
-        - name: id
-          in: path
-          description: "ID of book to locate"
-          required: true
-          type: integer
-        - name: User
+        - name: Books
           in: body
           schema:
             type: object
+            required:
+              - title
+              - author
             properties:
-              Who:
-                $ref: '#/definitions/Who'
+              title:
+                description: "Name of the book"
+                type: string
+              author:
+                description: "Author of the book"
+                type: string
+              synopsis:
+                description: "Brief summary of the book"
+                type: string
       responses:
         200:
-          description: "Successful operation"
+          description: "Successfully added book"
           schema:
-            type: object
-            properties:
-              Who:
-                $ref: '#/definitions/Who'
-      deprecated: false
-  /library/{id}/checkin:
-    put:
-      summary: "Checkin book with given ID"
-      description: "A User can Checkin a book with given ID"
-      parameters:
-        - name: id
-          in: path
-          description: "ID of book to locate"
-          required: true
-          type: integer
-        - name: Review
-          in: body
-          schema:
-            type: object
-            properties:
-              Review:
-                $ref: '#/definitions/Review'
-      responses:
-        200:
-          description: "Successful operation"
-          schema:
-            type: object
-            properties:
-              Review:
-                $ref: '#/definitions/Review'
-      deprecated: false
+            $ref: "#/definitions/Book"
 definitions:
-  Title:
-    type: string
-    description: "Book title"
-    example: "The handmaid's tail"
-  id:
-    type: integer
-    description: "Book ID"
-  Who:
-    type: string
-    description: "Name of user checking book out/in"
-    example: "bookworm"
-  Time:
-    type: string
-  Review:
-    type: integer
-    description: "Review of the book (1-5)"
-    example: 2
-  Checkout:
-    type: object
-    required:
-      - "Who"
-      - "Review"
-    properties:
-      Who:
-        $ref: '#/definitions/Who'
-      TimeOut:
-        $ref: '#/definitions/Time'
-      Timein:
-        $ref: '#/definitions/Time'
-      Review:
-        $ref: '#/definitions/Review'
   Book:
     type: object
     required:
-      - "Title"
+      - id
+      - title
+      - author
+      - links
     properties:
-      Title:
-        $ref: '#/definitions/Title'
-      Self:
+      id:
+        description: "Unique book id"
+        type: string
+      title:
+        description: "Name of the book"
+        type: string
+      author:
+        description: "Author of the book"
+        type: string
+      synopsis:
+        description: "Brief summary of the book"
+        type: string
+      links:
         type: object
+        required:
+          - self
+          - reservations
+          - reviews
         properties:
-          HRef:
+          self:
             type: string
-          id:
-            $ref: '#/definitions/id'
-      History:
-        type: array
-        items: {
-          $ref: '#/definitions/Checkout'
-        }
-    example:
-      Title: "I know why the caged bird sings"
-      Self:
-        - HRef: "amazon.com"
-          id: 5
-  Library:
-    type: object
-    description: "All books stored in the library"
-    properties:
-      Books:
-        type: array
-        items: {
-          $ref: '#/definitions/Book'
-        }
-    example:
-      - Title: "I know why the caged bird sings"
-        Self:
-          - HRef: "amazon.com"
-            id: 5
-        History:
-          - Who: "Cat"
-            TimeOut:
-            Timein:
-            Review:
-      - Title: "Girl, Woman, Other"
-        Self: null,
-        History: null
+          reservations:
+            type: string
+          reviews:
+            type: string
