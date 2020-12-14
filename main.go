@@ -21,6 +21,8 @@ func main() {
 		os.Exit(1)
 	}
 
+	log.Event(nil, "loaded configuration", log.INFO, log.Data{"config": cfg})
+
 	r := mux.NewRouter()
 
 	r.HandleFunc("/library", createBook).Methods("POST")
@@ -30,7 +32,7 @@ func main() {
 	r.HandleFunc("/library/{id}/checkout", checkoutBook).Methods("PUT")
 	r.HandleFunc("/library/{id}/checkin", checkinBook).Methods("PUT")
 
-	http.ListenAndServe(cfg.BindAddr, r)
+	http.ListenAndServe(":"+cfg.BindAddr, r)
 }
 
 func createBook(w http.ResponseWriter, r *http.Request) {

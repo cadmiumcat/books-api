@@ -1,8 +1,6 @@
 package config
 
-import (
-	"github.com/kelseyhightower/envconfig"
-)
+import "github.com/kelseyhightower/envconfig"
 
 type Configuration struct {
 	BindAddr string `envconfig:"BIND_ADDR"`
@@ -17,8 +15,13 @@ func Get() (*Configuration, error) {
 	}
 
 	cfg = &Configuration{
-		BindAddr: ":8080",
+		BindAddr: "8080",
 	}
 
-	return cfg, envconfig.Process("", cfg)
+	err := envconfig.Process("", cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	return cfg, nil
 }
