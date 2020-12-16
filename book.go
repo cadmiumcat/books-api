@@ -58,7 +58,7 @@ func checkout(b *Book, name string) error {
 	if h != 0 {
 		lastCheckout := b.History[h-1]
 		if lastCheckout.In.IsZero() {
-			return fmt.Errorf("this book is currently checked out to: [%s]", lastCheckout.Who)
+			return fmt.Errorf("this book is currently checked out to: %s", lastCheckout.Who)
 		}
 	}
 
