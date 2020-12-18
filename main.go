@@ -110,7 +110,7 @@ func checkoutBook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := checkout(book, co.Who); err != nil {
-		log.Event(ctx, "could not check out book", log.ERROR, log.Error(err))
+		log.Event(ctx, "could not check out book", log.ERROR, log.Error(err), log.Data{"book": book.History})
 		http.Error(w, "invalid checkout details provided", http.StatusBadRequest)
 		return
 	}

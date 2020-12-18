@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"time"
 )
@@ -58,12 +59,12 @@ func checkout(b *Book, name string) error {
 	if h != 0 {
 		lastCheckout := b.History[h-1]
 		if lastCheckout.In.IsZero() {
-			return fmt.Errorf("this book is currently checked out to: %s", lastCheckout.Who)
+			return errors.New("this book is currently checked out")
 		}
 	}
 
 	if len(name) == 0 {
-		return fmt.Errorf("a name must be provided for checkout")
+		return errors.New("a name must be provided for checkout")
 	}
 
 	b.History = append(b.History, Checkout{
