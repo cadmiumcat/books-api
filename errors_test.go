@@ -15,14 +15,14 @@ func TestErrorMessage(t *testing.T) {
 			err := checkout(&book, user)
 
 			Convey("Then an error message shows that the book is already checked out", func() {
-				So(err, ShouldBeError, "this book is currently checked out")
+				So(err, ShouldBeError, ErrBookCheckedOut)
 			})
 		})
 
 		Convey("When a user tries to check in a book without providing a valid review", func() {
 			err := checkin(&book, 100)
 			Convey("Then an error message shows that a review must be provided", func() {
-				So(err, ShouldBeError, "a review between 1 and 5 must be provided")
+				So(err, ShouldBeError, ErrReviewMissing)
 			})
 		})
 
@@ -33,14 +33,14 @@ func TestErrorMessage(t *testing.T) {
 		Convey("When a user tries to check out a book without providing a name", func() {
 			err := checkout(&book, "")
 			Convey("Then an error message shows that a name must be provided", func() {
-				So(err, ShouldBeError, "a name must be provided for checkout")
+				So(err, ShouldBeError, ErrNameMissing)
 			})
 		})
 
 		Convey("When a user tries to check in the book", func() {
 			err := checkin(&book, 4)
 			Convey("Then an error message shows that the book has not been checked out", func() {
-				So(err, ShouldBeError, "this book is not currently checked out")
+				So(err, ShouldBeError, ErrBookNotCheckedOut)
 			})
 		})
 
