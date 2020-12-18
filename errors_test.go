@@ -12,12 +12,12 @@ func TestErrorMessage(t *testing.T) {
 			History: []Checkout{{Who: "user"}},
 		}
 
-		Convey("When a User checks out the book", func() {
+		Convey("When a User tries checks out the book", func() {
 			user := "otherUser"
 			err := checkout(&book, user)
 
-			Convey("An error should say it's already checked out", func() {
-				So(err, ShouldBeError, "this book is currently checked out to: user")
+			Convey("Then an error shows that the book is already checked out", func() {
+				So(err, ShouldBeError, "this book is currently checked out")
 			})
 		})
 
