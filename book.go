@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"time"
 )
 
@@ -78,16 +77,16 @@ func checkout(b *Book, name string) error {
 func checkin(b *Book, review int) error {
 	h := len(b.History)
 	if h == 0 {
-		return fmt.Errorf("this book is not currently checked out")
+		return errors.New("this book is not currently checked out")
 	}
 
 	if review < 1 || review > 5 {
-		return fmt.Errorf("a review between 1 and 5 must be provided")
+		return errors.New("a review between 1 and 5 must be provided")
 	}
 
 	lastCheckout := b.History[h-1]
 	if !lastCheckout.In.IsZero() {
-		return fmt.Errorf("this book is not currently checked out")
+		return errors.New("this book is not currently checked out")
 	}
 
 	b.History[h-1] = Checkout{
