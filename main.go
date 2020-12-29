@@ -32,7 +32,7 @@ func main() {
 	r.HandleFunc("/library/{id}/checkout", checkoutBook).Methods("PUT")
 	r.HandleFunc("/library/{id}/checkin", checkinBook).Methods("PUT")
 
-	http.ListenAndServe(":"+cfg.BindAddr, r)
+	http.ListenAndServe(cfg.BindAddr, r)
 }
 
 func createBook(w http.ResponseWriter, r *http.Request) {
