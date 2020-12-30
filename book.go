@@ -22,10 +22,10 @@ type Link struct {
 	ID   string
 }
 
-var lib []Book
+var books []Book
 
 func init() {
-	lib = append(lib, Book{
+	books = append(books, Book{
 		Title: "Book 1",
 		Self: &Link{
 			HRef: "amazon.com",
@@ -35,9 +35,9 @@ func init() {
 }
 
 func get(id string) (book *Book) {
-	for i, l := range lib {
+	for i, l := range books {
 		if l.Self.ID == id {
-			book = &lib[i]
+			book = &books[i]
 			break
 		}
 	}
@@ -45,11 +45,11 @@ func get(id string) (book *Book) {
 }
 
 func getAll() []Book {
-	return lib
+	return books
 }
 
 func add(b Book) {
-	lib = append(lib, b)
+	books = append(books, b)
 }
 
 func checkout(b *Book, name string) error {
