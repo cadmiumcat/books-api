@@ -23,16 +23,21 @@ func main() {
 
 	log.Event(nil, "loaded configuration", log.INFO, log.Data{"config": cfg})
 
-	r := mux.NewRouter()
+	router := SetupRoutes()
 
-	r.HandleFunc("/library", createBook).Methods("POST")
-	r.HandleFunc("/library", listBooks).Methods("GET")
-	r.HandleFunc("/library/{id}", getBook).Methods("GET")
+	http.ListenAndServe(cfg.BindAddr, router)
+}
 
-	r.HandleFunc("/library/{id}/checkout", checkoutBook).Methods("PUT")
-	r.HandleFunc("/library/{id}/checkin", checkinBook).Methods("PUT")
+func SetupRoutes() *mux.Router {
+	router := mux.NewRouter()
 
-	http.ListenAndServe(cfg.BindAddr, r)
+	router.HandleFunc("/books", createBook).Methods("POST")
+	router.HandleFunc("/library", listBooks).Methods("GET")
+	router.HandleFunc("/library/{id}", getBook).Methods("GET")
+
+	router.HandleFunc("/library/{id}/checkout", checkoutBook).Methods("PUT")
+	router.HandleFunc("/library/{id}/checkin", checkinBook).Methods("PUT")
+	return router
 }
 
 func createBook(w http.ResponseWriter, r *http.Request) {
