@@ -53,6 +53,7 @@ func createBook(w http.ResponseWriter, r *http.Request) {
 	add(book)
 
 	w.Header().Set("content-type", "application/json")
+	w.WriteHeader(http.StatusCreated)
 	w.Write(b)
 }
 
