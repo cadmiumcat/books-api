@@ -64,7 +64,7 @@ paths:
                 description: "Brief summary of the book"
                 type: string
       responses:
-        200:
+        201:
           description: "Successfully added book"
           schema:
             $ref: "#/definitions/Book"
