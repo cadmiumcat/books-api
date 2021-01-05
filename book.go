@@ -6,8 +6,17 @@ import (
 
 type Book struct {
 	Title   string
+	Author  string
 	Self    *Link
 	History []Checkout
+}
+
+func (b Book) validate() error {
+	if b.Title == "" || b.Author == "" {
+		return ErrInvalidBook
+	}
+
+	return nil
 }
 
 type Checkout struct {
