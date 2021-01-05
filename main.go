@@ -55,6 +55,13 @@ func createBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = book.validate()
+	if err != nil {
+		w.Header().Set("content-type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 	add(book)
 
 	w.Header().Set("content-type", "application/json")
