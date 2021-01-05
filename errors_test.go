@@ -46,4 +46,14 @@ func TestErrorMessage(t *testing.T) {
 
 	})
 
+	Convey("Given an invalid book", t, func() {
+		book := Book{}
+		Convey("When the book is checked for validation", func() {
+			err := book.validate()
+			Convey("Then an error message shows that the book is invalid", func() {
+				So(err, ShouldBeError, ErrInvalidBook)
+			})
+		})
+	})
+
 }
