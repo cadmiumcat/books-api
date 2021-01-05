@@ -10,7 +10,7 @@ func TestErrorMessage(t *testing.T) {
 		book := Book{
 			History: []Checkout{{Who: "user"}},
 		}
-		Convey("When a User tries checks out the book", func() {
+		Convey("When a User tries to check out the book", func() {
 			user := "otherUser"
 			err := checkout(&book, user)
 
