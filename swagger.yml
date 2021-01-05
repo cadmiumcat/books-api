@@ -68,6 +68,8 @@ paths:
           description: "Successfully added book"
           schema:
             $ref: "#/definitions/Book"
+        400:
+          description: "Bad request. Invalid Book supplied"
 definitions:
   Book:
     type: object
