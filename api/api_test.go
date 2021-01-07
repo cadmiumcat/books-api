@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	. "github.com/smartystreets/goconvey/convey"
@@ -16,7 +16,7 @@ func TestEndpoints(t *testing.T) {
 			So(err, ShouldBeNil)
 
 			response := httptest.NewRecorder()
-			router := SetupRoutes()
+			router := setupRoutes()
 			router.ServeHTTP(response, request)
 
 			Convey("Then the HTTP response code is 400", func() {
@@ -30,7 +30,7 @@ func TestEndpoints(t *testing.T) {
 			So(err, ShouldBeNil)
 
 			response := httptest.NewRecorder()
-			router := SetupRoutes()
+			router := setupRoutes()
 			router.ServeHTTP(response, request)
 
 			Convey("Then the HTTP response code is 201", func() {
