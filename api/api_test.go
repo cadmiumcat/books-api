@@ -38,4 +38,17 @@ func TestEndpoints(t *testing.T) {
 			})
 		})
 	})
+
+	Convey("Given an existing book with book id={id}", t, func() {
+		Convey("When I send an HTTP GET request to /books/{id}", func() {
+			Convey("Then the HTTP response code is 200")
+		})
+
+	})
+
+	Convey("Given a book that does not exist with book id={id}", t, func() {
+		Convey("When I send an HTTP GET request to /books/{id}", func() {
+			Convey("then the HTTP response code is 404")
+		})
+	})
 }
