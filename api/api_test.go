@@ -39,16 +39,35 @@ func TestEndpoints(t *testing.T) {
 		})
 	})
 
-	Convey("Given an existing book with book id={id}", t, func() {
-		Convey("When I send an HTTP GET request to /books/{id}", func() {
-			Convey("Then the HTTP response code is 200")
+	Convey("Given an existing book with book id=1", t, func() {
+		id := "1"
+		Convey("When I send an HTTP GET request to /books/1", func() {
+			request, err := http.NewRequest(http.MethodGet, "/books/"+id, nil)
+			So(err, ShouldBeNil)
+
+			response := httptest.NewRecorder()
+			router := setupRoutes()
+			router.ServeHTTP(response, request)
+
+			Convey("Then the HTTP response code is 200", func() {
+				So(response.Code, ShouldEqual, http.StatusOK)
+			})
 		})
 
 	})
 
-	Convey("Given a book that does not exist with book id={id}", t, func() {
-		Convey("When I send an HTTP GET request to /books/{id}", func() {
-			Convey("then the HTTP response code is 404")
+	Convey("Given a book that does not exist with book id=3", t, func() {
+		id := "3"
+		Convey("When I send an HTTP GET request to /books/3", func() {
+			request, err := http.NewRequest(http.MethodGet, "/books/"+id, nil)
+			So(err, ShouldBeNil)
+
+			response := httptest.NewRecorder()
+			router := setupRoutes()
+			router.ServeHTTP(response, request)
+			Convey("then the HTTP response code is 404", func() {
+				So(response.Code, ShouldEqual, http.StatusNotFound)
+			})
 		})
 	})
 }

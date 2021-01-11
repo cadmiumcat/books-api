@@ -17,7 +17,7 @@ func setupRoutes() *mux.Router {
 
 	router.HandleFunc("/books", createBook).Methods("POST")
 	router.HandleFunc("/library", listBooks).Methods("GET")
-	router.HandleFunc("/library/{id}", getBook).Methods("GET")
+	router.HandleFunc("/books/{id}", getBook).Methods("GET")
 
 	router.HandleFunc("/library/{id}/checkout", checkoutBook).Methods("PUT")
 	router.HandleFunc("/library/{id}/checkin", checkinBook).Methods("PUT")

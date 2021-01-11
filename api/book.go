@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/ONSdigital/log.go/log"
 	"github.com/gorilla/mux"
 	"io/ioutil"
@@ -63,6 +64,8 @@ func getAll() []Book {
 }
 
 func add(b Book) {
+	link := Link{HRef: "", ID: fmt.Sprint(len(books)+1) }
+	b.Self = &link
 	books = append(books, b)
 }
 
