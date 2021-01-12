@@ -40,36 +40,44 @@ type Link struct {
 	Reviews      string
 }
 
-var books []Book
+type Books struct {
+	Count int
+	Items []Book
+}
 
-func init() {
-	books = append(books, Book{
-		Id:    "1",
-		Title: "Book 1",
-		Links: &Link{
-			Self:         "",
-			Reservations: "",
-		},
-	})
+var books Books
+
+func init()  {
+	b := Book{
+		Title:    "Test book",
+		Author:   "author",
+		Synopsis: "",
+	}
+
+	add(b)
+
 }
 
 func get(id string) (book *Book) {
-	for i, l := range books {
+	for i, l := range books.Items {
 		if l.Id == id {
-			book = &books[i]
+			book = &books.Items[i]
 			break
 		}
 	}
 	return
 }
 
-func getAll() []Book {
+func getAll() Books {
 	return books
 }
 
 func add(b Book) {
-	b.Id = fmt.Sprint(len(books) + 1)
-	books = append(books, b)
+	count := len(books.Items)
+	books.Count = count + 1
+
+	b.Id = fmt.Sprint(books.Count)
+	books.Items = append(books.Items, b)
 }
 
 func checkout(b *Book, name string) error {
