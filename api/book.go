@@ -64,7 +64,7 @@ func getAll() []Book {
 }
 
 func add(b Book) {
-	link := Link{HRef: "", ID: fmt.Sprint(len(books)+1) }
+	link := Link{HRef: "", ID: fmt.Sprint(len(books) + 1)}
 	b.Self = &link
 	books = append(books, b)
 }
