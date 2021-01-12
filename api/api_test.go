@@ -70,4 +70,19 @@ func TestEndpoints(t *testing.T) {
 			})
 		})
 	})
+
+	Convey("Given ", t, func() {
+		Convey("When I send an HTTP GET request to /books", func() {
+			request, err := http.NewRequest(http.MethodGet, "/books", nil)
+			So(err, ShouldBeNil)
+
+			response := httptest.NewRecorder()
+			router := setupRoutes()
+			router.ServeHTTP(response, request)
+
+			Convey("then the HTTP response code is 200", func() {
+				So(response.Code, ShouldEqual, http.StatusOK)
+			})
+		})
+	})
 }
