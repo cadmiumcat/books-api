@@ -25,7 +25,7 @@ func TestEndpoints(t *testing.T) {
 		})
 
 		Convey("When the body contains a valid book", func() {
-			body := strings.NewReader(`{ "title":"Girl, Woman, Other", "author":"Bernardine Evaristo" }`)
+			body := strings.NewReader(`{"title":"Girl, Woman, Other", "author":"Bernardine Evaristo" }`)
 			request, err := http.NewRequest(http.MethodPost, "/books", body)
 			So(err, ShouldBeNil)
 

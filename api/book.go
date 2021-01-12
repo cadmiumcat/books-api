@@ -11,10 +11,12 @@ import (
 )
 
 type Book struct {
-	Title   string
-	Author  string
-	Self    *Link
-	History []Checkout
+	Id       string
+	Title    string
+	Author   string
+	Synopsis string
+	Links    *Link
+	History  []Checkout
 }
 
 func (b Book) validate() error {
@@ -33,25 +35,27 @@ type Checkout struct {
 }
 
 type Link struct {
-	HRef string
-	ID   string
+	Self         string
+	Reservations string
+	Reviews      string
 }
 
 var books []Book
 
 func init() {
 	books = append(books, Book{
+		Id:    "1",
 		Title: "Book 1",
-		Self: &Link{
-			HRef: "amazon.com",
-			ID:   "1",
+		Links: &Link{
+			Self:         "",
+			Reservations: "",
 		},
 	})
 }
 
 func get(id string) (book *Book) {
 	for i, l := range books {
-		if l.Self.ID == id {
+		if l.Id == id {
 			book = &books[i]
 			break
 		}
@@ -64,8 +68,7 @@ func getAll() []Book {
 }
 
 func add(b Book) {
-	link := Link{HRef: "", ID: fmt.Sprint(len(books) + 1)}
-	b.Self = &link
+	b.Id = fmt.Sprint(len(books) + 1)
 	books = append(books, b)
 }
 
