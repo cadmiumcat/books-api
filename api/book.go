@@ -47,7 +47,7 @@ type Books struct {
 
 var books Books
 
-func init()  {
+func init() {
 	b := Book{
 		Title:    "Test book",
 		Author:   "author",

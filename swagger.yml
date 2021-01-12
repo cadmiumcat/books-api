@@ -46,6 +46,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/definitions/Book"
+        500:
+          description: "Internal server error"
     post:
       summary: "Adds a new book"
       description: "Add a new book to the list"
