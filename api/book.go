@@ -11,12 +11,12 @@ import (
 )
 
 type Book struct {
-	Id       string
-	Title    string
-	Author   string
-	Synopsis string
-	Links    *Link
-	History  []Checkout
+	Id       string     `json:"id"`
+	Title    string     `json:"title"`
+	Author   string     `json:"author"`
+	Synopsis string     `json:"synopsis"`
+	Links    *Link      `json:"links"`
+	History  []Checkout `json:"history"`
 }
 
 func (b Book) validate() error {
@@ -41,16 +41,16 @@ type Link struct {
 }
 
 type Books struct {
-	Count int
-	Items []Book
+	Count int    `json:"total_count"`
+	Items []Book `json:"items"`
 }
 
 var books Books
 
 func init() {
 	b := Book{
-		Title:    "Test book",
-		Author:   "author",
+		Title:    "default book",
+		Author:   "default author",
 		Synopsis: "",
 	}
 
