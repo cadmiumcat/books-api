@@ -1,14 +1,22 @@
 package main
 
 import (
-	"fmt"
 	"time"
 )
 
 type Book struct {
 	Title   string
+	Author  string
 	Self    *Link
 	History []Checkout
+}
+
+func (b Book) validate() error {
+	if b.Title == "" || b.Author == "" {
+		return ErrInvalidBook
+	}
+
+	return nil
 }
 
 type Checkout struct {
@@ -23,10 +31,10 @@ type Link struct {
 	ID   string
 }
 
-var lib []Book
+var books []Book
 
 func init() {
-	lib = append(lib, Book{
+	books = append(books, Book{
 		Title: "Book 1",
 		Self: &Link{
 			HRef: "amazon.com",
@@ -36,9 +44,9 @@ func init() {
 }
 
 func get(id string) (book *Book) {
-	for i, l := range lib {
+	for i, l := range books {
 		if l.Self.ID == id {
-			book = &lib[i]
+			book = &books[i]
 			break
 		}
 	}
@@ -46,11 +54,11 @@ func get(id string) (book *Book) {
 }
 
 func getAll() []Book {
-	return lib
+	return books
 }
 
 func add(b Book) {
-	lib = append(lib, b)
+	books = append(books, b)
 }
 
 func checkout(b *Book, name string) error {
@@ -58,12 +66,12 @@ func checkout(b *Book, name string) error {
 	if h != 0 {
 		lastCheckout := b.History[h-1]
 		if lastCheckout.In.IsZero() {
-			return fmt.Errorf("this book is currently checked out to: [%s]", lastCheckout.Who)
+			return ErrBookCheckedOut
 		}
 	}
 
 	if len(name) == 0 {
-		return fmt.Errorf("a name must be provided for checkout")
+		return ErrNameMissing
 	}
 
 	b.History = append(b.History, Checkout{
@@ -77,16 +85,16 @@ func checkout(b *Book, name string) error {
 func checkin(b *Book, review int) error {
 	h := len(b.History)
 	if h == 0 {
-		return fmt.Errorf("this book is not currently checked out")
+		return ErrBookNotCheckedOut
 	}
 
 	if review < 1 || review > 5 {
-		return fmt.Errorf("a review between 1 and 5 must be provided")
+		return ErrReviewMissing
 	}
 
 	lastCheckout := b.History[h-1]
 	if !lastCheckout.In.IsZero() {
-		return fmt.Errorf("this book is not currently checked out")
+		return ErrBookNotCheckedOut
 	}
 
 	b.History[h-1] = Checkout{

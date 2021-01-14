@@ -1,10 +1,18 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"net/http"
-
 	"github.com/ONSdigital/log.go/log"
+	"net/http"
+)
+
+var (
+	ErrBookCheckedOut    = errors.New("this book is currently checked out")
+	ErrNameMissing       = errors.New("a name must be provided for checkout")
+	ErrReviewMissing     = errors.New("a review between 1 and 5 must be provided")
+	ErrBookNotCheckedOut = errors.New("this book is not currently checked out")
+	ErrInvalidBook       = errors.New("invalid book. Missing required field")
 )
 
 func readFailed(w http.ResponseWriter, err error) {

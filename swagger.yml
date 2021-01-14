@@ -64,10 +64,12 @@ paths:
                 description: "Brief summary of the book"
                 type: string
       responses:
-        200:
+        201:
           description: "Successfully added book"
           schema:
             $ref: "#/definitions/Book"
+        400:
+          description: "Bad request. Invalid Book supplied"
 definitions:
   Book:
     type: object

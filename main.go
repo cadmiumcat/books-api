@@ -21,16 +21,23 @@ func main() {
 		os.Exit(1)
 	}
 
-	r := mux.NewRouter()
+	log.Event(nil, "loaded configuration", log.INFO, log.Data{"config": cfg})
 
-	r.HandleFunc("/library", createBook).Methods("POST")
-	r.HandleFunc("/library", listBooks).Methods("GET")
-	r.HandleFunc("/library/{id}", getBook).Methods("GET")
+	router := SetupRoutes()
 
-	r.HandleFunc("/library/{id}/checkout", checkoutBook).Methods("PUT")
-	r.HandleFunc("/library/{id}/checkin", checkinBook).Methods("PUT")
+	http.ListenAndServe(cfg.BindAddr, router)
+}
 
-	http.ListenAndServe(cfg.BindAddr, r)
+func SetupRoutes() *mux.Router {
+	router := mux.NewRouter()
+
+	router.HandleFunc("/books", createBook).Methods("POST")
+	router.HandleFunc("/library", listBooks).Methods("GET")
+	router.HandleFunc("/library/{id}", getBook).Methods("GET")
+
+	router.HandleFunc("/library/{id}/checkout", checkoutBook).Methods("PUT")
+	router.HandleFunc("/library/{id}/checkin", checkinBook).Methods("PUT")
+	return router
 }
 
 func createBook(w http.ResponseWriter, r *http.Request) {
@@ -48,9 +55,17 @@ func createBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = book.validate()
+	if err != nil {
+		w.Header().Set("content-type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 	add(book)
 
 	w.Header().Set("content-type", "application/json")
+	w.WriteHeader(http.StatusCreated)
 	w.Write(b)
 }
 
@@ -108,7 +123,7 @@ func checkoutBook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := checkout(book, co.Who); err != nil {
-		log.Event(ctx, "could not check out book", log.ERROR, log.Error(err))
+		log.Event(ctx, "could not check out book", log.ERROR, log.Error(err), log.Data{"book": book.History})
 		http.Error(w, "invalid checkout details provided", http.StatusBadRequest)
 		return
 	}
