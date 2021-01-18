@@ -20,6 +20,10 @@ paths:
           description: "Successfully returned a book"
           schema:
             $ref: "#/definitions/Book"
+        400:
+          description: "Resource not found"
+        500:
+          description: "Internal server error"
       deprecated: false
   /books:
     get:
@@ -42,6 +46,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/definitions/Book"
+        500:
+          description: "Internal server error"
     post:
       summary: "Adds a new book"
       description: "Add a new book to the list"

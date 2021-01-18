@@ -1,12 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"github.com/ONSdigital/log.go/log"
+	"github.com/cadmiumcat/books-api/api"
 	"github.com/cadmiumcat/books-api/config"
-	"github.com/gorilla/mux"
-	"io/ioutil"
-	"net/http"
 	"os"
 )
 
@@ -23,148 +20,6 @@ func main() {
 
 	log.Event(nil, "loaded configuration", log.INFO, log.Data{"config": cfg})
 
-	router := SetupRoutes()
+	api.Setup(cfg)
 
-	http.ListenAndServe(cfg.BindAddr, router)
-}
-
-func SetupRoutes() *mux.Router {
-	router := mux.NewRouter()
-
-	router.HandleFunc("/books", createBook).Methods("POST")
-	router.HandleFunc("/library", listBooks).Methods("GET")
-	router.HandleFunc("/library/{id}", getBook).Methods("GET")
-
-	router.HandleFunc("/library/{id}/checkout", checkoutBook).Methods("PUT")
-	router.HandleFunc("/library/{id}/checkin", checkinBook).Methods("PUT")
-	return router
-}
-
-func createBook(w http.ResponseWriter, r *http.Request) {
-	b, err := ioutil.ReadAll(r.Body)
-	defer r.Body.Close()
-	if err != nil {
-		readFailed(w, err)
-		return
-	}
-
-	var book Book
-	err = json.Unmarshal(b, &book)
-	if err != nil {
-		unmarshalFailed(w, err)
-		return
-	}
-
-	err = book.validate()
-	if err != nil {
-		w.Header().Set("content-type", "application/json")
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	add(book)
-
-	w.Header().Set("content-type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	w.Write(b)
-}
-
-func listBooks(w http.ResponseWriter, r *http.Request) {
-	b, err := json.Marshal(getAll())
-	if err != nil {
-		marshalFailed(w, err)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(b)
-}
-
-func getBook(w http.ResponseWriter, r *http.Request) {
-	id := mux.Vars(r)["id"]
-
-	book := get(id)
-	if book == nil {
-		bookNotFound(w, id)
-		return
-	}
-
-	b, err := json.Marshal(book)
-	if err != nil {
-		marshalFailed(w, err)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(b)
-}
-
-func checkoutBook(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	id := mux.Vars(r)["id"]
-	book := get(id)
-	if book == nil {
-		bookNotFound(w, id)
-		return
-	}
-
-	b, err := ioutil.ReadAll(r.Body)
-	defer r.Body.Close()
-	if err != nil {
-		readFailed(w, err)
-		return
-	}
-
-	var co Checkout
-	err = json.Unmarshal(b, &co)
-	if err != nil {
-		unmarshalFailed(w, err)
-		return
-	}
-
-	if err := checkout(book, co.Who); err != nil {
-		log.Event(ctx, "could not check out book", log.ERROR, log.Error(err), log.Data{"book": book.History})
-		http.Error(w, "invalid checkout details provided", http.StatusBadRequest)
-		return
-	}
-
-	w.WriteHeader(http.StatusCreated)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(b)
-	return
-}
-
-func checkinBook(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	b, err := ioutil.ReadAll(r.Body)
-	defer r.Body.Close()
-	if err != nil {
-		readFailed(w, err)
-		return
-	}
-
-	var co Checkout
-	err = json.Unmarshal(b, &co)
-	if err != nil {
-		unmarshalFailed(w, err)
-		return
-	}
-
-	id := mux.Vars(r)["id"]
-	book := get(id)
-	if book == nil {
-		bookNotFound(w, id)
-		return
-	}
-
-	if err := checkin(book, co.Review); err != nil {
-		log.Event(ctx, "could not check in book", log.ERROR, log.Error(err))
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-
-	w.WriteHeader(http.StatusCreated)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(b)
-	return
 }
