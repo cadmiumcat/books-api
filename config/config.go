@@ -3,7 +3,7 @@ package config
 import "github.com/kelseyhightower/envconfig"
 
 type Configuration struct {
-	BindAddr string `envconfig:"BIND_ADDR"`
+	BindAddr    string `envconfig:"BIND_ADDR"`
 	MongoConfig MongoConfig
 }
 
@@ -25,8 +25,8 @@ func Get() (*Configuration, error) {
 		BindAddr: ":8080",
 		MongoConfig: MongoConfig{
 			BindAddr:   "localhost:27017",
-			Collection: "bookStore",
-			Database:   "books",
+			Collection: "books",
+			Database:   "bookStore",
 		},
 	}
 

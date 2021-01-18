@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestConfig(t *testing.T)  {
+func TestConfig(t *testing.T) {
 
 	Convey("Given an environment with no environment variables", t, func() {
 		os.Clearenv()
@@ -22,6 +22,6 @@ func TestConfig(t *testing.T)  {
 				So(err, ShouldBeNil)
 			})
 		})
-	} )
-	
+	})
+
 }
