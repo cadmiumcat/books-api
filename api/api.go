@@ -6,6 +6,7 @@ import (
 	"github.com/cadmiumcat/books-api/mongo"
 	"github.com/gorilla/mux"
 	"net/http"
+	"os"
 )
 
 func Setup(cfg *config.Configuration) {
@@ -15,6 +16,7 @@ func Setup(cfg *config.Configuration) {
 	err := mongodb.Init(cfg.MongoConfig)
 	if err != nil {
 		log.Event(nil, "failed to initialise mongo", log.ERROR, log.Error(err))
+		os.Exit(1)
 	}
 
 	http.ListenAndServe(cfg.BindAddr, router)
