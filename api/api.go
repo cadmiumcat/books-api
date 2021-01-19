@@ -9,8 +9,14 @@ import (
 	"os"
 )
 
+type BooksAPI struct {
+	Router *mux.Router
+}
+
 func Setup(cfg *config.Configuration) {
-	router := setupRoutes()
+	api := &BooksAPI{Router: mux.NewRouter()}
+
+	setupRoutes(api)
 
 	mongodb := &mongo.Mongo{}
 	err := mongodb.Init(cfg.MongoConfig)
@@ -19,17 +25,16 @@ func Setup(cfg *config.Configuration) {
 		os.Exit(1)
 	}
 
-	http.ListenAndServe(cfg.BindAddr, router)
+	http.ListenAndServe(cfg.BindAddr, api.Router)
 
 }
-func setupRoutes() *mux.Router {
-	router := mux.NewRouter()
+func setupRoutes(api *BooksAPI)  {
 
-	router.HandleFunc("/books", createBook).Methods("POST")
-	router.HandleFunc("/books", listBooks).Methods("GET")
-	router.HandleFunc("/books/{id}", getBook).Methods("GET")
+	api.Router.HandleFunc("/books", createBook).Methods("POST")
+	api.Router.HandleFunc("/books", listBooks).Methods("GET")
+	api.Router.HandleFunc("/books/{id}", getBook).Methods("GET")
 
-	router.HandleFunc("/library/{id}/checkout", checkoutBook).Methods("PUT")
-	router.HandleFunc("/library/{id}/checkin", checkinBook).Methods("PUT")
-	return router
+	api.Router.HandleFunc("/library/{id}/checkout", checkoutBook).Methods("PUT")
+	api.Router.HandleFunc("/library/{id}/checkin", checkinBook).Methods("PUT")
+	return
 }

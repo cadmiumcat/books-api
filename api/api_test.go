@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/gorilla/mux"
 	. "github.com/smartystreets/goconvey/convey"
 	"net/http"
 	"net/http/httptest"
@@ -9,6 +10,7 @@ import (
 )
 
 func TestEndpoints(t *testing.T) {
+	api := &BooksAPI{Router: mux.NewRouter()}
 	Convey("Given a POST request to add a book", t, func() {
 		Convey("When the body does not contain a valid book", func() {
 			body := strings.NewReader(`{}`)
@@ -16,8 +18,8 @@ func TestEndpoints(t *testing.T) {
 			So(err, ShouldBeNil)
 
 			response := httptest.NewRecorder()
-			router := setupRoutes()
-			router.ServeHTTP(response, request)
+			setupRoutes(api)
+			api.Router.ServeHTTP(response, request)
 
 			Convey("Then the HTTP response code is 400", func() {
 				So(response.Code, ShouldEqual, http.StatusBadRequest)
@@ -30,8 +32,8 @@ func TestEndpoints(t *testing.T) {
 			So(err, ShouldBeNil)
 
 			response := httptest.NewRecorder()
-			router := setupRoutes()
-			router.ServeHTTP(response, request)
+			setupRoutes(api)
+			api.Router.ServeHTTP(response, request)
 
 			Convey("Then the HTTP response code is 201", func() {
 				So(response.Code, ShouldEqual, http.StatusCreated)
@@ -41,13 +43,14 @@ func TestEndpoints(t *testing.T) {
 
 	Convey("Given an existing book with book id=1", t, func() {
 		id := "1"
+
 		Convey("When I send an HTTP GET request to /books/1", func() {
 			request, err := http.NewRequest(http.MethodGet, "/books/"+id, nil)
 			So(err, ShouldBeNil)
 
 			response := httptest.NewRecorder()
-			router := setupRoutes()
-			router.ServeHTTP(response, request)
+			setupRoutes(api)
+			api.Router.ServeHTTP(response, request)
 
 			Convey("Then the HTTP response code is 200", func() {
 				So(response.Code, ShouldEqual, http.StatusOK)
@@ -63,8 +66,8 @@ func TestEndpoints(t *testing.T) {
 			So(err, ShouldBeNil)
 
 			response := httptest.NewRecorder()
-			router := setupRoutes()
-			router.ServeHTTP(response, request)
+			setupRoutes(api)
+			api.Router.ServeHTTP(response, request)
 			Convey("then the HTTP response code is 404", func() {
 				So(response.Code, ShouldEqual, http.StatusNotFound)
 			})
@@ -77,8 +80,8 @@ func TestEndpoints(t *testing.T) {
 			So(err, ShouldBeNil)
 
 			response := httptest.NewRecorder()
-			router := setupRoutes()
-			router.ServeHTTP(response, request)
+			setupRoutes(api)
+			api.Router.ServeHTTP(response, request)
 
 			Convey("then the HTTP response code is 200", func() {
 				So(response.Code, ShouldEqual, http.StatusOK)
