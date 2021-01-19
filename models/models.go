@@ -14,7 +14,7 @@ type Book struct {
 	History  []Checkout `json:"history"`
 }
 
-func (b Book) Validate() error {
+func (b *Book) Validate() error {
 	if b.Title == "" || b.Author == "" {
 		return errors.New("invalid book. Missing required field")
 	}

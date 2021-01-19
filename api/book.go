@@ -13,16 +13,6 @@ import (
 
 var books models.Books
 
-func init() {
-	b := models.Book{
-		Title:    "default book",
-		Author:   "default author",
-		Synopsis: "",
-	}
-
-	add(b)
-
-}
 
 func get(id string) (book *models.Book) {
 	for i, l := range books.Items {
@@ -92,7 +82,7 @@ func checkin(b *models.Book, review int) error {
 	return nil
 }
 
-func (api *BooksAPI) createBook(w http.ResponseWriter, r *http.Request) {
+func (api *API) createBook(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
@@ -100,7 +90,8 @@ func (api *BooksAPI) createBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var book models.Book
+	book := &models.Book{}
+
 	err = json.Unmarshal(b, &book)
 	if err != nil {
 		unmarshalFailed(w, err)
@@ -114,7 +105,8 @@ func (api *BooksAPI) createBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	add(book)
+	api.dataStore.AddBook(book)
+
 
 	w.Header().Set("content-type", "application/json")
 	w.WriteHeader(http.StatusCreated)
