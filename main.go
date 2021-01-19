@@ -4,6 +4,7 @@ import (
 	"github.com/ONSdigital/log.go/log"
 	"github.com/cadmiumcat/books-api/api"
 	"github.com/cadmiumcat/books-api/config"
+	"github.com/cadmiumcat/books-api/interfaces"
 	"github.com/cadmiumcat/books-api/mongo"
 	"os"
 )
@@ -11,7 +12,7 @@ import (
 const serviceName = "books-api"
 
 func main() {
-	var dataStore api.DataStore
+	var dataStore interfaces.DataStore
 
 	log.Namespace = serviceName
 	// Get Config

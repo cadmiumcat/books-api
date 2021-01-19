@@ -13,7 +13,6 @@ import (
 
 var books models.Books
 
-
 func get(id string) (book *models.Book) {
 	for i, l := range books.Items {
 		if l.Id == id {
@@ -106,7 +105,6 @@ func (api *API) createBook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	api.dataStore.AddBook(book)
-
 
 	w.Header().Set("content-type", "application/json")
 	w.WriteHeader(http.StatusCreated)

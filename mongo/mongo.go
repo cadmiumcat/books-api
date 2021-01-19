@@ -15,7 +15,7 @@ type Mongo struct {
 	Database   string
 	Session    *mgo.Session
 	URI        string
-	lockClient   *dpMongoLock.Lock
+	lockClient *dpMongoLock.Lock
 }
 
 func (m *Mongo) Init(mongoConfig config.MongoConfig) (err error) {
@@ -32,7 +32,6 @@ func (m *Mongo) Init(mongoConfig config.MongoConfig) (err error) {
 
 	return nil
 }
-
 
 // Close closes the mongo session and returns any error
 func (m *Mongo) Close(ctx context.Context) (err error) {

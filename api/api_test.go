@@ -1,6 +1,8 @@
 package api
 
 import (
+	"github.com/cadmiumcat/books-api/interfaces/datastoretest"
+	"github.com/cadmiumcat/books-api/models"
 	"github.com/gorilla/mux"
 	. "github.com/smartystreets/goconvey/convey"
 	"net/http"
@@ -10,7 +12,11 @@ import (
 )
 
 func TestEndpoints(t *testing.T) {
-	api := &BooksAPI{Router: mux.NewRouter()}
+	api := &API{
+		Router:    mux.NewRouter(),
+		dataStore: &datastoretest.DataStoreMock{AddBookFunc: func(book *models.Book) {}},
+	}
+
 	Convey("Given a POST request to add a book", t, func() {
 		Convey("When the body does not contain a valid book", func() {
 			body := strings.NewReader(`{}`)
