@@ -11,17 +11,20 @@ import (
 
 type BooksAPI struct {
 	Router *mux.Router
+	BookStore *mongo.Mongo
 }
 
 func Setup(cfg *config.Configuration) {
-	api := &BooksAPI{Router: mux.NewRouter()}
+	api := &BooksAPI{
+		Router:    mux.NewRouter(),
+		BookStore: &mongo.Mongo{},
+	}
 
 	setupRoutes(api)
 
-	mongodb := &mongo.Mongo{}
-	err := mongodb.Init(cfg.MongoConfig)
+	err := api.BookStore.Init(cfg.MongoConfig)
 	if err != nil {
-		log.Event(nil, "failed to initialise mongo", log.ERROR, log.Error(err))
+		log.Event(nil, "failed to initialise mongo", log.FATAL, log.Error(err))
 		os.Exit(1)
 	}
 
@@ -30,7 +33,7 @@ func Setup(cfg *config.Configuration) {
 }
 func setupRoutes(api *BooksAPI)  {
 
-	api.Router.HandleFunc("/books", createBook).Methods("POST")
+	api.Router.HandleFunc("/books", api.createBook).Methods("POST")
 	api.Router.HandleFunc("/books", listBooks).Methods("GET")
 	api.Router.HandleFunc("/books/{id}", getBook).Methods("GET")
 

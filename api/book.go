@@ -92,7 +92,7 @@ func checkin(b *models.Book, review int) error {
 	return nil
 }
 
-func createBook(w http.ResponseWriter, r *http.Request) {
+func (api *BooksAPI) createBook(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
 	defer r.Body.Close()
 	if err != nil {
