@@ -4,51 +4,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ONSdigital/log.go/log"
+	"github.com/cadmiumcat/books-api/models"
 	"github.com/gorilla/mux"
 	"io/ioutil"
 	"net/http"
 	"time"
 )
 
-type Book struct {
-	Id       string     `json:"id"`
-	Title    string     `json:"title"`
-	Author   string     `json:"author"`
-	Synopsis string     `json:"synopsis"`
-	Links    *Link      `json:"links"`
-	History  []Checkout `json:"history"`
-}
-
-func (b Book) validate() error {
-	if b.Title == "" || b.Author == "" {
-		return ErrInvalidBook
-	}
-
-	return nil
-}
-
-type Checkout struct {
-	Who    string
-	Out    time.Time
-	In     time.Time
-	Review int
-}
-
-type Link struct {
-	Self         string
-	Reservations string
-	Reviews      string
-}
-
-type Books struct {
-	Count int    `json:"total_count"`
-	Items []Book `json:"items"`
-}
-
-var books Books
+var books models.Books
 
 func init() {
-	b := Book{
+	b := models.Book{
 		Title:    "default book",
 		Author:   "default author",
 		Synopsis: "",
@@ -58,7 +24,7 @@ func init() {
 
 }
 
-func get(id string) (book *Book) {
+func get(id string) (book *models.Book) {
 	for i, l := range books.Items {
 		if l.Id == id {
 			book = &books.Items[i]
@@ -68,11 +34,11 @@ func get(id string) (book *Book) {
 	return
 }
 
-func getAll() Books {
+func getAll() models.Books {
 	return books
 }
 
-func add(b Book) {
+func add(b models.Book) {
 	count := len(books.Items)
 	books.Count = count + 1
 
@@ -80,7 +46,7 @@ func add(b Book) {
 	books.Items = append(books.Items, b)
 }
 
-func checkout(b *Book, name string) error {
+func checkout(b *models.Book, name string) error {
 	h := len(b.History)
 	if h != 0 {
 		lastCheckout := b.History[h-1]
@@ -93,7 +59,7 @@ func checkout(b *Book, name string) error {
 		return ErrNameMissing
 	}
 
-	b.History = append(b.History, Checkout{
+	b.History = append(b.History, models.Checkout{
 		Who: name,
 		Out: time.Now(),
 	})
@@ -101,7 +67,7 @@ func checkout(b *Book, name string) error {
 	return nil
 }
 
-func checkin(b *Book, review int) error {
+func checkin(b *models.Book, review int) error {
 	h := len(b.History)
 	if h == 0 {
 		return ErrBookNotCheckedOut
@@ -116,7 +82,7 @@ func checkin(b *Book, review int) error {
 		return ErrBookNotCheckedOut
 	}
 
-	b.History[h-1] = Checkout{
+	b.History[h-1] = models.Checkout{
 		Who:    lastCheckout.Who,
 		Out:    lastCheckout.Out,
 		In:     time.Now(),
@@ -134,14 +100,14 @@ func createBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var book Book
+	var book models.Book
 	err = json.Unmarshal(b, &book)
 	if err != nil {
 		unmarshalFailed(w, err)
 		return
 	}
 
-	err = book.validate()
+	err = book.Validate()
 	if err != nil {
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
@@ -201,7 +167,7 @@ func checkoutBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var co Checkout
+	var co models.Checkout
 	err = json.Unmarshal(b, &co)
 	if err != nil {
 		unmarshalFailed(w, err)
@@ -229,7 +195,7 @@ func checkinBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var co Checkout
+	var co models.Checkout
 	err = json.Unmarshal(b, &co)
 	if err != nil {
 		unmarshalFailed(w, err)

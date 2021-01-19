@@ -1,14 +1,15 @@
 package api
 
 import (
+	"github.com/cadmiumcat/books-api/models"
 	. "github.com/smartystreets/goconvey/convey"
 	"testing"
 )
 
 func TestErrorMessage(t *testing.T) {
 	Convey("Given a checked out book", t, func() {
-		book := Book{
-			History: []Checkout{{Who: "user"}},
+		book := models.Book{
+			History: []models.Checkout{{Who: "user"}},
 		}
 		Convey("When a User tries to check out the book", func() {
 			user := "otherUser"
@@ -29,7 +30,7 @@ func TestErrorMessage(t *testing.T) {
 	})
 
 	Convey("Given a book in the book store that has never been checked out", t, func() {
-		book := Book{}
+		book := models.Book{}
 		Convey("When a user tries to check out a book without providing a name", func() {
 			err := checkout(&book, "")
 			Convey("Then an error message shows that a name must be provided", func() {
@@ -47,9 +48,9 @@ func TestErrorMessage(t *testing.T) {
 	})
 
 	Convey("Given an invalid book", t, func() {
-		book := Book{}
+		book := models.Book{}
 		Convey("When the book is checked for validation", func() {
-			err := book.validate()
+			err := book.Validate()
 			Convey("Then an error message shows that the book is invalid", func() {
 				So(err, ShouldBeError, ErrInvalidBook)
 			})
