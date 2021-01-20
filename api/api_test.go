@@ -11,11 +11,16 @@ import (
 	"testing"
 )
 
+const (
+	host = "http://localhost:80"
+)
+
 func TestEndpoints(t *testing.T) {
-	api := &API{
-		Router:    mux.NewRouter(),
-		dataStore: &datastoretest.DataStoreMock{AddBookFunc: func(book *models.Book) {}},
-	}
+	response := httptest.NewRecorder()
+
+	mockDataStore := &datastoretest.DataStoreMock{AddBookFunc: func(book *models.Book) {}}
+
+	api := Setup(host, mux.NewRouter(), mockDataStore)
 
 	Convey("Given a POST request to add a book", t, func() {
 		Convey("When the body does not contain a valid book", func() {
@@ -23,8 +28,6 @@ func TestEndpoints(t *testing.T) {
 			request, err := http.NewRequest(http.MethodPost, "/books", body)
 			So(err, ShouldBeNil)
 
-			response := httptest.NewRecorder()
-			setupRoutes(api)
 			api.Router.ServeHTTP(response, request)
 
 			Convey("Then the HTTP response code is 400", func() {
@@ -37,8 +40,6 @@ func TestEndpoints(t *testing.T) {
 			request, err := http.NewRequest(http.MethodPost, "/books", body)
 			So(err, ShouldBeNil)
 
-			response := httptest.NewRecorder()
-			setupRoutes(api)
 			api.Router.ServeHTTP(response, request)
 
 			Convey("Then the HTTP response code is 201", func() {
@@ -54,8 +55,6 @@ func TestEndpoints(t *testing.T) {
 			request, err := http.NewRequest(http.MethodGet, "/books/"+id, nil)
 			So(err, ShouldBeNil)
 
-			response := httptest.NewRecorder()
-			setupRoutes(api)
 			api.Router.ServeHTTP(response, request)
 
 			Convey("Then the HTTP response code is 200", func() {
@@ -71,8 +70,6 @@ func TestEndpoints(t *testing.T) {
 			request, err := http.NewRequest(http.MethodGet, "/books/"+id, nil)
 			So(err, ShouldBeNil)
 
-			response := httptest.NewRecorder()
-			setupRoutes(api)
 			api.Router.ServeHTTP(response, request)
 			Convey("then the HTTP response code is 404", func() {
 				So(response.Code, ShouldEqual, http.StatusNotFound)
@@ -85,8 +82,6 @@ func TestEndpoints(t *testing.T) {
 			request, err := http.NewRequest(http.MethodGet, "/books", nil)
 			So(err, ShouldBeNil)
 
-			response := httptest.NewRecorder()
-			setupRoutes(api)
 			api.Router.ServeHTTP(response, request)
 
 			Convey("then the HTTP response code is 200", func() {

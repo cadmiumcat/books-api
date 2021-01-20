@@ -6,6 +6,7 @@ import (
 	"github.com/cadmiumcat/books-api/config"
 	"github.com/cadmiumcat/books-api/interfaces"
 	"github.com/cadmiumcat/books-api/mongo"
+	"github.com/gorilla/mux"
 	"os"
 )
 
@@ -32,6 +33,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	api.Setup(cfg, dataStore)
+	host := cfg.BindAddr
 
+	api.Setup(host, mux.NewRouter(), dataStore)
 }

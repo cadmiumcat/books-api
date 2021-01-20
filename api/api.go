@@ -1,7 +1,6 @@
 package api
 
 import (
-	"github.com/cadmiumcat/books-api/config"
 	"github.com/cadmiumcat/books-api/interfaces"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -12,18 +11,11 @@ type API struct {
 	dataStore interfaces.DataStore
 }
 
-func Setup(cfg *config.Configuration, dataStore interfaces.DataStore) {
+func Setup(host string, router *mux.Router, dataStore interfaces.DataStore) *API {
 	api := &API{
-		Router:    mux.NewRouter(),
+		Router:    router,
 		dataStore: dataStore,
 	}
-
-	setupRoutes(api)
-
-	http.ListenAndServe(cfg.BindAddr, api.Router)
-
-}
-func setupRoutes(api *API) {
 
 	api.Router.HandleFunc("/books", api.createBook).Methods("POST")
 	api.Router.HandleFunc("/books", listBooks).Methods("GET")
@@ -31,5 +23,14 @@ func setupRoutes(api *API) {
 
 	api.Router.HandleFunc("/library/{id}/checkout", checkoutBook).Methods("PUT")
 	api.Router.HandleFunc("/library/{id}/checkin", checkinBook).Methods("PUT")
+
+	http.ListenAndServe(host, api.Router)
+
+	return api
+
+}
+
+func setupRoutes(api *API) {
+
 	return
 }
