@@ -27,6 +27,9 @@ var _ interfaces.DataStore = &DataStoreMock{}
 //             CloseFunc: func(ctx context.Context) error {
 // 	               panic("mock out the Close method")
 //             },
+//             GetBookFunc: func(id string) (*models.Book, error) {
+// 	               panic("mock out the GetBook method")
+//             },
 //             GetBooksFunc: func() (models.Books, error) {
 // 	               panic("mock out the GetBooks method")
 //             },
@@ -46,6 +49,9 @@ type DataStoreMock struct {
 	// CloseFunc mocks the Close method.
 	CloseFunc func(ctx context.Context) error
 
+	// GetBookFunc mocks the GetBook method.
+	GetBookFunc func(id string) (*models.Book, error)
+
 	// GetBooksFunc mocks the GetBooks method.
 	GetBooksFunc func() (models.Books, error)
 
@@ -64,6 +70,11 @@ type DataStoreMock struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 		}
+		// GetBook holds details about calls to the GetBook method.
+		GetBook []struct {
+			// ID is the id argument value.
+			ID string
+		}
 		// GetBooks holds details about calls to the GetBooks method.
 		GetBooks []struct {
 		}
@@ -75,6 +86,7 @@ type DataStoreMock struct {
 	}
 	lockAddBook  sync.RWMutex
 	lockClose    sync.RWMutex
+	lockGetBook  sync.RWMutex
 	lockGetBooks sync.RWMutex
 	lockInit     sync.RWMutex
 }
@@ -138,6 +150,37 @@ func (mock *DataStoreMock) CloseCalls() []struct {
 	mock.lockClose.RLock()
 	calls = mock.calls.Close
 	mock.lockClose.RUnlock()
+	return calls
+}
+
+// GetBook calls GetBookFunc.
+func (mock *DataStoreMock) GetBook(id string) (*models.Book, error) {
+	if mock.GetBookFunc == nil {
+		panic("DataStoreMock.GetBookFunc: method is nil but DataStore.GetBook was just called")
+	}
+	callInfo := struct {
+		ID string
+	}{
+		ID: id,
+	}
+	mock.lockGetBook.Lock()
+	mock.calls.GetBook = append(mock.calls.GetBook, callInfo)
+	mock.lockGetBook.Unlock()
+	return mock.GetBookFunc(id)
+}
+
+// GetBookCalls gets all the calls that were made to GetBook.
+// Check the length with:
+//     len(mockedDataStore.GetBookCalls())
+func (mock *DataStoreMock) GetBookCalls() []struct {
+	ID string
+} {
+	var calls []struct {
+		ID string
+	}
+	mock.lockGetBook.RLock()
+	calls = mock.calls.GetBook
+	mock.lockGetBook.RUnlock()
 	return calls
 }
 

@@ -12,5 +12,6 @@ type DataStore interface {
 	Init(config.MongoConfig) (err error)
 	Close(ctx context.Context) (err error)
 	AddBook(book *models.Book)
+	GetBook(id string) (*models.Book, error)
 	GetBooks() (models.Books, error)
 }

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"github.com/cadmiumcat/books-api/interfaces/datastoretest"
 	"github.com/cadmiumcat/books-api/models"
 	"github.com/gorilla/mux"
@@ -17,16 +18,15 @@ const (
 
 func TestEndpoints(t *testing.T) {
 
-	mockDataStore := &datastoretest.DataStoreMock{
-		AddBookFunc: func(book *models.Book) {},
-		GetBooksFunc: func() (models.Books, error) {
-			return models.Books{}, nil
-		},
-	}
 
-	api := Setup(host, mux.NewRouter(), mockDataStore)
 
 	Convey("Given a POST request to add a book", t, func() {
+		mockDataStore := &datastoretest.DataStoreMock{
+			AddBookFunc: func(book *models.Book) {},
+		}
+
+		api := Setup(host, mux.NewRouter(), mockDataStore)
+
 		Convey("When the body does not contain a valid book", func() {
 			response := httptest.NewRecorder()
 
@@ -58,7 +58,13 @@ func TestEndpoints(t *testing.T) {
 
 	Convey("Given an existing book with book id=1", t, func() {
 		id := "1"
+		mockDataStore := &datastoretest.DataStoreMock{
+			GetBookFunc: func(id string) (*models.Book, error) {
+				return &models.Book{Id: "1"}, nil
+			},
+		}
 
+		api := Setup(host, mux.NewRouter(), mockDataStore)
 		Convey("When I send an HTTP GET request to /books/1", func() {
 			response := httptest.NewRecorder()
 
@@ -75,6 +81,14 @@ func TestEndpoints(t *testing.T) {
 	})
 
 	Convey("Given a book that does not exist with book id=3", t, func() {
+		mockDataStore := &datastoretest.DataStoreMock{
+			GetBookFunc: func(id string) (*models.Book, error) {
+				return nil, errors.New("error message")
+			},
+		}
+
+		api := Setup(host, mux.NewRouter(), mockDataStore)
+
 		id := "3"
 		Convey("When I send an HTTP GET request to /books/3", func() {
 			response := httptest.NewRecorder()
@@ -90,6 +104,13 @@ func TestEndpoints(t *testing.T) {
 	})
 
 	Convey("Given ", t, func() {
+		mockDataStore := &datastoretest.DataStoreMock{
+			GetBooksFunc: func() (models.Books, error) {
+				return models.Books{}, nil
+			},
+		}
+
+		api := Setup(host, mux.NewRouter(), mockDataStore)
 		Convey("When I send an HTTP GET request to /books", func() {
 			response := httptest.NewRecorder()
 
