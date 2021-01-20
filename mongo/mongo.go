@@ -9,6 +9,7 @@ import (
 	"github.com/cadmiumcat/books-api/config"
 	"github.com/cadmiumcat/books-api/models"
 	"github.com/globalsign/mgo"
+	"github.com/globalsign/mgo/bson"
 )
 
 type Mongo struct {
@@ -50,14 +51,31 @@ func (m *Mongo) AddBook(book *models.Book) {
 	return
 }
 
+func (m *Mongo) GetBook(ID string) (*models.Book, error){
+	session := m.Session.Copy()
+	defer session.Close()
+
+	var book models.Book
+	err := session.DB(m.Database).C(m.Collection).Find(bson.M{"id": ID}).One(&book)
+
+	if err != nil {
+		if err == mgo.ErrNotFound {
+			return nil, errors.New("book not found")
+		}
+		return nil, err
+	}
+
+	return &book, err
+}
+
 func (m *Mongo) GetBooks() (models.Books, error) {
 	session := m.Session.Copy()
 	defer session.Close()
 
-	iter := session.DB(m.Database).C(m.Collection).Find(nil)
+	list := session.DB(m.Database).C(m.Collection).Find(nil)
 
 	books := &models.Books{}
-	if err := iter.All(&books.Items); err != nil {
+	if err := list.All(&books.Items); err != nil {
 		log.Event(nil, "can't get it", log.FATAL, log.Error(err))
 	}
 
