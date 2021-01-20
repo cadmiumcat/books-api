@@ -51,7 +51,7 @@ func (m *Mongo) AddBook(book *models.Book) {
 	return
 }
 
-func (m *Mongo) GetBook(ID string) (*models.Book, error){
+func (m *Mongo) GetBook(ID string) (*models.Book, error) {
 	session := m.Session.Copy()
 	defer session.Close()
 

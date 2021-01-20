@@ -18,8 +18,6 @@ const (
 
 func TestEndpoints(t *testing.T) {
 
-
-
 	Convey("Given a POST request to add a book", t, func() {
 		mockDataStore := &datastoretest.DataStoreMock{
 			AddBookFunc: func(book *models.Book) {},
