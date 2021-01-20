@@ -28,7 +28,7 @@ func TestEndpoints(t *testing.T) {
 			request, err := http.NewRequest(http.MethodPost, "/books", body)
 			So(err, ShouldBeNil)
 
-			api.Router.ServeHTTP(response, request)
+			api.router.ServeHTTP(response, request)
 
 			Convey("Then the HTTP response code is 400", func() {
 				So(response.Code, ShouldEqual, http.StatusBadRequest)
@@ -40,7 +40,7 @@ func TestEndpoints(t *testing.T) {
 			request, err := http.NewRequest(http.MethodPost, "/books", body)
 			So(err, ShouldBeNil)
 
-			api.Router.ServeHTTP(response, request)
+			api.router.ServeHTTP(response, request)
 
 			Convey("Then the HTTP response code is 201", func() {
 				So(response.Code, ShouldEqual, http.StatusCreated)
@@ -55,7 +55,7 @@ func TestEndpoints(t *testing.T) {
 			request, err := http.NewRequest(http.MethodGet, "/books/"+id, nil)
 			So(err, ShouldBeNil)
 
-			api.Router.ServeHTTP(response, request)
+			api.router.ServeHTTP(response, request)
 
 			Convey("Then the HTTP response code is 200", func() {
 				So(response.Code, ShouldEqual, http.StatusOK)
@@ -70,7 +70,7 @@ func TestEndpoints(t *testing.T) {
 			request, err := http.NewRequest(http.MethodGet, "/books/"+id, nil)
 			So(err, ShouldBeNil)
 
-			api.Router.ServeHTTP(response, request)
+			api.router.ServeHTTP(response, request)
 			Convey("then the HTTP response code is 404", func() {
 				So(response.Code, ShouldEqual, http.StatusNotFound)
 			})
@@ -82,7 +82,7 @@ func TestEndpoints(t *testing.T) {
 			request, err := http.NewRequest(http.MethodGet, "/books", nil)
 			So(err, ShouldBeNil)
 
-			api.Router.ServeHTTP(response, request)
+			api.router.ServeHTTP(response, request)
 
 			Convey("then the HTTP response code is 200", func() {
 				So(response.Code, ShouldEqual, http.StatusOK)
