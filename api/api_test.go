@@ -16,14 +16,20 @@ const (
 )
 
 func TestEndpoints(t *testing.T) {
-	response := httptest.NewRecorder()
 
-	mockDataStore := &datastoretest.DataStoreMock{AddBookFunc: func(book *models.Book) {}}
+	mockDataStore := &datastoretest.DataStoreMock{
+		AddBookFunc: func(book *models.Book) {},
+		GetBooksFunc: func() (models.Books, error) {
+			return models.Books{}, nil
+		},
+	}
 
 	api := Setup(host, mux.NewRouter(), mockDataStore)
 
 	Convey("Given a POST request to add a book", t, func() {
 		Convey("When the body does not contain a valid book", func() {
+			response := httptest.NewRecorder()
+
 			body := strings.NewReader(`{}`)
 			request, err := http.NewRequest(http.MethodPost, "/books", body)
 			So(err, ShouldBeNil)
@@ -36,6 +42,8 @@ func TestEndpoints(t *testing.T) {
 		})
 
 		Convey("When the body contains a valid book", func() {
+			response := httptest.NewRecorder()
+
 			body := strings.NewReader(`{"title":"Girl, Woman, Other", "author":"Bernardine Evaristo" }`)
 			request, err := http.NewRequest(http.MethodPost, "/books", body)
 			So(err, ShouldBeNil)
@@ -52,6 +60,8 @@ func TestEndpoints(t *testing.T) {
 		id := "1"
 
 		Convey("When I send an HTTP GET request to /books/1", func() {
+			response := httptest.NewRecorder()
+
 			request, err := http.NewRequest(http.MethodGet, "/books/"+id, nil)
 			So(err, ShouldBeNil)
 
@@ -67,6 +77,8 @@ func TestEndpoints(t *testing.T) {
 	Convey("Given a book that does not exist with book id=3", t, func() {
 		id := "3"
 		Convey("When I send an HTTP GET request to /books/3", func() {
+			response := httptest.NewRecorder()
+
 			request, err := http.NewRequest(http.MethodGet, "/books/"+id, nil)
 			So(err, ShouldBeNil)
 
@@ -79,6 +91,8 @@ func TestEndpoints(t *testing.T) {
 
 	Convey("Given ", t, func() {
 		Convey("When I send an HTTP GET request to /books", func() {
+			response := httptest.NewRecorder()
+
 			request, err := http.NewRequest(http.MethodGet, "/books", nil)
 			So(err, ShouldBeNil)
 

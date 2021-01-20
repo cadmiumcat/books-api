@@ -3,8 +3,10 @@ package mongo
 import (
 	"context"
 	"errors"
+	"fmt"
 	dpMongodb "github.com/ONSdigital/dp-mongodb"
 	dpMongoLock "github.com/ONSdigital/dp-mongodb/dplock"
+	"github.com/ONSdigital/log.go/log"
 	"github.com/cadmiumcat/books-api/config"
 	"github.com/cadmiumcat/books-api/models"
 	"github.com/globalsign/mgo"
@@ -45,4 +47,21 @@ func (m *Mongo) AddBook(book *models.Book) {
 
 	collection := session.DB(m.Database).C(m.Collection)
 	collection.Insert(book)
+
+	return
+}
+
+func (m *Mongo) GetBooks() (models.Books, error) {
+	session := m.Session.Copy()
+	defer session.Close()
+
+	iter := session.DB(m.Database).C(m.Collection).Find(nil)
+
+	books := &models.Books{}
+	if err := iter.All(&books.Items); err != nil {
+		log.Event(nil, "can't get it", log.FATAL, log.Error(err))
+	}
+	fmt.Println(books)
+
+	return *books, nil
 }

@@ -111,8 +111,10 @@ func (api *API) createBook(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
-func listBooks(w http.ResponseWriter, r *http.Request) {
-	b, err := json.Marshal(getAll())
+func (api *API) listBooks(w http.ResponseWriter, r *http.Request) {
+	books, err := api.dataStore.GetBooks()
+
+	b, err := json.Marshal(books)
 	if err != nil {
 		marshalFailed(w, err)
 		return

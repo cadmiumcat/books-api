@@ -7,20 +7,20 @@ import (
 )
 
 type API struct {
-	host string
+	host      string
 	router    *mux.Router
 	dataStore interfaces.DataStore
 }
 
 func Setup(host string, router *mux.Router, dataStore interfaces.DataStore) *API {
 	api := &API{
-		host: host,
+		host:      host,
 		router:    router,
 		dataStore: dataStore,
 	}
 
 	api.router.HandleFunc("/books", api.createBook).Methods("POST")
-	api.router.HandleFunc("/books", listBooks).Methods("GET")
+	api.router.HandleFunc("/books", api.listBooks).Methods("GET")
 	api.router.HandleFunc("/books/{id}", getBook).Methods("GET")
 
 	api.router.HandleFunc("/library/{id}/checkout", checkoutBook).Methods("PUT")
