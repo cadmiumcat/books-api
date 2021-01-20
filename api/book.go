@@ -114,6 +114,8 @@ func (api *API) createBook(w http.ResponseWriter, r *http.Request) {
 func (api *API) listBooks(w http.ResponseWriter, r *http.Request) {
 	books, err := api.dataStore.GetBooks()
 
+	books.Count = len(books.Items)
+
 	b, err := json.Marshal(books)
 	if err != nil {
 		marshalFailed(w, err)

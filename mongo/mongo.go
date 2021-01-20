@@ -3,7 +3,6 @@ package mongo
 import (
 	"context"
 	"errors"
-	"fmt"
 	dpMongodb "github.com/ONSdigital/dp-mongodb"
 	dpMongoLock "github.com/ONSdigital/dp-mongodb/dplock"
 	"github.com/ONSdigital/log.go/log"
@@ -61,7 +60,6 @@ func (m *Mongo) GetBooks() (models.Books, error) {
 	if err := iter.All(&books.Items); err != nil {
 		log.Event(nil, "can't get it", log.FATAL, log.Error(err))
 	}
-	fmt.Println(books)
 
 	return *books, nil
 }
