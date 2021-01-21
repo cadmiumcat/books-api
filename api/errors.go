@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/ONSdigital/log.go/log"
@@ -15,23 +16,23 @@ var (
 	ErrInvalidBook       = errors.New("invalid book. Missing required field")
 )
 
-func readFailed(w http.ResponseWriter, err error) {
-	log.Event(nil, "error reading request body", log.ERROR, log.Error(err))
+func readFailed(ctx context.Context, w http.ResponseWriter, err error) {
+	log.Event(ctx, "error reading request body", log.ERROR, log.Error(err))
 	http.Error(w, "cannot read request body", http.StatusInternalServerError)
 }
 
-func bookNotFound(w http.ResponseWriter, id string) {
+func bookNotFound(ctx context.Context, w http.ResponseWriter, id string) {
 	msg := fmt.Sprintf("book id %q not found", id)
-	log.Event(nil, msg, log.INFO)
+	log.Event(ctx, msg, log.INFO)
 	http.Error(w, msg, http.StatusNotFound)
 }
 
-func unmarshalFailed(w http.ResponseWriter, err error) {
-	log.Event(nil, "error returned from json unmarshal", log.ERROR, log.Error(err))
+func unmarshalFailed(ctx context.Context, w http.ResponseWriter, err error) {
+	log.Event(ctx, "error returned from json unmarshal", log.ERROR, log.Error(err))
 	http.Error(w, "cannot unmarshal json body", http.StatusInternalServerError)
 }
 
-func marshalFailed(w http.ResponseWriter, err error) {
+func marshalFailed(ctx context.Context, w http.ResponseWriter, err error) {
 	log.Event(nil, "error returned from json marshal", log.ERROR, log.Error(err))
 	http.Error(w, "cannot marshal content to json", http.StatusInternalServerError)
 }

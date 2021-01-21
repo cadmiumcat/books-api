@@ -55,66 +55,72 @@ func checkin(b *models.Book, review int) error {
 	return nil
 }
 
-func (api *API) createBook(w http.ResponseWriter, r *http.Request) {
-	b, err := ioutil.ReadAll(r.Body)
-	defer r.Body.Close()
+func (api *API) createBook(writer http.ResponseWriter, request *http.Request) {
+	ctx := request.Context()
+
+	bytes, err := ioutil.ReadAll(request.Body)
+	defer request.Body.Close()
 	if err != nil {
-		readFailed(w, err)
+		readFailed(ctx, writer, err)
 		return
 	}
 
 	book := &models.Book{}
 
-	err = json.Unmarshal(b, &book)
+	err = json.Unmarshal(bytes, &book)
 	if err != nil {
-		unmarshalFailed(w, err)
+		unmarshalFailed(ctx, writer, err)
 		return
 	}
 
 	err = book.Validate()
 	if err != nil {
-		w.Header().Set("content-type", "application/json")
-		w.WriteHeader(http.StatusBadRequest)
+		writer.Header().Set("content-type", "application/json")
+		writer.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	api.dataStore.AddBook(book)
 
-	w.Header().Set("content-type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	w.Write(b)
+	writer.Header().Set("content-type", "application/json")
+	writer.WriteHeader(http.StatusCreated)
+	writer.Write(bytes)
 }
 
-func (api *API) listBooks(w http.ResponseWriter, r *http.Request) {
+func (api *API) listBooks(writer http.ResponseWriter, request *http.Request) {
+	ctx := request.Context()
+
 	books, err := api.dataStore.GetBooks()
 
 	books.Count = len(books.Items)
 
-	b, err := json.Marshal(books)
+	bytes, err := json.Marshal(books)
 	if err != nil {
-		marshalFailed(w, err)
+		marshalFailed(ctx, writer, err)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(b)
+	writer.Header().Set("Content-Type", "application/json")
+	writer.Write(bytes)
 }
 
-func (api *API) getBook(w http.ResponseWriter, r *http.Request) {
-	id := mux.Vars(r)["id"]
+func (api *API) getBook(writer http.ResponseWriter, request *http.Request) {
+	ctx := request.Context()
+
+	id := mux.Vars(request)["id"]
 
 	book, err := api.dataStore.GetBook(id)
 	if book == nil {
-		bookNotFound(w, id)
+		bookNotFound(ctx, writer, id)
 		return
 	}
 
-	b, err := json.Marshal(book)
+	bytes, err := json.Marshal(book)
 	if err != nil {
-		marshalFailed(w, err)
+		marshalFailed(ctx, writer, err)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(b)
+	writer.Header().Set("Content-Type", "application/json")
+	writer.Write(bytes)
 }
