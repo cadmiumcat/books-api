@@ -36,3 +36,8 @@ func marshalFailed(ctx context.Context, w http.ResponseWriter, err error) {
 	log.Event(nil, "error returned from json marshal", log.ERROR, log.Error(err))
 	http.Error(w, "cannot marshal content to json", http.StatusInternalServerError)
 }
+
+func invalidBook(ctx context.Context, w http.ResponseWriter, err error)  {
+	log.Event(ctx,"invalid book", log.ERROR, log.Error(err))
+	http.Error(w, "invalid book", http.StatusBadRequest)
+}

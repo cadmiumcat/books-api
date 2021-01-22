@@ -75,8 +75,7 @@ func (api *API) createBook(writer http.ResponseWriter, request *http.Request) {
 
 	err = book.Validate()
 	if err != nil {
-		writer.Header().Set("content-type", "application/json")
-		writer.WriteHeader(http.StatusBadRequest)
+		invalidBook(ctx, writer, err)
 		return
 	}
 
