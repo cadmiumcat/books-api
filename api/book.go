@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/cadmiumcat/books-api/models"
 	"github.com/gorilla/mux"
+	uuid "github.com/satori/go.uuid"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -79,7 +80,14 @@ func (api *API) createBook(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
+	book.ID = uuid.NewV4().String()
 	api.dataStore.AddBook(book)
+
+	bytes, err = json.Marshal(book)
+	if err != nil {
+		marshalFailed(ctx, writer, err)
+		return
+	}
 
 	writer.Header().Set("content-type", "application/json")
 	writer.WriteHeader(http.StatusCreated)

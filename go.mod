@@ -8,8 +8,6 @@ require (
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/gorilla/mux v1.8.0
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/matryer/moq v0.1.4 // indirect
-	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
+	github.com/satori/go.uuid v1.2.0
 	github.com/smartystreets/goconvey v1.6.4
-	gopkg.in/check.v1 v1.0.0-20200902074654-038fdea0a05b // indirect
 )

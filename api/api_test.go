@@ -61,7 +61,7 @@ func TestEndpoints(t *testing.T) {
 		id := "1"
 		mockDataStore := &datastoretest.DataStoreMock{
 			GetBookFunc: func(id string) (*models.Book, error) {
-				return &models.Book{Id: "1"}, nil
+				return &models.Book{ID: "1"}, nil
 			},
 		}
 
