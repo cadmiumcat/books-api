@@ -9,9 +9,9 @@ type Book struct {
 	ID       string     `json:"id" bson:"_id"`
 	Title    string     `json:"title"`
 	Author   string     `json:"author"`
-	Synopsis string     `json:"synopsis"`
-	Links    *Link      `json:"links"`
-	History  []Checkout `json:"history"`
+	Synopsis string     `json:"synopsis,omitempty"`
+	Links    *Link      `json:"links,omitempty"`
+	History  []Checkout `json:"history,omitempty"`
 }
 
 func (b *Book) Validate() error {
