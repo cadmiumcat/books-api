@@ -13,9 +13,7 @@ import (
 	"testing"
 )
 
-const (
-	host = "http://localhost:80"
-)
+const host = "http://localhost:80"
 
 func TestEndpoints(t *testing.T) {
 	t.Parallel()

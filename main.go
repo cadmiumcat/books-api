@@ -36,7 +36,5 @@ func main() {
 		os.Exit(1)
 	}
 
-	host := cfg.BindAddr
-
-	api.Setup(ctx, host, mux.NewRouter(), dataStore)
+	api.Setup(ctx, cfg.BindAddr, mux.NewRouter(), dataStore)
 }
