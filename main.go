@@ -24,7 +24,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// TODO: figure out why this does not log the binding address for the database
 	log.Event(ctx, "loaded configuration", log.INFO, log.Data{"config": cfg})
 
 	var dataStore interfaces.DataStore

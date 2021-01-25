@@ -38,6 +38,9 @@ func TestEndpoints(t *testing.T) {
 			Convey("Then the HTTP response code is 400", func() {
 				So(response.Code, ShouldEqual, http.StatusBadRequest)
 			})
+			Convey("And there AddBook function is not called", func() {
+				So(len(mockDataStore.AddBookCalls()), ShouldEqual, 0)
+			})
 		})
 
 		Convey("When the body contains a valid book", func() {
@@ -51,6 +54,9 @@ func TestEndpoints(t *testing.T) {
 
 			Convey("Then the HTTP response code is 201", func() {
 				So(response.Code, ShouldEqual, http.StatusCreated)
+			})
+			Convey("And the AddBook function is called once", func() {
+				So(len(mockDataStore.AddBookCalls()), ShouldEqual, 1)
 			})
 		})
 	})
@@ -76,6 +82,9 @@ func TestEndpoints(t *testing.T) {
 
 			Convey("Then the HTTP response code is 200", func() {
 				So(response.Code, ShouldEqual, http.StatusOK)
+			})
+			Convey("And the GetBook function is called once", func() {
+				So(len(mockDataStore.GetBookCalls()), ShouldEqual, 1)
 			})
 		})
 
@@ -103,6 +112,9 @@ func TestEndpoints(t *testing.T) {
 			Convey("then the HTTP response code is 404", func() {
 				So(response.Code, ShouldEqual, http.StatusNotFound)
 			})
+			Convey("And the GetBook function is called once", func() {
+				So(len(mockDataStore.GetBookCalls()), ShouldEqual, 1)
+			})
 		})
 	})
 
@@ -126,6 +138,9 @@ func TestEndpoints(t *testing.T) {
 
 			Convey("then the HTTP response code is 200", func() {
 				So(response.Code, ShouldEqual, http.StatusOK)
+			})
+			Convey("And the GetBooks function is called once", func() {
+				So(len(mockDataStore.GetBooksCalls()), ShouldEqual, 1)
 			})
 		})
 	})
