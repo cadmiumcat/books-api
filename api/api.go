@@ -14,6 +14,7 @@ type API struct {
 	dataStore interfaces.DataStore
 }
 
+// Setup sets up the endpoints and starts the http server.
 func Setup(ctx context.Context, host string, router *mux.Router, dataStore interfaces.DataStore) *API {
 	api := &API{
 		host:      host,
@@ -21,9 +22,11 @@ func Setup(ctx context.Context, host string, router *mux.Router, dataStore inter
 		dataStore: dataStore,
 	}
 
+	// Endpoints
 	api.router.HandleFunc("/books", api.createBook).Methods("POST")
 	api.router.HandleFunc("/books", api.listBooks).Methods("GET")
 	api.router.HandleFunc("/books/{id}", api.getBook).Methods("GET")
+
 
 	log.Event(ctx, "starting http server", log.INFO, log.Data{"bind_addr": api.host})
 	http.ListenAndServe(api.host, api.router)

@@ -26,8 +26,8 @@ func main() {
 
 	log.Event(ctx, "loaded configuration", log.INFO, log.Data{"config": cfg})
 
+	// Initialise database
 	var dataStore interfaces.DataStore
-
 	dataStore = &mongo.Mongo{}
 	err = dataStore.Init(cfg.MongoConfig)
 	if err != nil {
@@ -35,5 +35,6 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Run the service
 	api.Setup(ctx, cfg.BindAddr, mux.NewRouter(), dataStore)
 }
