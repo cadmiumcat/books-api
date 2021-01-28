@@ -12,6 +12,7 @@ import (
 	"github.com/globalsign/mgo/bson"
 )
 
+// Mongo contains the information needed to create and interact with a mongo session
 type Mongo struct {
 	Collection string
 	Database   string
@@ -20,6 +21,8 @@ type Mongo struct {
 	lockClient *dpMongoLock.Lock
 }
 
+// Init initialises a mongo session with the given configuration.
+// It returns an error if the session already exists or if it cannot connect.
 func (m *Mongo) Init(mongoConfig config.MongoConfig) (err error) {
 	if m.Session != nil {
 		return errors.New("session already exists")
@@ -41,6 +44,7 @@ func (m *Mongo) Close(ctx context.Context) (err error) {
 	return dpMongodb.Close(ctx, m.Session)
 }
 
+// AddBook adds a Book
 func (m *Mongo) AddBook(book *models.Book) {
 	session := m.Session.Copy()
 	defer session.Close()
@@ -51,6 +55,8 @@ func (m *Mongo) AddBook(book *models.Book) {
 	return
 }
 
+// GetBook returns a models.Book for a given ID.
+// It returns an error if the Book is not found
 func (m *Mongo) GetBook(ID string) (*models.Book, error) {
 	session := m.Session.Copy()
 	defer session.Close()
@@ -68,6 +74,8 @@ func (m *Mongo) GetBook(ID string) (*models.Book, error) {
 	return &book, err
 }
 
+// GetBooks returns all the existing models.Books.
+// It returns an error if the models.Books cannot be listed.
 func (m *Mongo) GetBooks() (models.Books, error) {
 	session := m.Session.Copy()
 	defer session.Close()

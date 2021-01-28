@@ -56,6 +56,7 @@ func checkin(b *models.Book, review int) error {
 	return nil
 }
 
+//
 func (api *API) createBook(writer http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
 

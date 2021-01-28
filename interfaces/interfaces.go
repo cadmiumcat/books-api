@@ -8,6 +8,7 @@ import (
 
 //go:generate moq -out datastoretest/datastore.go -pkg datastoretest . DataStore
 
+// DataStore implements the methods required to interact with the database
 type DataStore interface {
 	Init(config.MongoConfig) (err error)
 	Close(ctx context.Context) (err error)
