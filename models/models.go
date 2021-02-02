@@ -9,9 +9,9 @@ type Book struct {
 	ID       string     `json:"id" bson:"_id"`
 	Title    string     `json:"title" bson:"title"`
 	Author   string     `json:"author" bson:"author"`
-	Synopsis string     `json:"synopsis,omitempty" bson:"synopsis"`
-	Links    *Link      `json:"links,omitempty" bson:"links"`
-	History  []Checkout `json:"history,omitempty" bson:"history"`
+	Synopsis string     `json:"synopsis,omitempty" bson:"synopsis,omitempty"`
+	Links    *Link      `json:"links,omitempty" bson:"links,omitempty"`
+	History  []Checkout `json:"history,omitempty" bson:"history,omitempty"`
 }
 
 func (b *Book) Validate() error {
@@ -36,6 +36,6 @@ type Link struct {
 }
 
 type Books struct {
-	Count int    `json:"totalCount" bson:"totalCount"`
-	Items []Book `json:"items" bson:"items"`
+	Count int    `json:"totalCount"`
+	Items []Book `json:"items"`
 }
