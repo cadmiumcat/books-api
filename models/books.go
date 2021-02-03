@@ -16,7 +16,7 @@ type Book struct {
 }
 
 // Validate checks a Book for missing required fields.
-// It returns an error when
+// It returns an error when required fields (e.g. author/title) are not provided.
 func (b *Book) Validate() error {
 	if b.Title == "" || b.Author == "" {
 		return errors.New("invalid book. Missing required field")
