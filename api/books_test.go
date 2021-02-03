@@ -26,6 +26,19 @@ func TestEndpoints(t *testing.T) {
 
 		api := Setup(ctx, host, mux.NewRouter(), mockDataStore)
 
+		Convey("When there is no request body", func() {
+			response := httptest.NewRecorder()
+
+			body := strings.NewReader(``)
+			request, err := http.NewRequest(http.MethodPost, "/books", body)
+			So(err, ShouldBeNil)
+
+			api.router.ServeHTTP(response, request)
+			Convey("Then the HTTP response code is 400", func() {
+				So(response.Code, ShouldEqual, http.StatusBadRequest)
+			})
+		})
+
 		Convey("When the body does not contain a valid book", func() {
 			response := httptest.NewRecorder()
 

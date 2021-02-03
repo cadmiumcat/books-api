@@ -59,6 +59,11 @@ func checkin(b *models.Book, review int) error {
 func (api *API) createBook(writer http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
 
+	if request.Body == http.NoBody {
+		missingBody(ctx, writer, ErrRequestBodyMissing)
+		return
+	}
+
 	bytes, err := ioutil.ReadAll(request.Body)
 	defer request.Body.Close()
 	if err != nil {
@@ -91,7 +96,7 @@ func (api *API) createBook(writer http.ResponseWriter, request *http.Request) {
 
 	writer.Header().Set("content-type", "application/json")
 	writer.WriteHeader(http.StatusCreated)
-	writer.Write(bytes)
+	_, _ = writer.Write(bytes)
 }
 
 func (api *API) listBooks(writer http.ResponseWriter, request *http.Request) {
@@ -108,7 +113,7 @@ func (api *API) listBooks(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	writer.Header().Set("Content-Type", "application/json")
-	writer.Write(bytes)
+	_, _ = writer.Write(bytes)
 }
 
 func (api *API) getBook(writer http.ResponseWriter, request *http.Request) {
@@ -129,5 +134,5 @@ func (api *API) getBook(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	writer.Header().Set("Content-Type", "application/json")
-	writer.Write(bytes)
+	_, _ = writer.Write(bytes)
 }

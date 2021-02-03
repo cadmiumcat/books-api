@@ -14,6 +14,7 @@ var (
 	ErrReviewMissing     = errors.New("a review between 1 and 5 must be provided")
 	ErrBookNotCheckedOut = errors.New("this book is not currently checked out")
 	ErrInvalidBook       = errors.New("invalid book. Missing required field")
+	ErrRequestBodyMissing = errors.New("request body missing")
 )
 
 func readFailed(ctx context.Context, w http.ResponseWriter, err error) {
@@ -40,4 +41,9 @@ func marshalFailed(ctx context.Context, w http.ResponseWriter, err error) {
 func invalidBook(ctx context.Context, w http.ResponseWriter, err error) {
 	log.Event(ctx, "invalid book", log.ERROR, log.Error(err))
 	http.Error(w, "invalid book", http.StatusBadRequest)
+}
+
+func missingBody(ctx context.Context, w http.ResponseWriter, err error)  {
+	log.Event(ctx, "invalid book", log.ERROR, log.Error(err))
+	http.Error(w, err.Error(), http.StatusBadRequest)
 }
