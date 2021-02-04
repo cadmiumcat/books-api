@@ -37,9 +37,13 @@ func TestEndpoints(t *testing.T) {
 			Convey("Then the HTTP response code is 400", func() {
 				So(response.Code, ShouldEqual, http.StatusBadRequest)
 			})
+
+			Convey("And the response says the request body is missing", func() {
+				So(response.Body.String(), ShouldContainSubstring, ErrRequestBodyMissing.Error())
+			})
 		})
 
-		Convey("When the body does not contain a valid book", func() {
+		Convey("When the body is empty", func() {
 			response := httptest.NewRecorder()
 
 			body := strings.NewReader(`{}`)
@@ -53,6 +57,9 @@ func TestEndpoints(t *testing.T) {
 			})
 			Convey("And there AddBook function is not called", func() {
 				So(len(mockDataStore.AddBookCalls()), ShouldEqual, 0)
+			})
+			Convey("And the response says the request is empty", func() {
+				So(response.Body.String(), ShouldContainSubstring, ErrEmptyRequest.Error())
 			})
 		})
 

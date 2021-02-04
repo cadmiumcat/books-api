@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"encoding/json"
 	"github.com/cadmiumcat/books-api/models"
 	"github.com/gorilla/mux"
@@ -9,6 +10,8 @@ import (
 	"net/http"
 	"time"
 )
+
+const emptyJson = "{}"
 
 func checkout(b *models.Book, name string) error {
 	h := len(b.History)
@@ -64,16 +67,23 @@ func (api *API) createBook(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	bytes, err := ioutil.ReadAll(request.Body)
+	body, err := ioutil.ReadAll(request.Body)
 	defer request.Body.Close()
 	if err != nil {
 		readFailed(ctx, writer, err)
 		return
 	}
+	buffer := new(bytes.Buffer)
+	json.Compact(buffer, body)
+
+	if buffer.String() == emptyJson {
+		emptyRequest(ctx, writer, ErrEmptyRequest)
+		return
+	}
 
 	book := &models.Book{}
 
-	err = json.Unmarshal(bytes, &book)
+	err = json.Unmarshal(body, &book)
 	if err != nil {
 		unmarshalFailed(ctx, writer, err)
 		return
@@ -88,7 +98,7 @@ func (api *API) createBook(writer http.ResponseWriter, request *http.Request) {
 	book.ID = uuid.NewV4().String()
 	api.dataStore.AddBook(book)
 
-	bytes, err = json.Marshal(book)
+	body, err = json.Marshal(book)
 	if err != nil {
 		marshalFailed(ctx, writer, err)
 		return
@@ -96,7 +106,7 @@ func (api *API) createBook(writer http.ResponseWriter, request *http.Request) {
 
 	writer.Header().Set("content-type", "application/json")
 	writer.WriteHeader(http.StatusCreated)
-	_, _ = writer.Write(bytes)
+	_, _ = writer.Write(body)
 }
 
 func (api *API) listBooks(writer http.ResponseWriter, request *http.Request) {

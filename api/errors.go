@@ -9,12 +9,13 @@ import (
 )
 
 var (
-	ErrBookCheckedOut    = errors.New("this book is currently checked out")
-	ErrNameMissing       = errors.New("a name must be provided for checkout")
-	ErrReviewMissing     = errors.New("a review between 1 and 5 must be provided")
-	ErrBookNotCheckedOut = errors.New("this book is not currently checked out")
-	ErrInvalidBook       = errors.New("invalid book. Missing required field")
+	ErrBookCheckedOut     = errors.New("this book is currently checked out")
+	ErrNameMissing        = errors.New("a name must be provided for checkout")
+	ErrReviewMissing      = errors.New("a review between 1 and 5 must be provided")
+	ErrBookNotCheckedOut  = errors.New("this book is not currently checked out")
+	ErrInvalidBook        = errors.New("invalid book. Missing required field")
 	ErrRequestBodyMissing = errors.New("request body missing")
+	ErrEmptyRequest       = errors.New("empty request body")
 )
 
 func readFailed(ctx context.Context, w http.ResponseWriter, err error) {
@@ -43,7 +44,12 @@ func invalidBook(ctx context.Context, w http.ResponseWriter, err error) {
 	http.Error(w, "invalid book", http.StatusBadRequest)
 }
 
-func missingBody(ctx context.Context, w http.ResponseWriter, err error)  {
+func missingBody(ctx context.Context, w http.ResponseWriter, err error) {
 	log.Event(ctx, "invalid book", log.ERROR, log.Error(err))
+	http.Error(w, err.Error(), http.StatusBadRequest)
+}
+
+func emptyRequest(ctx context.Context, w http.ResponseWriter, err error) {
+	log.Event(ctx, "empty request body", log.ERROR, log.Error(err))
 	http.Error(w, err.Error(), http.StatusBadRequest)
 }
