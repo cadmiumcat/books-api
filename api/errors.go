@@ -40,12 +40,12 @@ func marshalFailed(ctx context.Context, w http.ResponseWriter, err error) {
 }
 
 func invalidBook(ctx context.Context, w http.ResponseWriter, err error) {
-	log.Event(ctx, "invalid book", log.ERROR, log.Error(err))
-	http.Error(w, "invalid book", http.StatusBadRequest)
+	log.Event(ctx, ErrInvalidBook.Error(), log.ERROR, log.Error(err))
+	http.Error(w, ErrInvalidBook.Error(), http.StatusBadRequest)
 }
 
 func missingBody(ctx context.Context, w http.ResponseWriter, err error) {
-	log.Event(ctx, "invalid book", log.ERROR, log.Error(err))
+	log.Event(ctx, err.Error(), log.ERROR, log.Error(err))
 	http.Error(w, err.Error(), http.StatusBadRequest)
 }
 
