@@ -56,7 +56,7 @@ func TestEndpoints(t *testing.T) {
 				So(response.Code, ShouldEqual, http.StatusBadRequest)
 			})
 			Convey("And there AddBook function is not called", func() {
-				So(len(mockDataStore.AddBookCalls()), ShouldEqual, 0)
+				So(mockDataStore.AddBookCalls(), ShouldHaveLength, 0)
 			})
 			Convey("And the response says the request is empty", func() {
 				So(response.Body.String(), ShouldContainSubstring, ErrEmptyRequest.Error())
@@ -76,7 +76,7 @@ func TestEndpoints(t *testing.T) {
 				So(response.Code, ShouldEqual, http.StatusCreated)
 			})
 			Convey("And the AddBook function is called once", func() {
-				So(len(mockDataStore.AddBookCalls()), ShouldEqual, 1)
+				So(mockDataStore.AddBookCalls(), ShouldHaveLength, 1)
 			})
 		})
 	})
@@ -104,7 +104,7 @@ func TestEndpoints(t *testing.T) {
 				So(response.Code, ShouldEqual, http.StatusOK)
 			})
 			Convey("And the GetBook function is called once", func() {
-				So(len(mockDataStore.GetBookCalls()), ShouldEqual, 1)
+				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
 			})
 		})
 
@@ -133,7 +133,7 @@ func TestEndpoints(t *testing.T) {
 				So(response.Code, ShouldEqual, http.StatusNotFound)
 			})
 			Convey("And the GetBook function is called once", func() {
-				So(len(mockDataStore.GetBookCalls()), ShouldEqual, 1)
+				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
 			})
 		})
 	})
@@ -160,7 +160,7 @@ func TestEndpoints(t *testing.T) {
 				So(response.Code, ShouldEqual, http.StatusOK)
 			})
 			Convey("And the GetBooks function is called once", func() {
-				So(len(mockDataStore.GetBooksCalls()), ShouldEqual, 1)
+				So(mockDataStore.GetBooksCalls(), ShouldHaveLength, 1)
 			})
 		})
 	})
