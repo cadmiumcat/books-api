@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/cadmiumcat/books-api/interfaces/datastoretest"
+	"github.com/cadmiumcat/books-api/interfaces/mock"
 	"github.com/cadmiumcat/books-api/models"
 	"github.com/gorilla/mux"
 	. "github.com/smartystreets/goconvey/convey"
@@ -17,14 +18,16 @@ const host = "http://localhost:80"
 
 func TestEndpoints(t *testing.T) {
 	t.Parallel()
+	hcMock := mock.HealthCheckerMock{}
 
 	Convey("Given a POST request to add a book", t, func() {
 		mockDataStore := &datastoretest.DataStoreMock{
 			AddBookFunc: func(book *models.Book) {},
 		}
+
 		ctx := context.Background()
 
-		api := Setup(ctx, host, mux.NewRouter(), mockDataStore)
+		api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
 
 		Convey("When there is no request body", func() {
 			response := httptest.NewRecorder()
@@ -91,7 +94,7 @@ func TestEndpoints(t *testing.T) {
 
 		ctx := context.Background()
 
-		api := Setup(ctx, host, mux.NewRouter(), mockDataStore)
+		api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
 		Convey("When I send an HTTP GET request to /books/1", func() {
 			response := httptest.NewRecorder()
 
@@ -119,7 +122,7 @@ func TestEndpoints(t *testing.T) {
 
 		ctx := context.Background()
 
-		api := Setup(ctx, host, mux.NewRouter(), mockDataStore)
+		api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
 
 		id := "3"
 		Convey("When I send an HTTP GET request to /books/3", func() {
@@ -147,7 +150,7 @@ func TestEndpoints(t *testing.T) {
 
 		ctx := context.Background()
 
-		api := Setup(ctx, host, mux.NewRouter(), mockDataStore)
+		api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
 		Convey("When I send an HTTP GET request to /books", func() {
 			response := httptest.NewRecorder()
 
