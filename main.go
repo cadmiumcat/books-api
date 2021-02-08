@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	health "github.com/ONSdigital/dp-healthcheck/healthcheck"
 	"github.com/ONSdigital/log.go/log"
 	"github.com/cadmiumcat/books-api/api"
 	"github.com/cadmiumcat/books-api/config"
@@ -12,6 +13,15 @@ import (
 )
 
 const serviceName = "books-api"
+
+var (
+	// BuildTime represents the time in which the service was built
+	BuildTime string
+	// GitCommit represents the commit (SHA-1) hash of the service that is running
+	GitCommit string
+	// Version represents the version of the service that is running
+	Version string
+)
 
 func main() {
 	ctx := context.Background()
@@ -26,6 +36,16 @@ func main() {
 
 	log.Event(ctx, "loaded configuration", log.INFO, log.Data{"config": cfg})
 
+	// Initialise Health Check?
+	versionInfo, err := health.NewVersionInfo(BuildTime, GitCommit, Version)
+	if err != nil {
+		log.Event(ctx, "could not instantiate health check", log.FATAL, log.Error(err))
+		os.Exit(1)
+	}
+
+	hc := health.New(versionInfo, cfg.HealthCheckCriticalTimeout, cfg.HealthCheckInterval)
+	hc.Start(ctx)
+
 	// Initialise database
 	var dataStore interfaces.DataStore
 	dataStore = &mongo.Mongo{}
@@ -36,5 +56,5 @@ func main() {
 	}
 
 	// Run the service
-	api.Setup(ctx, cfg.BindAddr, mux.NewRouter(), dataStore)
+	api.Setup(ctx, cfg.BindAddr, mux.NewRouter(), dataStore, &hc)
 }

@@ -1,10 +1,15 @@
 package config
 
-import "github.com/kelseyhightower/envconfig"
+import (
+	"github.com/kelseyhightower/envconfig"
+	"time"
+)
 
 type Configuration struct {
-	BindAddr    string `envconfig:"BIND_ADDR"`
-	MongoConfig MongoConfig
+	BindAddr                   string `envconfig:"BIND_ADDR"`
+	HealthCheckCriticalTimeout time.Duration
+	HealthCheckInterval        time.Duration
+	MongoConfig                MongoConfig
 }
 
 type MongoConfig struct {
@@ -22,7 +27,9 @@ func Get() (*Configuration, error) {
 	}
 
 	cfg = &Configuration{
-		BindAddr: ":8080",
+		BindAddr:                   ":8080",
+		HealthCheckCriticalTimeout: 90 * time.Second,
+		HealthCheckInterval:        30 * time.Second,
 		MongoConfig: MongoConfig{
 			BindAddr:   "localhost:27017",
 			Collection: "books",
