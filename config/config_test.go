@@ -4,6 +4,7 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 	"os"
 	"testing"
+	"time"
 )
 
 func TestConfig(t *testing.T) {
@@ -17,6 +18,8 @@ func TestConfig(t *testing.T) {
 				So(cfg.MongoConfig.BindAddr, ShouldEqual, "localhost:27017")
 				So(cfg.MongoConfig.Database, ShouldEqual, "bookStore")
 				So(cfg.MongoConfig.Collection, ShouldEqual, "books")
+				So(cfg.HealthCheckInterval, ShouldEqual, 30*time.Second)
+				So(cfg.HealthCheckCriticalTimeout, ShouldEqual, 90*time.Second)
 			})
 			Convey("And there should be no errors", func() {
 				So(err, ShouldBeNil)
