@@ -1,25 +1,36 @@
 package api
 
 import (
-	"github.com/cadmiumcat/books-api/config"
+	"context"
+	"github.com/ONSdigital/log.go/log"
+	"github.com/cadmiumcat/books-api/interfaces"
 	"github.com/gorilla/mux"
 	"net/http"
 )
 
-func Setup(cfg *config.Configuration) {
-	router := setupRoutes()
-
-	http.ListenAndServe(cfg.BindAddr, router)
-
+type API struct {
+	host      string
+	router    *mux.Router
+	dataStore interfaces.DataStore
 }
-func setupRoutes() *mux.Router {
-	router := mux.NewRouter()
 
-	router.HandleFunc("/books", createBook).Methods("POST")
-	router.HandleFunc("/books", listBooks).Methods("GET")
-	router.HandleFunc("/books/{id}", getBook).Methods("GET")
+// Setup sets up the endpoints and starts the http server.
+func Setup(ctx context.Context, host string, router *mux.Router, dataStore interfaces.DataStore) *API {
+	api := &API{
+		host:      host,
+		router:    router,
+		dataStore: dataStore,
+	}
 
-	router.HandleFunc("/library/{id}/checkout", checkoutBook).Methods("PUT")
-	router.HandleFunc("/library/{id}/checkin", checkinBook).Methods("PUT")
-	return router
+	// Endpoints
+	api.router.HandleFunc("/books", api.createBook).Methods("POST")
+	api.router.HandleFunc("/books", api.listBooks).Methods("GET")
+	api.router.HandleFunc("/books/{id}", api.getBook).Methods("GET")
+
+
+	log.Event(ctx, "starting http server", log.INFO, log.Data{"bind_addr": api.host})
+	http.ListenAndServe(api.host, api.router)
+
+	return api
+
 }
