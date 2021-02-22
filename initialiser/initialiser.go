@@ -18,4 +18,3 @@ func GetHTTPServer(bindAddr string, router http.Handler) interfaces.HTTPServer {
 	httpServer := dpHttp.NewServer(bindAddr, router)
 	return httpServer
 }
-

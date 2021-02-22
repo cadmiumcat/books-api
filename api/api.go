@@ -8,10 +8,10 @@ import (
 )
 
 type API struct {
-	host       string
-	router     *mux.Router
-	dataStore  interfaces.DataStore
-	hc         interfaces.HealthChecker
+	host      string
+	router    *mux.Router
+	dataStore interfaces.DataStore
+	hc        interfaces.HealthChecker
 }
 
 // Setup sets up the endpoints and starts the http  initialiser.
