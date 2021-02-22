@@ -14,7 +14,7 @@ type API struct {
 	hc        interfaces.HealthChecker
 }
 
-// Setup sets up the endpoints and starts the http  initialiser.
+// Setup sets up the endpoints.
 func Setup(ctx context.Context, host string, router *mux.Router, dataStore interfaces.DataStore, hc interfaces.HealthChecker) *API {
 	api := &API{
 		host:      host,
