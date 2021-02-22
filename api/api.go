@@ -5,7 +5,6 @@ import (
 	"github.com/ONSdigital/log.go/log"
 	"github.com/cadmiumcat/books-api/interfaces"
 	"github.com/gorilla/mux"
-	"net/http"
 )
 
 type API struct {
@@ -15,7 +14,7 @@ type API struct {
 	hc        interfaces.HealthChecker
 }
 
-// Setup sets up the endpoints and starts the http server.
+// Setup sets up the endpoints.
 func Setup(ctx context.Context, host string, router *mux.Router, dataStore interfaces.DataStore, hc interfaces.HealthChecker) *API {
 	api := &API{
 		host:      host,
@@ -31,8 +30,7 @@ func Setup(ctx context.Context, host string, router *mux.Router, dataStore inter
 
 	api.router.HandleFunc("/health", api.hc.Handler).Methods("GET")
 
-	log.Event(ctx, "starting http server", log.INFO, log.Data{"bind_addr": api.host})
-	http.ListenAndServe(api.host, api.router)
+	log.Event(ctx, "enabling endpoints", log.INFO, log.Data{"bind_addr": api.host})
 
 	return api
 

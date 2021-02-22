@@ -6,6 +6,7 @@ import (
 	"github.com/ONSdigital/log.go/log"
 	"github.com/cadmiumcat/books-api/api"
 	"github.com/cadmiumcat/books-api/config"
+	"github.com/cadmiumcat/books-api/initialiser"
 	"github.com/cadmiumcat/books-api/interfaces"
 	"github.com/cadmiumcat/books-api/mongo"
 	"github.com/gorilla/mux"
@@ -55,6 +56,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Run the service
-	api.Setup(ctx, cfg.BindAddr, mux.NewRouter(), dataStore, &hc)
+	// Initialise server
+	svc := initialiser.Service{}
+	router := mux.NewRouter()
+	svc.Server = initialiser.GetHTTPServer(cfg.BindAddr, router)
+
+	svc.API = api.Setup(ctx, cfg.BindAddr, router, dataStore, &hc)
+
+	svc.Server.ListenAndServe()
 }
