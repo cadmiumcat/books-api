@@ -10,6 +10,8 @@ import (
 
 //go:generate moq -out datastoretest/datastore.go -pkg datastoretest . DataStore
 //go:generate moq -out mock/healthcheck.go -pkg mock . HealthChecker
+//go:generate moq -out mock/server.go -pkg mock . HTTPServer
+//go:generate moq -out mock/initaliser.go -pkg mock . Initialiser
 
 // DataStore implements the methods required to interact with the database
 type DataStore interface {
@@ -26,4 +28,12 @@ type HealthChecker interface {
 	Start(ctx context.Context)
 	Stop()
 	AddCheck(name string, checker healthcheck.Checker) (err error)
+}
+
+type HTTPServer interface {
+	ListenAndServe() error
+}
+
+type Initialiser interface {
+	GetHTTPServer(BindAddr string, router http.Handler) HTTPServer
 }
