@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	health "github.com/ONSdigital/dp-healthcheck/healthcheck"
+	hc "github.com/ONSdigital/dp-healthcheck/healthcheck"
 	"github.com/ONSdigital/log.go/log"
 	"github.com/cadmiumcat/books-api/api"
 	"github.com/cadmiumcat/books-api/config"
@@ -38,13 +38,13 @@ func main() {
 	log.Event(ctx, "loaded configuration", log.INFO, log.Data{"config": cfg})
 
 	// Initialise Health Check?
-	versionInfo, err := health.NewVersionInfo(BuildTime, GitCommit, Version)
+	versionInfo, err := hc.NewVersionInfo(BuildTime, GitCommit, Version)
 	if err != nil {
 		log.Event(ctx, "could not instantiate health check", log.FATAL, log.Error(err))
 		os.Exit(1)
 	}
 
-	hc := health.New(versionInfo, cfg.HealthCheckCriticalTimeout, cfg.HealthCheckInterval)
+	hc := hc.New(versionInfo, cfg.HealthCheckCriticalTimeout, cfg.HealthCheckInterval)
 	hc.Start(ctx)
 
 	// Initialise database
