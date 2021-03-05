@@ -3,6 +3,7 @@ package mongo
 import (
 	"context"
 	"errors"
+	dpHealthcheck "github.com/ONSdigital/dp-healthcheck/healthcheck"
 	dpMongodb "github.com/ONSdigital/dp-mongodb"
 	dpMongoLock "github.com/ONSdigital/dp-mongodb/dplock"
 	"github.com/ONSdigital/log.go/log"
@@ -88,4 +89,24 @@ func (m *Mongo) GetBooks() (models.Books, error) {
 	}
 
 	return *books, nil
+}
+
+func (m *Mongo) Checker(ctx context.Context, state *dpHealthcheck.CheckState) error {
+	if err := m.Healthcheck(ctx); err != nil {
+		state.Update(dpHealthcheck.StatusCritical, err.Error(), 0)
+		return nil
+	}
+	state.Update(dpHealthcheck.StatusOK, "mongo ok", 0)
+	return nil
+}
+
+func (m *Mongo) Healthcheck(ctx context.Context) error {
+	s := m.Session.Copy()
+	defer s.Close()
+	err := s.Ping()
+	if err != nil {
+		log.Event(ctx, "Ping mongo", log.ERROR, log.Error(err))
+		return err
+	}
+	return nil
 }

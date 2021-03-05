@@ -45,7 +45,7 @@ func main() {
 	}
 
 	hc := hc.New(versionInfo, cfg.HealthCheckCriticalTimeout, cfg.HealthCheckInterval)
-	hc.Start(ctx)
+
 
 	// Initialise database
 	var dataStore interfaces.DataStore
@@ -56,12 +56,20 @@ func main() {
 		os.Exit(1)
 	}
 
+	if err = hc.AddCheck("mongoDB", dataStore.Checker); err != nil {
+		log.Event(ctx, "failed to add healthcheck", log.FATAL, log.Error(err))
+	}
+
 	// Initialise server
 	svc := initialiser.Service{}
 	router := mux.NewRouter()
 	svc.Server = initialiser.GetHTTPServer(cfg.BindAddr, router)
 
 	svc.API = api.Setup(ctx, cfg.BindAddr, router, dataStore, &hc)
+	//router.HandleFunc("/health", hc.Handler)
+	hc.Start(ctx)
 
 	svc.Server.ListenAndServe()
+
+	hc.Stop()
 }
