@@ -91,15 +91,17 @@ func (m *Mongo) GetBooks() (models.Books, error) {
 	return *books, nil
 }
 
+// Checker calls an api health endpoint and updates the provided CheckState
 func (m *Mongo) Checker(ctx context.Context, state *dpHealthcheck.CheckState) error {
 	if err := m.Healthcheck(ctx); err != nil {
 		state.Update(dpHealthcheck.StatusCritical, err.Error(), 0)
 		return nil
 	}
-	state.Update(dpHealthcheck.StatusOK, "mongo ok", 0)
+	state.Update(dpHealthcheck.StatusOK, "Mongodb is ok", 0)
 	return nil
 }
 
+// Healthcheck calls the service to check its health status
 func (m *Mongo) Healthcheck(ctx context.Context) error {
 	s := m.Session.Copy()
 	defer s.Close()

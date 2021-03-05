@@ -46,7 +46,6 @@ func main() {
 
 	hc := hc.New(versionInfo, cfg.HealthCheckCriticalTimeout, cfg.HealthCheckInterval)
 
-
 	// Initialise database
 	var dataStore interfaces.DataStore
 	dataStore = &mongo.Mongo{}
@@ -66,7 +65,7 @@ func main() {
 	svc.Server = initialiser.GetHTTPServer(cfg.BindAddr, router)
 
 	svc.API = api.Setup(ctx, cfg.BindAddr, router, dataStore, &hc)
-	//router.HandleFunc("/health", hc.Handler)
+
 	hc.Start(ctx)
 
 	svc.Server.ListenAndServe()
