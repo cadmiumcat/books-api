@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
-	hc "github.com/ONSdigital/dp-healthcheck/healthcheck"
+	dpHealthCheck "github.com/ONSdigital/dp-healthcheck/healthcheck"
+	dpMongoDB "github.com/ONSdigital/dp-mongodb/health"
 	"github.com/ONSdigital/log.go/log"
 	"github.com/cadmiumcat/books-api/api"
 	"github.com/cadmiumcat/books-api/config"
 	"github.com/cadmiumcat/books-api/initialiser"
-	"github.com/cadmiumcat/books-api/interfaces"
 	"github.com/cadmiumcat/books-api/mongo"
 	"github.com/gorilla/mux"
 	"os"
@@ -38,25 +38,41 @@ func main() {
 	log.Event(ctx, "loaded configuration", log.INFO, log.Data{"config": cfg})
 
 	// Initialise Health Check?
-	versionInfo, err := hc.NewVersionInfo(BuildTime, GitCommit, Version)
+	versionInfo, err := dpHealthCheck.NewVersionInfo(BuildTime, GitCommit, Version)
 	if err != nil {
 		log.Event(ctx, "could not instantiate health check", log.FATAL, log.Error(err))
 		os.Exit(1)
 	}
 
-	hc := hc.New(versionInfo, cfg.HealthCheckCriticalTimeout, cfg.HealthCheckInterval)
+	hc := dpHealthCheck.New(versionInfo, cfg.HealthCheckCriticalTimeout, cfg.HealthCheckInterval)
 
 	// Initialise database
-	var dataStore interfaces.DataStore
-	dataStore = &mongo.Mongo{}
-	err = dataStore.Init(cfg.MongoConfig)
+	//var dataStore interfaces.DataStore
+	mongodb := &mongo.Mongo{}
+	err = mongodb.Init(cfg.MongoConfig)
 	if err != nil {
 		log.Event(ctx, "failed to initialise mongo", log.FATAL, log.Error(err))
 		os.Exit(1)
 	}
 
-	if err = hc.AddCheck("mongoDB", dataStore.Checker); err != nil {
-		log.Event(ctx, "failed to add healthcheck", log.FATAL, log.Error(err))
+	databaseCollectionBuilder := make(map[dpMongoDB.Database][]dpMongoDB.Collection)
+	databaseCollectionBuilder[(dpMongoDB.Database)(mongodb.Database)] = []dpMongoDB.Collection{(dpMongoDB.Collection)(mongodb.Collection)}
+
+	mongoClient := dpMongoDB.NewClientWithCollections(mongodb.Session, databaseCollectionBuilder)
+
+	var hasErrors bool
+	mongoHealth := dpMongoDB.CheckMongoClient{
+		Client:      *mongoClient,
+		Healthcheck: mongoClient.Healthcheck,
+	}
+	if err := hc.AddCheck("mongoDB", mongoHealth.Checker); err != nil {
+		hasErrors = true
+		log.Event(ctx, "error adding mongoDB checker", log.FATAL, log.Error(err))
+		os.Exit(1)
+	}
+
+	if hasErrors {
+		log.Event(ctx, "error registering checkers for healthcheck", log.ERROR)
 	}
 
 	// Initialise server
@@ -64,7 +80,7 @@ func main() {
 	router := mux.NewRouter()
 	svc.Server = initialiser.GetHTTPServer(cfg.BindAddr, router)
 
-	svc.API = api.Setup(ctx, cfg.BindAddr, router, dataStore, &hc)
+	svc.API = api.Setup(ctx, cfg.BindAddr, router, mongodb, &hc)
 
 	hc.Start(ctx)
 
