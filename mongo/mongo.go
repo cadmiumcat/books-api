@@ -95,7 +95,7 @@ func (m *Mongo) GetBooks() (models.Books, error) {
 func (m *Mongo) Checker(ctx context.Context, state *dpHealthcheck.CheckState) error {
 	if err := m.Healthcheck(ctx); err != nil {
 		state.Update(dpHealthcheck.StatusCritical, err.Error(), 0)
-		return nil
+		return err
 	}
 	state.Update(dpHealthcheck.StatusOK, "Mongodb is ok", 0)
 	return nil
