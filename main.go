@@ -60,6 +60,25 @@ func main() {
 
 	mongoClient := dpMongoDB.NewClientWithCollections(mongodb.Session, databaseCollectionBuilder)
 
+	registerCheckers(ctx, &hc, mongoClient)
+
+	// Initialise server
+	svc := initialiser.Service{}
+	router := mux.NewRouter()
+	svc.Server = initialiser.GetHTTPServer(cfg.BindAddr, router)
+
+	svc.API = api.Setup(ctx, cfg.BindAddr, router, mongodb, &hc)
+
+	hc.Start(ctx)
+
+	svc.Server.ListenAndServe()
+
+	hc.Stop()
+}
+
+
+// registerCheckers adds the checkers for the provided clients to the health check object
+func registerCheckers(ctx context.Context, hc *dpHealthCheck.HealthCheck, mongoClient *dpMongoDB.Client) {
 	var hasErrors bool
 	mongoHealth := dpMongoDB.CheckMongoClient{
 		Client:      *mongoClient,
@@ -74,17 +93,4 @@ func main() {
 	if hasErrors {
 		log.Event(ctx, "error registering checkers for healthcheck", log.ERROR)
 	}
-
-	// Initialise server
-	svc := initialiser.Service{}
-	router := mux.NewRouter()
-	svc.Server = initialiser.GetHTTPServer(cfg.BindAddr, router)
-
-	svc.API = api.Setup(ctx, cfg.BindAddr, router, mongodb, &hc)
-
-	hc.Start(ctx)
-
-	svc.Server.ListenAndServe()
-
-	hc.Stop()
 }
