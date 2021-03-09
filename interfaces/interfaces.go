@@ -20,7 +20,6 @@ type DataStore interface {
 	AddBook(book *models.Book)
 	GetBook(id string) (*models.Book, error)
 	GetBooks() (models.Books, error)
-	Checker(ctx context.Context, state *healthcheck.CheckState) error
 }
 
 // HealthChecker defines the required methods from Healthcheck

@@ -5,7 +5,6 @@ package datastoretest
 
 import (
 	"context"
-	"github.com/ONSdigital/dp-healthcheck/healthcheck"
 	"github.com/cadmiumcat/books-api/config"
 	"github.com/cadmiumcat/books-api/interfaces"
 	"github.com/cadmiumcat/books-api/models"
@@ -24,9 +23,6 @@ var _ interfaces.DataStore = &DataStoreMock{}
 //         mockedDataStore := &DataStoreMock{
 //             AddBookFunc: func(book *models.Book)  {
 // 	               panic("mock out the AddBook method")
-//             },
-//             CheckerFunc: func(ctx context.Context, state *healthcheck.CheckState) error {
-// 	               panic("mock out the Checker method")
 //             },
 //             CloseFunc: func(ctx context.Context) error {
 // 	               panic("mock out the Close method")
@@ -50,9 +46,6 @@ type DataStoreMock struct {
 	// AddBookFunc mocks the AddBook method.
 	AddBookFunc func(book *models.Book)
 
-	// CheckerFunc mocks the Checker method.
-	CheckerFunc func(ctx context.Context, state *healthcheck.CheckState) error
-
 	// CloseFunc mocks the Close method.
 	CloseFunc func(ctx context.Context) error
 
@@ -71,13 +64,6 @@ type DataStoreMock struct {
 		AddBook []struct {
 			// Book is the book argument value.
 			Book *models.Book
-		}
-		// Checker holds details about calls to the Checker method.
-		Checker []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// State is the state argument value.
-			State *healthcheck.CheckState
 		}
 		// Close holds details about calls to the Close method.
 		Close []struct {
@@ -99,7 +85,6 @@ type DataStoreMock struct {
 		}
 	}
 	lockAddBook  sync.RWMutex
-	lockChecker  sync.RWMutex
 	lockClose    sync.RWMutex
 	lockGetBook  sync.RWMutex
 	lockGetBooks sync.RWMutex
@@ -134,41 +119,6 @@ func (mock *DataStoreMock) AddBookCalls() []struct {
 	mock.lockAddBook.RLock()
 	calls = mock.calls.AddBook
 	mock.lockAddBook.RUnlock()
-	return calls
-}
-
-// Checker calls CheckerFunc.
-func (mock *DataStoreMock) Checker(ctx context.Context, state *healthcheck.CheckState) error {
-	if mock.CheckerFunc == nil {
-		panic("DataStoreMock.CheckerFunc: method is nil but DataStore.Checker was just called")
-	}
-	callInfo := struct {
-		Ctx   context.Context
-		State *healthcheck.CheckState
-	}{
-		Ctx:   ctx,
-		State: state,
-	}
-	mock.lockChecker.Lock()
-	mock.calls.Checker = append(mock.calls.Checker, callInfo)
-	mock.lockChecker.Unlock()
-	return mock.CheckerFunc(ctx, state)
-}
-
-// CheckerCalls gets all the calls that were made to Checker.
-// Check the length with:
-//     len(mockedDataStore.CheckerCalls())
-func (mock *DataStoreMock) CheckerCalls() []struct {
-	Ctx   context.Context
-	State *healthcheck.CheckState
-} {
-	var calls []struct {
-		Ctx   context.Context
-		State *healthcheck.CheckState
-	}
-	mock.lockChecker.RLock()
-	calls = mock.calls.Checker
-	mock.lockChecker.RUnlock()
 	return calls
 }
 
