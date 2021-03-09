@@ -60,6 +60,7 @@ func main() {
 
 	mongoClient := dpMongoDB.NewClientWithCollections(mongodb.Session, databaseCollectionBuilder)
 
+	// Add API checks
 	registerCheckers(ctx, &hc, mongoClient)
 
 	// Initialise server
@@ -75,7 +76,6 @@ func main() {
 
 	hc.Stop()
 }
-
 
 // registerCheckers adds the checkers for the provided clients to the health check object
 func registerCheckers(ctx context.Context, hc *dpHealthCheck.HealthCheck, mongoClient *dpMongoDB.Client) {
