@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	dpHealthCheck "github.com/ONSdigital/dp-healthcheck/healthcheck"
 	dpMongoDB "github.com/ONSdigital/dp-mongodb/health"
 	"github.com/ONSdigital/log.go/log"
@@ -22,6 +23,9 @@ var (
 	GitCommit string
 	// Version represents the version of the service that is running
 	Version string
+
+	// Errors
+	ErrRegisterHealthCheck = errors.New("error registering checkers for healthcheck")
 )
 
 func main() {
@@ -61,7 +65,11 @@ func main() {
 	mongoClient := dpMongoDB.NewClientWithCollections(mongodb.Session, databaseCollectionBuilder)
 
 	// Add API checks
-	registerCheckers(ctx, &hc, mongoClient)
+	if err := registerCheckers(ctx, &hc, mongoClient); err !=nil {
+		log.Event(ctx, err.Error(), log.FATAL, log.Error(err))
+		os.Exit(1)
+	}
+	hc.Start(ctx)
 
 	// Initialise server
 	svc := initialiser.Service{}
@@ -70,15 +78,13 @@ func main() {
 
 	svc.API = api.Setup(ctx, cfg.BindAddr, router, mongodb, &hc)
 
-	hc.Start(ctx)
-
 	svc.Server.ListenAndServe()
 
 	hc.Stop()
 }
 
 // registerCheckers adds the checkers for the provided clients to the health check object
-func registerCheckers(ctx context.Context, hc *dpHealthCheck.HealthCheck, mongoClient *dpMongoDB.Client) {
+func registerCheckers(ctx context.Context, hc *dpHealthCheck.HealthCheck, mongoClient *dpMongoDB.Client) error {
 	var hasErrors bool
 	mongoHealth := dpMongoDB.CheckMongoClient{
 		Client:      *mongoClient,
@@ -87,10 +93,12 @@ func registerCheckers(ctx context.Context, hc *dpHealthCheck.HealthCheck, mongoC
 	if err := hc.AddCheck("mongoDB", mongoHealth.Checker); err != nil {
 		hasErrors = true
 		log.Event(ctx, "error adding mongoDB checker", log.FATAL, log.Error(err))
-		os.Exit(1)
 	}
 
 	if hasErrors {
-		log.Event(ctx, "error registering checkers for healthcheck", log.ERROR)
+		log.Event(ctx, ErrRegisterHealthCheck.Error(), log.ERROR)
+		return ErrRegisterHealthCheck
 	}
+
+	return nil
 }
