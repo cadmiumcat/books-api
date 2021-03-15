@@ -32,6 +32,9 @@ func (m *Mongo) Init(mongoConfig config.MongoConfig) (err error) {
 		return err
 	}
 
+	m.Session.EnsureSafe(&mgo.Safe{WMode: "majority"})
+	m.Session.SetMode(mgo.Strong, true)
+
 	m.Collection = mongoConfig.Collection
 	m.Database = mongoConfig.Database
 
