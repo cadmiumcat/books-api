@@ -25,11 +25,7 @@ paths:
       produces:
         - application/json
       parameters:
-        - in: path
-          name: id
-          description: "Unique book id"
-          type: integer
-          required: true
+        - $ref: "#/parameters/Book_id"
       responses:
         200:
           description: "Successfully returned a book"
@@ -95,16 +91,8 @@ paths:
       produces:
         - application/json
       parameters:
-        - in: path
-          name: id
-          description: "Unique book id"
-          type: integer
-          required: true
-        - in: path
-          name: review_id
-          description: "Unique review id"
-          type: integer
-          required: true
+        - $ref: "#/parameters/Book_id"
+        - $ref: "#/parameters/Review_id"
       responses:
         200:
           description: "Successfully returns a review for a given book"
@@ -119,11 +107,7 @@ paths:
       produces:
         - application/json
       parameters:
-        - in: path
-          name: id
-          description: "Unique book id"
-          type: integer
-          required: true
+        - $ref: "#/parameters/Book_id"
       responses:
         200:
           description: "Successfully returns a list of reviews for the book with the given id"
@@ -140,6 +124,20 @@ paths:
                   $ref: "#/definitions/Review"
         400:
           description: "Bad request. Invalid Book supplied"
+
+parameters:
+  Book_id:
+    in: path
+    name: id
+    description: "Unique book id"
+    type: integer
+    required: true
+  Review_id:
+    in: path
+    name: review_id
+    description: "Unique review id"
+    type: integer
+    required: true
 definitions:
   Book:
     type: object
