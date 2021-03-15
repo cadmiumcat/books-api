@@ -13,7 +13,7 @@ paths:
         200:
           description: "Successfully returns OK status with checks of dependent services"
           schema:
-            $ref: "#definitions/health"
+            $ref: "#/definitions/Health"
         429:
           description: "Services warming up or degraded (at least one check in WARNING or CRITICAL status)"
         500:
@@ -91,6 +91,28 @@ paths:
             $ref: "#/definitions/Book"
         400:
           description: "Bad request. Invalid Book supplied"
+  /books/{id}/reviews/{review_id}:
+    get:
+      summary: "Returns a specific review"
+      description: "Returns a specific review (review_id) of a book (id)"
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: id
+          description: "unique book id"
+          type: integer
+          required: true
+        - in: path
+          name: review_id
+          description: "unique review id"
+          type: integer
+          required: true
+      responses:
+        200:
+          description: "successfully returns a review for a given book"
+          schema:
+            $ref: "#/definitions/Review"
 definitions:
   Book:
     type: object
@@ -124,6 +146,26 @@ definitions:
           reservations:
             type: string
           reviews:
+            type: string
+  Review:
+    type: object
+    properties:
+      id:
+        description: "Unique book id"
+        type: string
+      last_updated:
+        description: "UTC timestamp of when the review was last updated"
+        type: string
+      message:
+        description: "Review message from user"
+        type: string
+      user:
+        description: "Reviewer details"
+        type: object
+        properties:
+          forenames:
+            type: string
+          surname:
             type: string
   Health:
     type: object
