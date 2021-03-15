@@ -124,7 +124,34 @@ paths:
                   $ref: "#/definitions/Review"
         400:
           description: "Bad request. Invalid Book supplied"
-
+    post:
+      summary: "Adds a review for a book"
+      description: "Add a review for the book with given id"
+      produces:
+        - application/json
+      parameters:
+        - $ref: "#/parameters/Book_id"
+        - name: review
+          in: body
+          schema:
+            type: object
+            properties:
+              message:
+                description: "Review message from user"
+                type: string
+              user:
+                description: "Reviewer details"
+                type: object
+                properties:
+                  forenames:
+                    type: string
+                  surname:
+                    type: string
+      responses:
+        201:
+          description: "Successfully added review"
+          schema:
+            $ref: "#/definitions/Review"
 parameters:
   Book_id:
     in: path
@@ -174,6 +201,9 @@ definitions:
             type: string
   Review:
     type: object
+    required:
+      - message
+      - user
     properties:
       id:
         description: "Unique book id"
