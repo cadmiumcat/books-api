@@ -17,7 +17,7 @@ paths:
         429:
           description: "Services warming up or degraded (at least one check in WARNING or CRITICAL status)"
         500:
-          description: "Service in CRITICAL state has exceeded timeout"
+          $ref: "#/definitions/500_error"
   /books/{id}:
     get:
       summary: "Return book's details"
@@ -34,7 +34,7 @@ paths:
         400:
           description: "Resource not found"
         500:
-          description: "Internal server error"
+          $ref: "#/definitions/500_error"
       deprecated: false
   /books:
     get:
@@ -55,7 +55,7 @@ paths:
                 items:
                   $ref: "#/definitions/Book"
         500:
-          description: "Internal server error"
+          $ref: "#/definitions/500_error"
     post:
       summary: "Adds a new book"
       description: "Add a new book to the list"
@@ -85,7 +85,7 @@ paths:
         400:
           description: "Bad request. Invalid Book supplied"
         500:
-          description: "Internal server error"
+          $ref: "#/definitions/500_error"
   /books/{id}/reviews/{review_id}:
     get:
       summary: "Returns a specific review"
@@ -103,7 +103,7 @@ paths:
         400:
           description: "Bad request. Invalid book or review id supplied"
         500:
-          description: "Internal server error"
+          $ref: "#/definitions/500_error"
     put:
       summary: "Updates a specific review"
       description: "Updates the message and/or user of a specific review. At least one (user/message) must be specified in the body"
@@ -121,7 +121,7 @@ paths:
         400:
           description: "Bad request. Invalid book or review id supplied"
         500:
-          description: "Internal server error"
+          $ref: "#/definitions/500_error"
   /books/{id}/reviews:
     get:
       summary: "Returns all the reviews for a book"
@@ -147,7 +147,7 @@ paths:
         400:
           description: "Bad request. Invalid Book supplied"
         500:
-          description: "Internal server error"
+          $ref: "#/definitions/500_error"
     post:
       summary: "Adds a review for a book"
       description: "Add a review for the book with given id"
@@ -162,7 +162,7 @@ paths:
           schema:
             $ref: "#/definitions/Review"
         500:
-          description: "Internal server error"
+          $ref: "#/definitions/500_error"
 parameters:
   Book_id:
     in: path
@@ -189,16 +189,11 @@ parameters:
           description: "Review message from user"
           type: string
         user:
-          description: "Reviewer details"
-          type: object
-          properties:
-            forenames:
-              description: "Reviewer's forenames"
-              type: string
-            surname:
-              description: "Reviewer's surnames"
-              type: string
+          $ref: "#/definitions/User"
 definitions:
+  book_id:
+    description: "Unique book id"
+    type: string
   Book:
     type: object
     required:
@@ -208,8 +203,7 @@ definitions:
       - links
     properties:
       id:
-        description: "Unique book id"
-        type: string
+        $ref: "#/definitions/book_id"
       title:
         description: "Name of the book"
         type: string
@@ -243,30 +237,20 @@ definitions:
       - links
     properties:
       id:
-        description: "Unique book id"
+        description: "Unique review id"
         type: string
       last_updated:
         description: "UTC timestamp of when the review was last updated"
         type: string
+        format: date-time
+        example: "2020-04-26T08:05:52Z"
       message:
         description: "Review message from user"
         type: string
       user:
-        description: "Reviewer details"
-        type: object
-        required:
-          - forenames
-          - surname
-        properties:
-          forenames:
-            description: "Reviewer's forenames"
-            type: string
-          surname:
-            description: "Reviewer's surnames"
-            type: string
+        $ref: "#/definitions/User"
       book_id:
-        description: "Unique book id"
-        type: string
+        $ref: "#/definitions/book_id"
       links:
         type: object
         required:
@@ -277,6 +261,19 @@ definitions:
             type: string
           book:
             type: string
+  User:
+    description: "Reviewer details"
+    type: object
+    required:
+      - forenames
+      - surname
+    properties:
+      forenames:
+        description: "Reviewer's forenames"
+        type: string
+      surname:
+        description: "Reviewer's surnames"
+        type: string
   Health:
     type: object
     properties:
@@ -346,3 +343,5 @@ definitions:
         type: string
         description: "The last failed health check date and time of the external service"
         example: null
+  500_error:
+    description: "Internal server error"
