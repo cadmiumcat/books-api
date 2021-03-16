@@ -84,6 +84,8 @@ paths:
             $ref: "#/definitions/Book"
         400:
           description: "Bad request. Invalid Book supplied"
+        500:
+          description: "Internal server error"
   /books/{id}/reviews/{review_id}:
     get:
       summary: "Returns a specific review"
@@ -100,6 +102,8 @@ paths:
             $ref: "#/definitions/Review"
         400:
           description: "Bad request. Invalid book or review id supplied"
+        500:
+          description: "Internal server error"
     put:
       summary: "Updates a specific review"
       description: "Updates the message and/or user of a specific review. At least one (user/message) must be specified in the body"
@@ -108,25 +112,7 @@ paths:
       parameters:
         - $ref: "#/parameters/Book_id"
         - $ref: "#/parameters/Review_id"
-        - name: UpdateReview
-          in: body
-          schema:
-            type: object
-            required:
-              - message
-              - user
-            properties:
-              message:
-                description: "Review message from user"
-                type: string
-              user:
-                description: "Reviewer details"
-                type: object
-                properties:
-                  forenames:
-                    type: string
-                  surname:
-                    type: string
+        - $ref: "#/parameters/Review"
       responses:
         200:
           description: "Successfully updated review for the book"
@@ -134,6 +120,8 @@ paths:
             $ref: "#/definitions/Review"
         400:
           description: "Bad request. Invalid book or review id supplied"
+        500:
+          description: "Internal server error"
   /books/{id}/reviews:
     get:
       summary: "Returns all the reviews for a book"
@@ -158,6 +146,8 @@ paths:
                   $ref: "#/definitions/Review"
         400:
           description: "Bad request. Invalid Book supplied"
+        500:
+          description: "Internal server error"
     post:
       summary: "Adds a review for a book"
       description: "Add a review for the book with given id"
@@ -165,28 +155,14 @@ paths:
         - application/json
       parameters:
         - $ref: "#/parameters/Book_id"
-        - name: review
-          in: body
-          required: true
-          schema:
-            type: object
-            properties:
-              message:
-                description: "Review message from user"
-                type: string
-              user:
-                description: "Reviewer details"
-                type: object
-                properties:
-                  forenames:
-                    type: string
-                  surname:
-                    type: string
+        - $ref: "#/parameters/Review"
       responses:
         201:
           description: "Successfully added review"
           schema:
             $ref: "#/definitions/Review"
+        500:
+          description: "Internal server error"
 parameters:
   Book_id:
     in: path
@@ -200,6 +176,28 @@ parameters:
     description: "Unique review id"
     type: integer
     required: true
+  Review:
+    name: review
+    in: body
+    schema:
+      type: object
+      required:
+        - message
+        - user
+      properties:
+        message:
+          description: "Review message from user"
+          type: string
+        user:
+          description: "Reviewer details"
+          type: object
+          properties:
+            forenames:
+              description: "Reviewer's forenames"
+              type: string
+            surname:
+              description: "Reviewer's surnames"
+              type: string
 definitions:
   Book:
     type: object
@@ -237,8 +235,12 @@ definitions:
   Review:
     type: object
     required:
+      - id
+      - last_updated
       - message
       - user
+      - book_id
+      - links
     properties:
       id:
         description: "Unique book id"
@@ -252,10 +254,28 @@ definitions:
       user:
         description: "Reviewer details"
         type: object
+        required:
+          - forenames
+          - surname
         properties:
           forenames:
+            description: "Reviewer's forenames"
             type: string
           surname:
+            description: "Reviewer's surnames"
+            type: string
+      book_id:
+        description: "Unique book id"
+        type: string
+      links:
+        type: object
+        required:
+          - self
+          - book
+        properties:
+          self:
+            type: string
+          book:
             type: string
   Health:
     type: object
