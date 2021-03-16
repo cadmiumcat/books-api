@@ -62,7 +62,7 @@ func main() {
 	databaseCollectionBuilder := make(map[dpMongoDB.Database][]dpMongoDB.Collection)
 	databaseCollectionBuilder[(dpMongoDB.Database)(mongodb.Database)] = []dpMongoDB.Collection{(dpMongoDB.Collection)(mongodb.Collection)}
 
-	mongoClient := dpMongoDB.NewClientWithCollections(mongodb.Session, databaseCollectionBuilder)
+	mongoClient := dpMongoDB.NewClientWithCollections(mongodb.Session.Copy(), databaseCollectionBuilder)
 
 	// Add API checks
 	if err := registerCheckers(ctx, &hc, mongoClient); err !=nil {
