@@ -41,7 +41,6 @@ func main() {
 
 	log.Event(ctx, "loaded configuration", log.INFO, log.Data{"config": cfg})
 
-	// Initialise Health Check?
 	versionInfo, err := dpHealthCheck.NewVersionInfo(BuildTime, GitCommit, Version)
 	if err != nil {
 		log.Event(ctx, "could not instantiate health check", log.FATAL, log.Error(err))
@@ -51,7 +50,6 @@ func main() {
 	hc := dpHealthCheck.New(versionInfo, cfg.HealthCheckCriticalTimeout, cfg.HealthCheckInterval)
 
 	// Initialise database
-	//var dataStore interfaces.DataStore
 	mongodb := &mongo.Mongo{}
 	err = mongodb.Init(cfg.MongoConfig)
 	if err != nil {
