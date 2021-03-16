@@ -100,6 +100,38 @@ paths:
             $ref: "#/definitions/Review"
         400:
           description: "Bad request. Invalid book or review id supplied"
+    put:
+      summary: "Updates a specific review"
+      description: "Updates the message and/or user of a specific review. At least one (user/message) must be specified in the body"
+      produces:
+        - application/json
+      parameters:
+        - $ref: "#/parameters/Book_id"
+        - $ref: "#/parameters/Review_id"
+        - name: UpdateReview
+          in: body
+          schema:
+            type: object
+            required:
+              - message
+              - user
+            properties:
+              message:
+                description: "Review message from user"
+                type: string
+              user:
+                description: "Reviewer details"
+                type: object
+                properties:
+                  forenames:
+                    type: string
+                  surname:
+                    type: string
+      responses:
+        200:
+          description: "Successfully updated review for the book"
+          schema:
+            $ref: "#/definitions/Review"
   /books/{id}/reviews:
     get:
       summary: "Returns all the reviews for a book"
@@ -133,6 +165,7 @@ paths:
         - $ref: "#/parameters/Book_id"
         - name: review
           in: body
+          required: true
           schema:
             type: object
             properties:
