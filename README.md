@@ -34,12 +34,16 @@ Install and run a mongoDB
 | MONGODB_COLLECTION           | books           | The MongoDB images database                                                                                        |
 | MONGODB_DATABASE             | bookStore       | MongoDB collection                                                                                                 |
 
+### Electronic Library Design
+
+See [ARCHITECTURE](architecture/README.md) Source of truth for processing of book data for search.
+
 ### Contributing
 
 See [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 ### License
 
-Copyright © 2021, Office for National Statistics (https://www.ons.gov.uk)
+Copyright © 2020 - 2021 Catalina Garcia
 
 Released under MIT license, see [LICENSE](LICENSE.md) for details.

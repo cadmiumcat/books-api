@@ -1,0 +1,13 @@
+title (Add/Update) Book data
+
+autonumber
+
+API User->Books API: Https POST/PUT:\nCreate/Update  book
+
+note over Books API: Validation on request body\nand path parameters
+
+Books API->MongoDB: TCP/IO socket: Write Op\nto create or update book
+
+Books API-->Book Search Builder: TCP: Kafka message
+
+Book Search Builder->Elasticsearch: Https: Add/update book to elasticsearch index
