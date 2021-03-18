@@ -2,7 +2,9 @@ books-api
 ================
 Digital Publishing Books API
 
+
 ### Getting started
+[Swagger specification](https://cadmiumcat.github.io/books-api/)
 
 #### Pre-requisites
 
