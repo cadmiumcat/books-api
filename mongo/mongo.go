@@ -62,7 +62,7 @@ func (m *Mongo) GetBook(ID string) (*models.Book, error) {
 	defer session.Close()
 
 	var book models.Book
-	err := session.DB(m.Database).C(m.Collection).Find(bson.M{"id": ID}).One(&book)
+	err := session.DB(m.Database).C(m.Collection).Find(bson.M{"_id": ID}).One(&book)
 
 	if err != nil {
 		if err == mgo.ErrNotFound {
@@ -84,7 +84,7 @@ func (m *Mongo) GetBooks() (models.Books, error) {
 
 	books := &models.Books{}
 	if err := list.All(&books.Items); err != nil {
-		log.Event(nil, "can't get it", log.FATAL, log.Error(err))
+		log.Event(nil, "unable to retrieve books", log.FATAL, log.Error(err))
 	}
 
 	return *books, nil
