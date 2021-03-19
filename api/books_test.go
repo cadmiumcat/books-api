@@ -86,13 +86,14 @@ func TestEndpoints(t *testing.T) {
 
 	Convey("Given an existing book with book id=1", t, func() {
 		id := "1"
+		ctx := context.Background()
+
 		mockDataStore := &datastoretest.DataStoreMock{
-			GetBookFunc: func(id string) (*models.Book, error) {
+			GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
 				return &models.Book{ID: "1"}, nil
 			},
 		}
 
-		ctx := context.Background()
 
 		api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
 		Convey("When I send an HTTP GET request to /books/1", func() {
@@ -114,13 +115,14 @@ func TestEndpoints(t *testing.T) {
 	})
 
 	Convey("Given a book that does not exist with book id=3", t, func() {
+		ctx := context.Background()
+
 		mockDataStore := &datastoretest.DataStoreMock{
-			GetBookFunc: func(id string) (*models.Book, error) {
+			GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
 				return nil, errors.New("error message")
 			},
 		}
 
-		ctx := context.Background()
 
 		api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
 
@@ -142,13 +144,14 @@ func TestEndpoints(t *testing.T) {
 	})
 
 	Convey("Given ", t, func() {
+		ctx := context.Background()
+
 		mockDataStore := &datastoretest.DataStoreMock{
-			GetBooksFunc: func() (models.Books, error) {
+			GetBooksFunc: func(ctx context.Context) (models.Books, error) {
 				return models.Books{}, nil
 			},
 		}
 
-		ctx := context.Background()
 
 		api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
 		Convey("When I send an HTTP GET request to /books", func() {
