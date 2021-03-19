@@ -63,7 +63,7 @@ func main() {
 	mongoClient := dpMongoDB.NewClientWithCollections(mongodb.Session.Copy(), databaseCollectionBuilder)
 
 	// Add API checks
-	if err := registerCheckers(ctx, &hc, mongoClient); err !=nil {
+	if err := registerCheckers(ctx, &hc, mongoClient); err != nil {
 		log.Event(ctx, err.Error(), log.FATAL, log.Error(err))
 		os.Exit(1)
 	}

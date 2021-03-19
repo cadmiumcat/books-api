@@ -33,6 +33,9 @@ var _ interfaces.DataStore = &DataStoreMock{}
 //             GetBooksFunc: func(ctx context.Context) (models.Books, error) {
 // 	               panic("mock out the GetBooks method")
 //             },
+//             GetReviewFunc: func(reviewID string) (*models.Review, error) {
+// 	               panic("mock out the GetReview method")
+//             },
 //             InitFunc: func(in1 config.MongoConfig) error {
 // 	               panic("mock out the Init method")
 //             },
@@ -54,6 +57,9 @@ type DataStoreMock struct {
 
 	// GetBooksFunc mocks the GetBooks method.
 	GetBooksFunc func(ctx context.Context) (models.Books, error)
+
+	// GetReviewFunc mocks the GetReview method.
+	GetReviewFunc func(reviewID string) (*models.Review, error)
 
 	// InitFunc mocks the Init method.
 	InitFunc func(in1 config.MongoConfig) error
@@ -82,17 +88,23 @@ type DataStoreMock struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
 		}
+		// GetReview holds details about calls to the GetReview method.
+		GetReview []struct {
+			// ReviewID is the reviewID argument value.
+			ReviewID string
+		}
 		// Init holds details about calls to the Init method.
 		Init []struct {
 			// In1 is the in1 argument value.
 			In1 config.MongoConfig
 		}
 	}
-	lockAddBook  sync.RWMutex
-	lockClose    sync.RWMutex
-	lockGetBook  sync.RWMutex
-	lockGetBooks sync.RWMutex
-	lockInit     sync.RWMutex
+	lockAddBook   sync.RWMutex
+	lockClose     sync.RWMutex
+	lockGetBook   sync.RWMutex
+	lockGetBooks  sync.RWMutex
+	lockGetReview sync.RWMutex
+	lockInit      sync.RWMutex
 }
 
 // AddBook calls AddBookFunc.
@@ -220,6 +232,37 @@ func (mock *DataStoreMock) GetBooksCalls() []struct {
 	mock.lockGetBooks.RLock()
 	calls = mock.calls.GetBooks
 	mock.lockGetBooks.RUnlock()
+	return calls
+}
+
+// GetReview calls GetReviewFunc.
+func (mock *DataStoreMock) GetReview(reviewID string) (*models.Review, error) {
+	if mock.GetReviewFunc == nil {
+		panic("DataStoreMock.GetReviewFunc: method is nil but DataStore.GetReview was just called")
+	}
+	callInfo := struct {
+		ReviewID string
+	}{
+		ReviewID: reviewID,
+	}
+	mock.lockGetReview.Lock()
+	mock.calls.GetReview = append(mock.calls.GetReview, callInfo)
+	mock.lockGetReview.Unlock()
+	return mock.GetReviewFunc(reviewID)
+}
+
+// GetReviewCalls gets all the calls that were made to GetReview.
+// Check the length with:
+//     len(mockedDataStore.GetReviewCalls())
+func (mock *DataStoreMock) GetReviewCalls() []struct {
+	ReviewID string
+} {
+	var calls []struct {
+		ReviewID string
+	}
+	mock.lockGetReview.RLock()
+	calls = mock.calls.GetReview
+	mock.lockGetReview.RUnlock()
 	return calls
 }
 

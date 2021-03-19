@@ -94,3 +94,7 @@ func (m *Mongo) GetBooks(ctx context.Context) (models.Books, error) {
 
 	return *books, nil
 }
+
+func (m *Mongo) GetReview(reviewID string) (*models.Review, error) {
+	return &models.Review{ID: reviewID}, nil
+}

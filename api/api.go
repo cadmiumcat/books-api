@@ -28,6 +28,8 @@ func Setup(ctx context.Context, host string, router *mux.Router, dataStore inter
 	api.router.HandleFunc("/books", api.listBooks).Methods("GET")
 	api.router.HandleFunc("/books/{id}", api.getBook).Methods("GET")
 
+	api.router.HandleFunc("/books/{id}/reviews/{reviewID}", api.getReview).Methods("GET")
+
 	api.router.HandleFunc("/health", api.hc.Handler).Methods("GET")
 
 	log.Event(ctx, "enabling endpoints", log.INFO, log.Data{"bind_addr": api.host})

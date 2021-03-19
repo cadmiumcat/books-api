@@ -16,7 +16,7 @@ import (
 
 const host = "localhost:8080"
 
-func TestEndpoints(t *testing.T) {
+func TestBooks(t *testing.T) {
 	t.Parallel()
 	hcMock := mock.HealthCheckerMock{}
 
