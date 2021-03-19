@@ -57,7 +57,7 @@ func (m *Mongo) AddBook(book *models.Book) {
 
 // GetBook returns a models.Book for a given ID.
 // It returns an error if the Book is not found
-func (m *Mongo) GetBook(ID string) (*models.Book, error) {
+func (m *Mongo) GetBook(ctx context.Context, ID string) (*models.Book, error) {
 	session := m.Session.Copy()
 	defer session.Close()
 
@@ -66,17 +66,19 @@ func (m *Mongo) GetBook(ID string) (*models.Book, error) {
 
 	if err != nil {
 		if err == mgo.ErrNotFound {
-			return nil, errors.New("book not found")
+			log.Event(ctx, "book not found", log.INFO, log.Error(err))
+			return nil, err
 		}
 		return nil, err
 	}
 
-	return &book, err
+	return &book, nil
 }
 
 // GetBooks returns all the existing models.Books.
 // It returns an error if the models.Books cannot be listed.
-func (m *Mongo) GetBooks() (models.Books, error) {
+func (m *Mongo) GetBooks(ctx context.Context) (models.Books, error) {
+
 	session := m.Session.Copy()
 	defer session.Close()
 
@@ -84,7 +86,8 @@ func (m *Mongo) GetBooks() (models.Books, error) {
 
 	books := &models.Books{}
 	if err := list.All(&books.Items); err != nil {
-		log.Event(nil, "unable to retrieve books", log.FATAL, log.Error(err))
+		log.Event(ctx, "unable to retrieve books", log.ERROR, log.Error(err))
+		return models.Books{}, err
 	}
 
 	return *books, nil

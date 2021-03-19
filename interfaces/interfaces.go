@@ -18,8 +18,8 @@ type DataStore interface {
 	Init(config.MongoConfig) (err error)
 	Close(ctx context.Context) (err error)
 	AddBook(book *models.Book)
-	GetBook(id string) (*models.Book, error)
-	GetBooks() (models.Books, error)
+	GetBook(ctx context.Context, id string) (*models.Book, error)
+	GetBooks(ctx context.Context) (models.Books, error)
 }
 
 // HealthChecker defines the required methods from Healthcheck
