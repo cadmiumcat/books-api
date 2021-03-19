@@ -13,9 +13,10 @@ type Configuration struct {
 }
 
 type MongoConfig struct {
-	BindAddr   string `envconfig:"MONGODB_BIND_ADDR"   json:"-"`
-	Collection string `envconfig:"MONGODB_COLLECTION"`
-	Database   string `envconfig:"MONGODB_DATABASE"`
+	BindAddr          string `envconfig:"MONGODB_BIND_ADDR"   json:"-"`
+	Database          string `envconfig:"MONGODB_DATABASE"`
+	BooksCollection   string `envconfig:"MONGODB_BOOKS_COLLECTION"`
+	ReviewsCollection string `envconfig:"MONGODB_REVIEWS_COLLECTION"`
 }
 
 var cfg *Configuration
@@ -31,9 +32,10 @@ func Get() (*Configuration, error) {
 		HealthCheckCriticalTimeout: 90 * time.Second,
 		HealthCheckInterval:        30 * time.Second,
 		MongoConfig: MongoConfig{
-			BindAddr:   "localhost:27017",
-			Collection: "books",
-			Database:   "bookStore",
+			BindAddr:          "localhost:27017",
+			Database:          "bookStore",
+			BooksCollection:   "books",
+			ReviewsCollection: "reviews",
 		},
 	}
 

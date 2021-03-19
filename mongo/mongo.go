@@ -16,11 +16,12 @@ var errBookNotFound = errors.New("book not found")
 
 // Mongo contains the information needed to create and interact with a mongo session
 type Mongo struct {
-	Collection string
-	Database   string
-	Session    *mgo.Session
-	URI        string
-	lockClient *dpMongoLock.Lock
+	BooksCollection   string
+	ReviewsCollection string
+	Database          string
+	Session           *mgo.Session
+	URI               string
+	lockClient        *dpMongoLock.Lock
 }
 
 // Init initialises a mongo session with the given configuration.
@@ -34,7 +35,8 @@ func (m *Mongo) Init(mongoConfig config.MongoConfig) (err error) {
 		return err
 	}
 
-	m.Collection = mongoConfig.Collection
+	m.BooksCollection = mongoConfig.BooksCollection
+	m.ReviewsCollection = mongoConfig.ReviewsCollection
 	m.Database = mongoConfig.Database
 
 	return nil
@@ -51,7 +53,7 @@ func (m *Mongo) AddBook(book *models.Book) {
 	session := m.Session.Copy()
 	defer session.Close()
 
-	collection := session.DB(m.Database).C(m.Collection)
+	collection := session.DB(m.Database).C(m.BooksCollection)
 	collection.Insert(book)
 
 	return
@@ -64,7 +66,7 @@ func (m *Mongo) GetBook(ctx context.Context, ID string) (*models.Book, error) {
 	defer session.Close()
 
 	var book models.Book
-	err := session.DB(m.Database).C(m.Collection).Find(bson.M{"_id": ID}).One(&book)
+	err := session.DB(m.Database).C(m.BooksCollection).Find(bson.M{"_id": ID}).One(&book)
 
 	if err != nil {
 		if err == mgo.ErrNotFound {
@@ -84,7 +86,7 @@ func (m *Mongo) GetBooks(ctx context.Context) (models.Books, error) {
 	session := m.Session.Copy()
 	defer session.Close()
 
-	list := session.DB(m.Database).C(m.Collection).Find(nil)
+	list := session.DB(m.Database).C(m.BooksCollection).Find(nil)
 
 	books := &models.Books{}
 	if err := list.All(&books.Items); err != nil {
@@ -96,5 +98,18 @@ func (m *Mongo) GetBooks(ctx context.Context) (models.Books, error) {
 }
 
 func (m *Mongo) GetReview(reviewID string) (*models.Review, error) {
-	return &models.Review{ID: reviewID}, nil
+	session := m.Session.Copy()
+	defer session.Close()
+
+	var review models.Review
+	err := session.DB(m.Database).C(m.ReviewsCollection).Find(bson.M{"_id": reviewID}).One(&review)
+
+	if err != nil {
+		if err == mgo.ErrNotFound {
+			return nil, errors.New("review not found")
+		}
+		return nil, err
+	}
+
+	return &review, err
 }
