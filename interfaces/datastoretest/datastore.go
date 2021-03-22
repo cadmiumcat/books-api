@@ -33,7 +33,7 @@ var _ interfaces.DataStore = &DataStoreMock{}
 //             GetBooksFunc: func(ctx context.Context) (models.Books, error) {
 // 	               panic("mock out the GetBooks method")
 //             },
-//             GetReviewFunc: func(reviewID string) (*models.Review, error) {
+//             GetReviewFunc: func(ctx context.Context, reviewID string) (*models.Review, error) {
 // 	               panic("mock out the GetReview method")
 //             },
 //             InitFunc: func(in1 config.MongoConfig) error {
@@ -59,7 +59,7 @@ type DataStoreMock struct {
 	GetBooksFunc func(ctx context.Context) (models.Books, error)
 
 	// GetReviewFunc mocks the GetReview method.
-	GetReviewFunc func(reviewID string) (*models.Review, error)
+	GetReviewFunc func(ctx context.Context, reviewID string) (*models.Review, error)
 
 	// InitFunc mocks the Init method.
 	InitFunc func(in1 config.MongoConfig) error
@@ -90,6 +90,8 @@ type DataStoreMock struct {
 		}
 		// GetReview holds details about calls to the GetReview method.
 		GetReview []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
 			// ReviewID is the reviewID argument value.
 			ReviewID string
 		}
@@ -236,28 +238,32 @@ func (mock *DataStoreMock) GetBooksCalls() []struct {
 }
 
 // GetReview calls GetReviewFunc.
-func (mock *DataStoreMock) GetReview(reviewID string) (*models.Review, error) {
+func (mock *DataStoreMock) GetReview(ctx context.Context, reviewID string) (*models.Review, error) {
 	if mock.GetReviewFunc == nil {
 		panic("DataStoreMock.GetReviewFunc: method is nil but DataStore.GetReview was just called")
 	}
 	callInfo := struct {
+		Ctx      context.Context
 		ReviewID string
 	}{
+		Ctx:      ctx,
 		ReviewID: reviewID,
 	}
 	mock.lockGetReview.Lock()
 	mock.calls.GetReview = append(mock.calls.GetReview, callInfo)
 	mock.lockGetReview.Unlock()
-	return mock.GetReviewFunc(reviewID)
+	return mock.GetReviewFunc(ctx, reviewID)
 }
 
 // GetReviewCalls gets all the calls that were made to GetReview.
 // Check the length with:
 //     len(mockedDataStore.GetReviewCalls())
 func (mock *DataStoreMock) GetReviewCalls() []struct {
+	Ctx      context.Context
 	ReviewID string
 } {
 	var calls []struct {
+		Ctx      context.Context
 		ReviewID string
 	}
 	mock.lockGetReview.RLock()

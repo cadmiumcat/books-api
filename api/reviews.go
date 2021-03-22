@@ -13,7 +13,7 @@ func (api *API) getReview(writer http.ResponseWriter, request *http.Request) {
 
 	reviewID := mux.Vars(request)["reviewID"]
 
-	review, _ := api.dataStore.GetReview(reviewID)
+	review, _ := api.dataStore.GetReview(ctx, reviewID)
 	if review == nil {
 		msg := fmt.Sprintf("review id %q not found", reviewID)
 		log.Event(ctx, msg, log.INFO)

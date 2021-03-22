@@ -94,7 +94,6 @@ func TestBooks(t *testing.T) {
 			},
 		}
 
-
 		api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
 		Convey("When I send an HTTP GET request to /books/1", func() {
 			response := httptest.NewRecorder()
@@ -123,7 +122,6 @@ func TestBooks(t *testing.T) {
 			},
 		}
 
-
 		api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
 
 		id := "3"
@@ -151,7 +149,6 @@ func TestBooks(t *testing.T) {
 				return models.Books{}, nil
 			},
 		}
-
 
 		api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
 		Convey("When I send an HTTP GET request to /books", func() {

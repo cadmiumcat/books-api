@@ -12,7 +12,10 @@ import (
 	"github.com/globalsign/mgo/bson"
 )
 
-var errBookNotFound = errors.New("book not found")
+var (
+	errBookNotFound   = errors.New("book not found")
+	errReviewNotFound = errors.New("review not found")
+)
 
 // Mongo contains the information needed to create and interact with a mongo session
 type Mongo struct {
@@ -97,7 +100,7 @@ func (m *Mongo) GetBooks(ctx context.Context) (models.Books, error) {
 	return *books, nil
 }
 
-func (m *Mongo) GetReview(reviewID string) (*models.Review, error) {
+func (m *Mongo) GetReview(ctx context.Context, reviewID string) (*models.Review, error) {
 	session := m.Session.Copy()
 	defer session.Close()
 
@@ -106,7 +109,8 @@ func (m *Mongo) GetReview(reviewID string) (*models.Review, error) {
 
 	if err != nil {
 		if err == mgo.ErrNotFound {
-			return nil, errors.New("review not found")
+			log.Event(ctx, errReviewNotFound.Error(), log.ERROR, log.Error(err))
+			return nil, errReviewNotFound
 		}
 		return nil, err
 	}
