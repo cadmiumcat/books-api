@@ -27,10 +27,10 @@ var _ interfaces.DataStore = &DataStoreMock{}
 //             CloseFunc: func(ctx context.Context) error {
 // 	               panic("mock out the Close method")
 //             },
-//             GetBookFunc: func(id string) (*models.Book, error) {
+//             GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
 // 	               panic("mock out the GetBook method")
 //             },
-//             GetBooksFunc: func() (models.Books, error) {
+//             GetBooksFunc: func(ctx context.Context) (models.Books, error) {
 // 	               panic("mock out the GetBooks method")
 //             },
 //             InitFunc: func(in1 config.MongoConfig) error {
@@ -50,10 +50,10 @@ type DataStoreMock struct {
 	CloseFunc func(ctx context.Context) error
 
 	// GetBookFunc mocks the GetBook method.
-	GetBookFunc func(id string) (*models.Book, error)
+	GetBookFunc func(ctx context.Context, id string) (*models.Book, error)
 
 	// GetBooksFunc mocks the GetBooks method.
-	GetBooksFunc func() (models.Books, error)
+	GetBooksFunc func(ctx context.Context) (models.Books, error)
 
 	// InitFunc mocks the Init method.
 	InitFunc func(in1 config.MongoConfig) error
@@ -72,11 +72,15 @@ type DataStoreMock struct {
 		}
 		// GetBook holds details about calls to the GetBook method.
 		GetBook []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
 			// ID is the id argument value.
 			ID string
 		}
 		// GetBooks holds details about calls to the GetBooks method.
 		GetBooks []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
 		}
 		// Init holds details about calls to the Init method.
 		Init []struct {
@@ -154,29 +158,33 @@ func (mock *DataStoreMock) CloseCalls() []struct {
 }
 
 // GetBook calls GetBookFunc.
-func (mock *DataStoreMock) GetBook(id string) (*models.Book, error) {
+func (mock *DataStoreMock) GetBook(ctx context.Context, id string) (*models.Book, error) {
 	if mock.GetBookFunc == nil {
 		panic("DataStoreMock.GetBookFunc: method is nil but DataStore.GetBook was just called")
 	}
 	callInfo := struct {
-		ID string
+		Ctx context.Context
+		ID  string
 	}{
-		ID: id,
+		Ctx: ctx,
+		ID:  id,
 	}
 	mock.lockGetBook.Lock()
 	mock.calls.GetBook = append(mock.calls.GetBook, callInfo)
 	mock.lockGetBook.Unlock()
-	return mock.GetBookFunc(id)
+	return mock.GetBookFunc(ctx, id)
 }
 
 // GetBookCalls gets all the calls that were made to GetBook.
 // Check the length with:
 //     len(mockedDataStore.GetBookCalls())
 func (mock *DataStoreMock) GetBookCalls() []struct {
-	ID string
+	Ctx context.Context
+	ID  string
 } {
 	var calls []struct {
-		ID string
+		Ctx context.Context
+		ID  string
 	}
 	mock.lockGetBook.RLock()
 	calls = mock.calls.GetBook
@@ -185,24 +193,29 @@ func (mock *DataStoreMock) GetBookCalls() []struct {
 }
 
 // GetBooks calls GetBooksFunc.
-func (mock *DataStoreMock) GetBooks() (models.Books, error) {
+func (mock *DataStoreMock) GetBooks(ctx context.Context) (models.Books, error) {
 	if mock.GetBooksFunc == nil {
 		panic("DataStoreMock.GetBooksFunc: method is nil but DataStore.GetBooks was just called")
 	}
 	callInfo := struct {
-	}{}
+		Ctx context.Context
+	}{
+		Ctx: ctx,
+	}
 	mock.lockGetBooks.Lock()
 	mock.calls.GetBooks = append(mock.calls.GetBooks, callInfo)
 	mock.lockGetBooks.Unlock()
-	return mock.GetBooksFunc()
+	return mock.GetBooksFunc(ctx)
 }
 
 // GetBooksCalls gets all the calls that were made to GetBooks.
 // Check the length with:
 //     len(mockedDataStore.GetBooksCalls())
 func (mock *DataStoreMock) GetBooksCalls() []struct {
+	Ctx context.Context
 } {
 	var calls []struct {
+		Ctx context.Context
 	}
 	mock.lockGetBooks.RLock()
 	calls = mock.calls.GetBooks

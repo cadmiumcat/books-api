@@ -112,7 +112,7 @@ func (api *API) createBook(writer http.ResponseWriter, request *http.Request) {
 func (api *API) listBooks(writer http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
 
-	books, err := api.dataStore.GetBooks()
+	books, err := api.dataStore.GetBooks(ctx)
 
 	books.Count = len(books.Items)
 
@@ -131,7 +131,7 @@ func (api *API) getBook(writer http.ResponseWriter, request *http.Request) {
 
 	id := mux.Vars(request)["id"]
 
-	book, err := api.dataStore.GetBook(id)
+	book, err := api.dataStore.GetBook(ctx, id)
 	if book == nil {
 		bookNotFound(ctx, writer, id)
 		return
