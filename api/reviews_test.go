@@ -13,6 +13,7 @@ import (
 )
 
 func TestReviews(t *testing.T) {
+	t.Parallel()
 	hcMock := mock.HealthCheckerMock{}
 
 	Convey("Given a existing book with at least one review (review_id=123)", t, func() {

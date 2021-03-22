@@ -119,3 +119,21 @@ func (m *Mongo) GetReview(ctx context.Context, reviewID string) (*models.Review,
 
 	return &review, err
 }
+
+// GetReviews returns all the existing models.Reviews.
+// It returns an error if the models.Reviews cannot be listed.
+func (m *Mongo) GetReviews(ctx context.Context, bookID string) (models.Reviews, error) {
+
+	session := m.Session.Copy()
+	defer session.Close()
+
+	list := session.DB(m.Database).C(m.ReviewsCollection).Find(bson.M{"links.book": bookID})
+
+	review := &models.Reviews{}
+	if err := list.All(&review.Items); err != nil {
+		log.Event(ctx, "unable to retrieve books", log.ERROR, log.Error(err))
+		return models.Reviews{}, err
+	}
+
+	return *review, nil
+}

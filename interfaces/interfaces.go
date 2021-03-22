@@ -21,6 +21,7 @@ type DataStore interface {
 	GetBook(ctx context.Context, id string) (*models.Book, error)
 	GetBooks(ctx context.Context) (models.Books, error)
 	GetReview(ctx context.Context, reviewID string) (*models.Review, error)
+	GetReviews(ctx context.Context, bookID string) (models.Reviews, error)
 }
 
 // HealthChecker defines the required methods from Healthcheck
