@@ -33,8 +33,9 @@ Install and run a mongoDB
 | HEALTHCHECK_INTERVAL         | 30s             | Time between self-healthchecks (`time.Duration` format)                                                            |
 | HEALTHCHECK_CRITICAL_TIMEOUT | 90s             | Time to wait until an unhealthy dependent propagates its state to make this app unhealthy (`time.Duration` format) |
 | MONGODB_BIND_ADDR            | localhost:27017 | The MongoDB bind address                                                                                           |
-| MONGODB_COLLECTION           | books           | The MongoDB images database                                                                                        |
-| MONGODB_DATABASE             | bookStore       | MongoDB collection                                                                                                 |
+| MONGODB_BOOKS_COLLECTION     | books           | The MongoDB books collection                                                                                        |
+| MONGODB_REVIEWS_COLLECTION   | reviews         | The MongoDB reviews collection                                                                                        |
+| MONGODB_DATABASE             | bookStore       | MongoDB database                                                                                                 |
 
 ### Electronic Library Design
 
