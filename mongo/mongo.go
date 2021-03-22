@@ -100,6 +100,8 @@ func (m *Mongo) GetBooks(ctx context.Context) (models.Books, error) {
 	return *books, nil
 }
 
+// GetReview returns a models.Review for a given reviewID.
+// It returns an error if the review is not found.
 func (m *Mongo) GetReview(ctx context.Context, reviewID string) (*models.Review, error) {
 	session := m.Session.Copy()
 	defer session.Close()
