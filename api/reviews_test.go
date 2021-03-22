@@ -19,7 +19,7 @@ func TestReviews(t *testing.T) {
 		bookID := "1"
 		reviewID := "123"
 		mockDataStore := &datastoretest.DataStoreMock{
-			GetReviewFunc: func(id string) (*models.Review, error) {
+			GetReviewFunc: func(ctx context.Context, id string) (*models.Review, error) {
 				return &models.Review{ID: "123"}, nil
 			},
 		}
