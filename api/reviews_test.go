@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"github.com/cadmiumcat/books-api/interfaces/datastoretest"
 	"github.com/cadmiumcat/books-api/interfaces/mock"
 	"github.com/cadmiumcat/books-api/models"
 	"github.com/gorilla/mux"
@@ -18,7 +17,7 @@ func TestReviews(t *testing.T) {
 	Convey("Given a existing book with at least one review (review_id=123)", t, func() {
 		bookID := "1"
 		reviewID := "123"
-		mockDataStore := &datastoretest.DataStoreMock{
+		mockDataStore := &mock.DataStoreMock{
 			GetReviewFunc: func(ctx context.Context, id string) (*models.Review, error) {
 				return &models.Review{ID: reviewID}, nil
 			},
@@ -46,7 +45,7 @@ func TestReviews(t *testing.T) {
 	Convey("Given a existing book with no reviews", t, func() {
 		bookID := "1"
 		reviewID := "123"
-		mockDataStore := &datastoretest.DataStoreMock{
+		mockDataStore := &mock.DataStoreMock{
 			GetReviewFunc: func(ctx context.Context, id string) (*models.Review, error) {
 				return nil, ErrReviewMissing
 			},

@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"errors"
-	"github.com/cadmiumcat/books-api/interfaces/datastoretest"
 	"github.com/cadmiumcat/books-api/interfaces/mock"
 	"github.com/cadmiumcat/books-api/models"
 	"github.com/gorilla/mux"
@@ -21,7 +20,7 @@ func TestBooks(t *testing.T) {
 	hcMock := mock.HealthCheckerMock{}
 
 	Convey("Given a POST request to add a book", t, func() {
-		mockDataStore := &datastoretest.DataStoreMock{
+		mockDataStore := &mock.DataStoreMock{
 			AddBookFunc: func(book *models.Book) {},
 		}
 
@@ -88,7 +87,7 @@ func TestBooks(t *testing.T) {
 		id := "1"
 		ctx := context.Background()
 
-		mockDataStore := &datastoretest.DataStoreMock{
+		mockDataStore := &mock.DataStoreMock{
 			GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
 				return &models.Book{ID: "1"}, nil
 			},
@@ -116,7 +115,7 @@ func TestBooks(t *testing.T) {
 	Convey("Given a book that does not exist with book id=3", t, func() {
 		ctx := context.Background()
 
-		mockDataStore := &datastoretest.DataStoreMock{
+		mockDataStore := &mock.DataStoreMock{
 			GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
 				return nil, errors.New("error message")
 			},
@@ -144,7 +143,7 @@ func TestBooks(t *testing.T) {
 	Convey("Given ", t, func() {
 		ctx := context.Background()
 
-		mockDataStore := &datastoretest.DataStoreMock{
+		mockDataStore := &mock.DataStoreMock{
 			GetBooksFunc: func(ctx context.Context) (models.Books, error) {
 				return models.Books{}, nil
 			},
