@@ -2,7 +2,6 @@ package mongo
 
 import (
 	"context"
-	"errors"
 	dpMongodb "github.com/ONSdigital/dp-mongodb"
 	dpMongoLock "github.com/ONSdigital/dp-mongodb/dplock"
 	"github.com/ONSdigital/log.go/log"
@@ -10,6 +9,7 @@ import (
 	"github.com/cadmiumcat/books-api/models"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
+	"github.com/pkg/errors"
 )
 
 var (
@@ -114,8 +114,8 @@ func (m *Mongo) GetReview(ctx context.Context, reviewID string) (*models.Review,
 			log.Event(ctx, errReviewNotFound.Error(), log.ERROR, log.Error(err))
 			return nil, errReviewNotFound
 		}
-		return nil, err
+		return nil, errors.Wrap(err, "unexpected error when getting a review")
 	}
 
-	return &review, err
+	return &review, nil
 }
