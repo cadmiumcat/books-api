@@ -2,7 +2,7 @@ package api
 
 import (
 	"context"
-	"errors"
+	"github.com/cadmiumcat/books-api/apierrors"
 	"github.com/cadmiumcat/books-api/interfaces/datastoretest"
 	"github.com/cadmiumcat/books-api/interfaces/mock"
 	"github.com/cadmiumcat/books-api/models"
@@ -42,7 +42,7 @@ func TestEndpoints(t *testing.T) {
 			})
 
 			Convey("And the response says the request body is missing", func() {
-				So(response.Body.String(), ShouldContainSubstring, ErrRequestBodyMissing.Error())
+				So(response.Body.String(), ShouldContainSubstring, apierrors.ErrEmptyRequest.Error())
 			})
 		})
 
@@ -62,7 +62,7 @@ func TestEndpoints(t *testing.T) {
 				So(mockDataStore.AddBookCalls(), ShouldHaveLength, 0)
 			})
 			Convey("And the response says the request is empty", func() {
-				So(response.Body.String(), ShouldContainSubstring, ErrEmptyRequest.Error())
+				So(response.Body.String(), ShouldContainSubstring, apierrors.ErrRequiredFieldMissing.Error())
 			})
 		})
 
@@ -94,7 +94,6 @@ func TestEndpoints(t *testing.T) {
 			},
 		}
 
-
 		api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
 		Convey("When I send an HTTP GET request to /books/1", func() {
 			response := httptest.NewRecorder()
@@ -119,10 +118,9 @@ func TestEndpoints(t *testing.T) {
 
 		mockDataStore := &datastoretest.DataStoreMock{
 			GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
-				return nil, errors.New("error message")
+				return nil, apierrors.ErrBookNotFound
 			},
 		}
-
 
 		api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
 
@@ -151,7 +149,6 @@ func TestEndpoints(t *testing.T) {
 				return models.Books{}, nil
 			},
 		}
-
 
 		api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
 		Convey("When I send an HTTP GET request to /books", func() {

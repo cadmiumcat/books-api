@@ -1,12 +1,11 @@
 package api
 
 import (
-	"bytes"
-	"encoding/json"
+	"github.com/ONSdigital/log.go/log"
+	"github.com/cadmiumcat/books-api/apierrors"
 	"github.com/cadmiumcat/books-api/models"
 	"github.com/gorilla/mux"
 	uuid "github.com/satori/go.uuid"
-	"io/ioutil"
 	"net/http"
 	"time"
 )
@@ -18,12 +17,12 @@ func checkout(b *models.Book, name string) error {
 	if h != 0 {
 		lastCheckout := b.History[h-1]
 		if lastCheckout.In.IsZero() {
-			return ErrBookCheckedOut
+			return apierrors.ErrBookCheckedOut
 		}
 	}
 
 	if len(name) == 0 {
-		return ErrNameMissing
+		return apierrors.ErrNameMissing
 	}
 
 	b.History = append(b.History, models.Checkout{
@@ -37,16 +36,16 @@ func checkout(b *models.Book, name string) error {
 func checkin(b *models.Book, review int) error {
 	h := len(b.History)
 	if h == 0 {
-		return ErrBookNotCheckedOut
+		return apierrors.ErrBookNotCheckedOut
 	}
 
 	if review < 1 || review > 5 {
-		return ErrReviewMissing
+		return apierrors.ErrReviewMissing
 	}
 
 	lastCheckout := b.History[h-1]
 	if !lastCheckout.In.IsZero() {
-		return ErrBookNotCheckedOut
+		return apierrors.ErrBookNotCheckedOut
 	}
 
 	b.History[h-1] = models.Checkout{
@@ -63,67 +62,46 @@ func (api *API) createBook(writer http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
 
 	if request.Body == http.NoBody {
-		missingBody(ctx, writer, ErrRequestBodyMissing)
-		return
-	}
-
-	body, err := ioutil.ReadAll(request.Body)
-	defer request.Body.Close()
-	if err != nil {
-		readFailed(ctx, writer, err)
-		return
-	}
-	buffer := new(bytes.Buffer)
-	json.Compact(buffer, body)
-
-	if buffer.String() == emptyJson {
-		emptyRequest(ctx, writer, ErrEmptyRequest)
+		handleError(ctx, writer, apierrors.ErrEmptyRequest, nil)
 		return
 	}
 
 	book := &models.Book{}
-
-	err = json.Unmarshal(body, &book)
-	if err != nil {
-		unmarshalFailed(ctx, writer, err)
+	if err := ReadJSONBody(ctx, request.Body, book); err != nil {
+		handleError(ctx, writer, err, nil)
 		return
 	}
 
-	err = book.Validate()
+	err := book.Validate()
 	if err != nil {
-		invalidBook(ctx, writer, err)
+		handleError(ctx, writer, err, nil)
 		return
 	}
 
 	book.ID = uuid.NewV4().String()
 	api.dataStore.AddBook(book)
 
-	body, err = json.Marshal(book)
-	if err != nil {
-		marshalFailed(ctx, writer, err)
+	if err := WriteJSONBody(book, writer, http.StatusCreated); err != nil {
+		handleError(ctx, writer, err, nil)
 		return
 	}
-
-	writer.Header().Set("content-type", "application/json")
-	writer.WriteHeader(http.StatusCreated)
-	_, _ = writer.Write(body)
 }
 
 func (api *API) listBooks(writer http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
 
 	books, err := api.dataStore.GetBooks(ctx)
+	if err != nil {
+		handleError(ctx, writer, err, nil)
+	}
 
 	books.Count = len(books.Items)
 
-	bytes, err := json.Marshal(books)
-	if err != nil {
-		marshalFailed(ctx, writer, err)
+	if err := WriteJSONBody(books, writer, http.StatusOK); err != nil {
+		handleError(ctx, writer, err, nil)
 		return
 	}
-
-	writer.Header().Set("Content-Type", "application/json")
-	_, _ = writer.Write(bytes)
+	log.Event(ctx, "successfully retrieved list of books", log.INFO)
 }
 
 func (api *API) getBook(writer http.ResponseWriter, request *http.Request) {
@@ -132,17 +110,14 @@ func (api *API) getBook(writer http.ResponseWriter, request *http.Request) {
 	id := mux.Vars(request)["id"]
 
 	book, err := api.dataStore.GetBook(ctx, id)
-	if book == nil {
-		bookNotFound(ctx, writer, id)
-		return
-	}
-
-	bytes, err := json.Marshal(book)
 	if err != nil {
-		marshalFailed(ctx, writer, err)
+		handleError(ctx, writer, err, nil)
 		return
 	}
 
-	writer.Header().Set("Content-Type", "application/json")
-	_, _ = writer.Write(bytes)
+	if err := WriteJSONBody(book, writer, http.StatusOK); err != nil {
+		handleError(ctx, writer, err, nil)
+		return
+	}
+	log.Event(ctx, "successfully retrieved book", log.INFO)
 }

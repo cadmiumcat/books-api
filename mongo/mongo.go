@@ -6,13 +6,12 @@ import (
 	dpMongodb "github.com/ONSdigital/dp-mongodb"
 	dpMongoLock "github.com/ONSdigital/dp-mongodb/dplock"
 	"github.com/ONSdigital/log.go/log"
+	"github.com/cadmiumcat/books-api/apierrors"
 	"github.com/cadmiumcat/books-api/config"
 	"github.com/cadmiumcat/books-api/models"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 )
-
-var errBookNotFound = errors.New("book not found")
 
 // Mongo contains the information needed to create and interact with a mongo session
 type Mongo struct {
@@ -68,8 +67,8 @@ func (m *Mongo) GetBook(ctx context.Context, ID string) (*models.Book, error) {
 
 	if err != nil {
 		if err == mgo.ErrNotFound {
-			log.Event(ctx, errBookNotFound.Error(), log.ERROR, log.Error(err))
-			return nil, errBookNotFound
+			log.Event(ctx, apierrors.ErrBookNotFound.Error(), log.ERROR, log.Error(err))
+			return nil, apierrors.ErrBookNotFound
 		}
 		return nil, err
 	}
