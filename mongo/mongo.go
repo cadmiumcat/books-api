@@ -62,12 +62,17 @@ func (m *Mongo) GetBook(ctx context.Context, ID string) (*models.Book, error) {
 	session := m.Session.Copy()
 	defer session.Close()
 
+	logData := log.Data{
+		"book_id": ID,
+		"database": m.Database,
+		"collection": m.Collection}
+
 	var book models.Book
 	err := session.DB(m.Database).C(m.Collection).Find(bson.M{"_id": ID}).One(&book)
 
 	if err != nil {
 		if err == mgo.ErrNotFound {
-			log.Event(ctx, apierrors.ErrBookNotFound.Error(), log.ERROR, log.Error(err))
+			log.Event(ctx, apierrors.ErrBookNotFound.Error(), log.ERROR, log.Error(err), logData)
 			return nil, apierrors.ErrBookNotFound
 		}
 		return nil, err
@@ -83,11 +88,15 @@ func (m *Mongo) GetBooks(ctx context.Context) (models.Books, error) {
 	session := m.Session.Copy()
 	defer session.Close()
 
+	logData := log.Data{
+		"database": m.Database,
+		"collection": m.Collection}
+
 	list := session.DB(m.Database).C(m.Collection).Find(nil)
 
 	books := &models.Books{}
 	if err := list.All(&books.Items); err != nil {
-		log.Event(ctx, "unable to retrieve books", log.ERROR, log.Error(err))
+		log.Event(ctx, "unable to retrieve books", log.ERROR, log.Error(err), logData)
 		return models.Books{}, err
 	}
 

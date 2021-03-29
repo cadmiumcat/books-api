@@ -72,9 +72,11 @@ func (api *API) createBook(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
+	logData := log.Data{"book": book}
+
 	err := book.Validate()
 	if err != nil {
-		handleError(ctx, writer, err, nil)
+		handleError(ctx, writer, err, logData)
 		return
 	}
 
@@ -82,7 +84,7 @@ func (api *API) createBook(writer http.ResponseWriter, request *http.Request) {
 	api.dataStore.AddBook(book)
 
 	if err := WriteJSONBody(book, writer, http.StatusCreated); err != nil {
-		handleError(ctx, writer, err, nil)
+		handleError(ctx, writer, err, logData)
 		return
 	}
 }
@@ -109,15 +111,17 @@ func (api *API) getBook(writer http.ResponseWriter, request *http.Request) {
 
 	id := mux.Vars(request)["id"]
 
+	logData := log.Data{"book_id": id}
+
 	book, err := api.dataStore.GetBook(ctx, id)
 	if err != nil {
-		handleError(ctx, writer, err, nil)
+		handleError(ctx, writer, err, logData)
 		return
 	}
 
 	if err := WriteJSONBody(book, writer, http.StatusOK); err != nil {
-		handleError(ctx, writer, err, nil)
+		handleError(ctx, writer, err, logData)
 		return
 	}
-	log.Event(ctx, "successfully retrieved book", log.INFO)
+	log.Event(ctx, "successfully retrieved book", log.INFO, logData)
 }
