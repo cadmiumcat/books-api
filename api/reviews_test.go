@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"github.com/cadmiumcat/books-api/apierrors"
 	"github.com/cadmiumcat/books-api/interfaces/mock"
 	"github.com/cadmiumcat/books-api/models"
 	"github.com/gorilla/mux"
@@ -47,7 +48,7 @@ func TestReviews(t *testing.T) {
 		reviewID := "123"
 		mockDataStore := &mock.DataStoreMock{
 			GetReviewFunc: func(ctx context.Context, id string) (*models.Review, error) {
-				return nil, ErrReviewMissing
+				return nil, apierrors.ErrReviewNotFound
 			},
 		}
 

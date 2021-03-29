@@ -2,7 +2,7 @@ package api
 
 import (
 	"context"
-	"errors"
+	"github.com/cadmiumcat/books-api/apierrors"
 	"github.com/cadmiumcat/books-api/interfaces/mock"
 	"github.com/cadmiumcat/books-api/models"
 	"github.com/gorilla/mux"
@@ -41,7 +41,7 @@ func TestBooks(t *testing.T) {
 			})
 
 			Convey("And the response says the request body is missing", func() {
-				So(response.Body.String(), ShouldContainSubstring, ErrRequestBodyMissing.Error())
+				So(response.Body.String(), ShouldContainSubstring, apierrors.ErrEmptyRequest.Error())
 			})
 		})
 
@@ -61,7 +61,7 @@ func TestBooks(t *testing.T) {
 				So(mockDataStore.AddBookCalls(), ShouldHaveLength, 0)
 			})
 			Convey("And the response says the request is empty", func() {
-				So(response.Body.String(), ShouldContainSubstring, ErrEmptyRequest.Error())
+				So(response.Body.String(), ShouldContainSubstring, apierrors.ErrRequiredFieldMissing.Error())
 			})
 		})
 
@@ -117,7 +117,7 @@ func TestBooks(t *testing.T) {
 
 		mockDataStore := &mock.DataStoreMock{
 			GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
-				return nil, errors.New("error message")
+				return nil, apierrors.ErrBookNotFound
 			},
 		}
 

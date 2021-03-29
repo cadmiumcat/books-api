@@ -5,16 +5,12 @@ import (
 	dpMongodb "github.com/ONSdigital/dp-mongodb"
 	dpMongoLock "github.com/ONSdigital/dp-mongodb/dplock"
 	"github.com/ONSdigital/log.go/log"
+	"github.com/cadmiumcat/books-api/apierrors"
 	"github.com/cadmiumcat/books-api/config"
 	"github.com/cadmiumcat/books-api/models"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"github.com/pkg/errors"
-)
-
-var (
-	errBookNotFound   = errors.New("book not found")
-	errReviewNotFound = errors.New("review not found")
 )
 
 // Mongo contains the information needed to create and interact with a mongo session
@@ -68,13 +64,18 @@ func (m *Mongo) GetBook(ctx context.Context, ID string) (*models.Book, error) {
 	session := m.Session.Copy()
 	defer session.Close()
 
+	logData := log.Data{
+		"book_id":    ID,
+		"database":   m.Database,
+		"collection": m.BooksCollection}
+
 	var book models.Book
 	err := session.DB(m.Database).C(m.BooksCollection).Find(bson.M{"_id": ID}).One(&book)
 
 	if err != nil {
 		if err == mgo.ErrNotFound {
-			log.Event(ctx, errBookNotFound.Error(), log.ERROR, log.Error(err))
-			return nil, errBookNotFound
+			log.Event(ctx, apierrors.ErrBookNotFound.Error(), log.ERROR, log.Error(err), logData)
+			return nil, apierrors.ErrBookNotFound
 		}
 		return nil, err
 	}
@@ -89,11 +90,15 @@ func (m *Mongo) GetBooks(ctx context.Context) (models.Books, error) {
 	session := m.Session.Copy()
 	defer session.Close()
 
+	logData := log.Data{
+		"database":   m.Database,
+		"collection": m.BooksCollection}
+
 	list := session.DB(m.Database).C(m.BooksCollection).Find(nil)
 
 	books := &models.Books{}
 	if err := list.All(&books.Items); err != nil {
-		log.Event(ctx, "unable to retrieve books", log.ERROR, log.Error(err))
+		log.Event(ctx, "unable to retrieve books", log.ERROR, log.Error(err), logData)
 		return models.Books{}, err
 	}
 
@@ -111,8 +116,8 @@ func (m *Mongo) GetReview(ctx context.Context, reviewID string) (*models.Review,
 
 	if err != nil {
 		if err == mgo.ErrNotFound {
-			log.Event(ctx, errReviewNotFound.Error(), log.ERROR, log.Error(err))
-			return nil, errReviewNotFound
+			log.Event(ctx, apierrors.ErrReviewMissing.Error(), log.ERROR, log.Error(err))
+			return nil, apierrors.ErrReviewMissing
 		}
 		return nil, errors.Wrap(err, "unexpected error when getting a review")
 	}
