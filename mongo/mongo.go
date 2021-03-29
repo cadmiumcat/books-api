@@ -111,12 +111,17 @@ func (m *Mongo) GetReview(ctx context.Context, reviewID string) (*models.Review,
 	session := m.Session.Copy()
 	defer session.Close()
 
+	logData := log.Data{
+		"review_id":    reviewID,
+		"database":   m.Database,
+		"collection": m.BooksCollection}
+
 	var review models.Review
 	err := session.DB(m.Database).C(m.ReviewsCollection).Find(bson.M{"_id": reviewID}).One(&review)
 
 	if err != nil {
 		if err == mgo.ErrNotFound {
-			log.Event(ctx, apierrors.ErrReviewMissing.Error(), log.ERROR, log.Error(err))
+			log.Event(ctx, apierrors.ErrReviewMissing.Error(), log.ERROR, log.Error(err), logData)
 			return nil, apierrors.ErrReviewMissing
 		}
 		return nil, errors.Wrap(err, "unexpected error when getting a review")
