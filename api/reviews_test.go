@@ -214,12 +214,39 @@ func TestReviews(t *testing.T) {
 			Convey("And the GetReviews function is called once", func() {
 				So(mockDataStore.GetReviewsCalls(), ShouldHaveLength, 1)
 			})
-			Convey("The response contains the right number of reviews", func() {
+			Convey("And the response body contains the right number of reviews", func() {
 				payload, err := ioutil.ReadAll(response.Body)
 				So(err, ShouldBeNil)
 				reviews := models.Reviews{}
 				err = json.Unmarshal(payload, &reviews)
 				So(reviews.Count, ShouldEqual, 2)
+			})
+		})
+	})
+
+	Convey("Given a GET request for a list of reviews of a book", t, func() {
+		Convey("When the book does not exist", func() {
+			mockDataStore := &mock.DataStoreMock{
+				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
+					return nil, apierrors.ErrBookNotFound
+				},
+			}
+
+			ctx := context.Background()
+
+			api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
+			response := httptest.NewRecorder()
+
+			request, err := http.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
+			So(err, ShouldBeNil)
+
+			api.router.ServeHTTP(response, request)
+			Convey("Then the HTTP response code is 404", func() {
+				So(response.Code, ShouldEqual, http.StatusNotFound)
+			})
+			Convey("And the GetReviews function is not called", func() {
+				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
+				So(mockDataStore.GetReviewsCalls(), ShouldHaveLength, 0)
 			})
 		})
 	})
