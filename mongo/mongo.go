@@ -137,11 +137,15 @@ func (m *Mongo) GetReviews(ctx context.Context, bookID string) (models.Reviews, 
 	session := m.Session.Copy()
 	defer session.Close()
 
+	logData := log.Data{
+		"database":   m.Database,
+		"collection": m.ReviewsCollection}
+
 	list := session.DB(m.Database).C(m.ReviewsCollection).Find(bson.M{"links.book": bookID})
 
 	review := &models.Reviews{}
 	if err := list.All(&review.Items); err != nil {
-		log.Event(ctx, "unable to retrieve books", log.ERROR, log.Error(err))
+		log.Event(ctx, "unable to retrieve reviews", log.ERROR, log.Error(err), logData)
 		return models.Reviews{}, err
 	}
 
