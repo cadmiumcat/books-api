@@ -2,7 +2,8 @@ package api
 
 import (
 	"context"
-	"github.com/pkg/errors"
+	"fmt"
+	"github.com/cadmiumcat/books-api/apierrors"
 	. "github.com/smartystreets/goconvey/convey"
 	"net/http"
 	"net/http/httptest"
@@ -10,18 +11,51 @@ import (
 )
 
 func TestHandleError(t *testing.T) {
-	Convey("Given an unknown error", t, func() {
-		ctx := context.Background()
-		err := errors.New("Unknown error")
+	t.Parallel()
 
-		Convey("When I pass the error to the handleError function", func() {
-			writer := httptest.NewRecorder()
-			handleError(ctx, writer, err, nil)
+	cases := []struct{
+		description string
+		input error
+		expected int
+	}{
+		{
+			input: apierrors.ErrBookNotFound,
+			expected: http.StatusNotFound,
+		},
+		{
+			input: apierrors.ErrReviewNotFound,
+			expected: http.StatusNotFound,
+		},
+		{
+			input: apierrors.ErrRequiredFieldMissing,
+			expected: http.StatusBadRequest,
+		},
+		{
+			input: apierrors.ErrEmptyRequest,
+			expected: http.StatusBadRequest,
+		},
+		{
+			description: "unknown error",
+			input: errMongoDB,
+			expected: http.StatusInternalServerError,
+		},
 
-			Convey("Then the status returned is internal server error", func() {
-				So(writer.Code, ShouldEqual, http.StatusInternalServerError)
+	}
+
+	Convey("Given a specific error", t, func() {
+		for _, test := range cases {
+			ctx := context.Background()
+			err := test.input
+			Convey("When I pass the " + test.input.Error() + " error to the handleError function", func() {
+				writer := httptest.NewRecorder()
+				handleError(ctx, writer, err, nil)
+
+				Convey(fmt.Sprintf("Then the status returned is %v",  test.expected), func() {
+					So(writer.Code, ShouldEqual, test.expected)
+
+				})
 			})
-		})
+		}
 	})
 
 }
