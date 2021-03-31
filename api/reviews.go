@@ -12,6 +12,13 @@ func (api *API) getReviews(writer http.ResponseWriter, request *http.Request) {
 
 	logData := log.Data{"book_id": bookID}
 
+	// Confirm that book exists. If bookID not found, then do not check for the reviews
+	_, err := api.dataStore.GetBook(ctx, bookID)
+	if err != nil {
+		handleError(ctx, writer, err, logData)
+		return
+	}
+
 	reviews, err := api.dataStore.GetReviews(ctx, bookID)
 	if err != nil {
 		handleError(ctx, writer, err, logData)

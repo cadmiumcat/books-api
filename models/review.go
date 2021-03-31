@@ -2,12 +2,12 @@ package models
 
 // A Review contains the fields that identify a review
 type Review struct {
-	ID    string `json:"id" bson:"_id"`
-	Links *link  `json:"links,omitempty" bson:"links,omitempty"`
+	ID    string      `json:"id" bson:"_id"`
+	Links *ReviewLink `json:"links,omitempty" bson:"links,omitempty"`
 }
 
-// link is the relationship between a Book and a Review
-type link struct {
+// ReviewLink is the relationship between a Book and a Review
+type ReviewLink struct {
 	Self string
 	Book string
 }
