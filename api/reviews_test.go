@@ -19,6 +19,9 @@ func TestReviews(t *testing.T) {
 		bookID := "1"
 		reviewID := "123"
 		mockDataStore := &mock.DataStoreMock{
+			GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
+				return &models.Book{ID: bookID}, nil
+			},
 			GetReviewFunc: func(ctx context.Context, id string) (*models.Review, error) {
 				return &models.Review{ID: reviewID}, nil
 			},
@@ -38,6 +41,7 @@ func TestReviews(t *testing.T) {
 				So(response.Code, ShouldEqual, http.StatusOK)
 			})
 			Convey("And the GetReview function is called once", func() {
+				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
 				So(mockDataStore.GetReviewCalls(), ShouldHaveLength, 1)
 			})
 		})
@@ -47,6 +51,9 @@ func TestReviews(t *testing.T) {
 		bookID := "1"
 		reviewID := "123"
 		mockDataStore := &mock.DataStoreMock{
+			GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
+				return &models.Book{ID: bookID}, nil
+			},
 			GetReviewFunc: func(ctx context.Context, id string) (*models.Review, error) {
 				return nil, apierrors.ErrReviewNotFound
 			},
@@ -66,8 +73,39 @@ func TestReviews(t *testing.T) {
 				So(response.Code, ShouldEqual, http.StatusNotFound)
 			})
 			Convey("And the GetReview function is called once", func() {
+				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
 				So(mockDataStore.GetReviewCalls(), ShouldHaveLength, 1)
 			})
 		})
 	})
+
+	Convey("Given a GET request for a review of a book", t, func() {
+		bookID := "1"
+		reviewID := "123"
+		mockDataStore := &mock.DataStoreMock{
+			GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
+				return nil, apierrors.ErrBookNotFound
+			},
+		}
+
+		ctx := context.Background()
+
+		api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
+		Convey("When the book does not exist", func() {
+			response := httptest.NewRecorder()
+
+			request, err := http.NewRequest(http.MethodGet, "/books/"+bookID+"/reviews/"+reviewID, nil)
+			So(err, ShouldBeNil)
+
+			api.router.ServeHTTP(response, request)
+			Convey("Then the HTTP response code is 404", func() {
+				So(response.Code, ShouldEqual, http.StatusNotFound)
+			})
+			Convey("And the GetReview function is not called", func() {
+				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
+				So(mockDataStore.GetReviewCalls(), ShouldHaveLength, 0)
+			})
+		})
+	})
+
 }

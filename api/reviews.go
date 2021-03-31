@@ -14,9 +14,17 @@ func (api *API) getReview(writer http.ResponseWriter, request *http.Request) {
 
 	logData := log.Data{"book_id": bookID, "review_id": reviewID}
 
-	review, err := api.dataStore.GetReview(ctx, reviewID)
-	if review == nil {
+	// Confirm that book exists. If bookID not found, then do not check for the review
+	_, err := api.dataStore.GetBook(ctx, bookID)
+	if err != nil {
 		handleError(ctx, writer, err, logData)
+		return
+	}
+
+	review, err := api.dataStore.GetReview(ctx, reviewID)
+	if err != nil {
+		handleError(ctx, writer, err, logData)
+		return
 	}
 
 	if err := WriteJSONBody(review, writer, http.StatusOK); err != nil {
