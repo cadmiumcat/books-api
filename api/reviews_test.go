@@ -35,6 +35,11 @@ var bookReview2 = models.Review{
 	},
 }
 
+var emptyReviews = models.Reviews{
+	Count: 0,
+	Items: nil,
+}
+
 var errMongoDB = errors.New("unexpected error in MongoDB")
 
 func TestReviews(t *testing.T) {
@@ -79,6 +84,9 @@ func TestReviews(t *testing.T) {
 			GetReviewFunc: func(ctx context.Context, id string) (*models.Review, error) {
 				return nil, apierrors.ErrReviewNotFound
 			},
+			GetReviewsFunc: func(ctx context.Context, bookID string) (models.Reviews, error) {
+				return emptyReviews, nil
+			},
 		}
 
 		ctx := context.Background()
@@ -97,6 +105,30 @@ func TestReviews(t *testing.T) {
 			Convey("And the GetReview function is called once", func() {
 				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
 				So(mockDataStore.GetReviewCalls(), ShouldHaveLength, 1)
+			})
+		})
+
+		Convey("When I send a HTTP GET request to /books/1/reviews", func() {
+			response := httptest.NewRecorder()
+
+			request, err := http.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
+			So(err, ShouldBeNil)
+
+			api.router.ServeHTTP(response, request)
+			Convey("Then the HTTP response code is 200", func() {
+				So(response.Code, ShouldEqual, http.StatusOK)
+			})
+			Convey("And the GetReviews function is called once", func() {
+				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
+				So(mockDataStore.GetReviewsCalls(), ShouldHaveLength, 1)
+			})
+			Convey("And the response contains a count of zero and no review items", func() {
+				payload, err := ioutil.ReadAll(response.Body)
+				So(err, ShouldBeNil)
+				reviews := models.Reviews{}
+				err = json.Unmarshal(payload, &reviews)
+				So(reviews.Count, ShouldEqual, 0)
+				So(reviews.Items, ShouldBeNil)
 			})
 		})
 	})
