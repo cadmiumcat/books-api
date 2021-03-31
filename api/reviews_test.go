@@ -12,12 +12,15 @@ import (
 	"testing"
 )
 
+const (
+	bookID = "1"
+	reviewID = "123"
+)
+
 func TestReviews(t *testing.T) {
 	hcMock := mock.HealthCheckerMock{}
 
 	Convey("Given a existing book with at least one review (review_id=123)", t, func() {
-		bookID := "1"
-		reviewID := "123"
 		mockDataStore := &mock.DataStoreMock{
 			GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
 				return &models.Book{ID: bookID}, nil
@@ -48,8 +51,6 @@ func TestReviews(t *testing.T) {
 	})
 
 	Convey("Given a existing book with no reviews", t, func() {
-		bookID := "1"
-		reviewID := "123"
 		mockDataStore := &mock.DataStoreMock{
 			GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
 				return &models.Book{ID: bookID}, nil
@@ -80,8 +81,6 @@ func TestReviews(t *testing.T) {
 	})
 
 	Convey("Given a GET request for a review of a book", t, func() {
-		bookID := "1"
-		reviewID := "123"
 		mockDataStore := &mock.DataStoreMock{
 			GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
 				return nil, apierrors.ErrBookNotFound
