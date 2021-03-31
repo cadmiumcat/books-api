@@ -6,6 +6,7 @@ import (
 	"github.com/cadmiumcat/books-api/interfaces/mock"
 	"github.com/cadmiumcat/books-api/models"
 	"github.com/gorilla/mux"
+	"github.com/pkg/errors"
 	. "github.com/smartystreets/goconvey/convey"
 	"net/http"
 	"net/http/httptest"
@@ -13,9 +14,11 @@ import (
 )
 
 const (
-	bookID = "1"
+	bookID   = "1"
 	reviewID = "123"
 )
+
+var errMongoDB = errors.New("unexpected error in MongoDB")
 
 func TestReviews(t *testing.T) {
 	hcMock := mock.HealthCheckerMock{}
@@ -81,16 +84,16 @@ func TestReviews(t *testing.T) {
 	})
 
 	Convey("Given a GET request for a review of a book", t, func() {
-		mockDataStore := &mock.DataStoreMock{
-			GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
-				return nil, apierrors.ErrBookNotFound
-			},
-		}
-
-		ctx := context.Background()
-
-		api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
 		Convey("When the book does not exist", func() {
+			mockDataStore := &mock.DataStoreMock{
+				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
+					return nil, apierrors.ErrBookNotFound
+				},
+			}
+
+			ctx := context.Background()
+
+			api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
 			response := httptest.NewRecorder()
 
 			request, err := http.NewRequest(http.MethodGet, "/books/"+bookID+"/reviews/"+reviewID, nil)
@@ -105,6 +108,28 @@ func TestReviews(t *testing.T) {
 				So(mockDataStore.GetReviewCalls(), ShouldHaveLength, 0)
 			})
 		})
-	})
 
+		Convey("When the database returns a generic error", func() {
+			Convey("When the book do the database returns an unexpected error", func() {
+				mockDataStore := &mock.DataStoreMock{
+					GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
+						return nil, errMongoDB
+					},
+				}
+
+				ctx := context.Background()
+
+				api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
+				response := httptest.NewRecorder()
+
+				request, err := http.NewRequest(http.MethodGet, "/books/"+bookID+"/reviews/"+reviewID, nil)
+				So(err, ShouldBeNil)
+
+				api.router.ServeHTTP(response, request)
+				Convey("Then 500 InternalServerError status code is returned", func() {
+					So(response.Code, ShouldEqual, http.StatusInternalServerError)
+				})
+			})
+		})
+	})
 }

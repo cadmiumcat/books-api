@@ -112,7 +112,7 @@ func (m *Mongo) GetReview(ctx context.Context, reviewID string) (*models.Review,
 	defer session.Close()
 
 	logData := log.Data{
-		"review_id":    reviewID,
+		"review_id":  reviewID,
 		"database":   m.Database,
 		"collection": m.ReviewsCollection}
 
