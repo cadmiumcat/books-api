@@ -13,44 +13,43 @@ import (
 func TestHandleError(t *testing.T) {
 	t.Parallel()
 
-	cases := []struct{
+	cases := []struct {
 		description string
-		input error
-		expected int
+		input       error
+		expected    int
 	}{
 		{
-			input: apierrors.ErrBookNotFound,
+			input:    apierrors.ErrBookNotFound,
 			expected: http.StatusNotFound,
 		},
 		{
-			input: apierrors.ErrReviewNotFound,
+			input:    apierrors.ErrReviewNotFound,
 			expected: http.StatusNotFound,
 		},
 		{
-			input: apierrors.ErrRequiredFieldMissing,
+			input:    apierrors.ErrRequiredFieldMissing,
 			expected: http.StatusBadRequest,
 		},
 		{
-			input: apierrors.ErrEmptyRequest,
+			input:    apierrors.ErrEmptyRequest,
 			expected: http.StatusBadRequest,
 		},
 		{
 			description: "unknown error",
-			input: errMongoDB,
-			expected: http.StatusInternalServerError,
+			input:       errMongoDB,
+			expected:    http.StatusInternalServerError,
 		},
-
 	}
 
 	Convey("Given a specific error", t, func() {
 		for _, test := range cases {
 			ctx := context.Background()
 			err := test.input
-			Convey("When I pass the " + test.input.Error() + " error to the handleError function", func() {
+			Convey("When I pass the "+test.input.Error()+" error to the handleError function", func() {
 				writer := httptest.NewRecorder()
 				handleError(ctx, writer, err, nil)
 
-				Convey(fmt.Sprintf("Then the status returned is %v",  test.expected), func() {
+				Convey(fmt.Sprintf("Then the status returned is %v", test.expected), func() {
 					So(writer.Code, ShouldEqual, test.expected)
 
 				})
