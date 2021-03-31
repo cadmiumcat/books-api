@@ -1,8 +1,6 @@
 package api
 
 import (
-	"encoding/json"
-	"fmt"
 	"github.com/ONSdigital/log.go/log"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -29,22 +27,28 @@ func (api *API) getReviews(writer http.ResponseWriter, request *http.Request) {
 func (api *API) getReview(writer http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
 
+	bookID := mux.Vars(request)["id"]
 	reviewID := mux.Vars(request)["reviewID"]
 
-	review, _ := api.dataStore.GetReview(ctx, reviewID)
-	if review == nil {
-		msg := fmt.Sprintf("review id %q not found", reviewID)
-		log.Event(ctx, msg, log.INFO)
-		http.Error(writer, msg, http.StatusNotFound)
-		return
-	}
+	logData := log.Data{"book_id": bookID, "review_id": reviewID}
 
-	bytes, err := json.Marshal(review)
+	// Confirm that book exists. If bookID not found, then do not check for the review
+	_, err := api.dataStore.GetBook(ctx, bookID)
 	if err != nil {
-		marshalFailed(ctx, writer, err)
+		handleError(ctx, writer, err, logData)
 		return
 	}
 
-	writer.Header().Set("Content-Type", "application/json")
-	_, _ = writer.Write(bytes)
+	review, err := api.dataStore.GetReview(ctx, reviewID)
+	if err != nil {
+		handleError(ctx, writer, err, logData)
+		return
+	}
+
+	if err := WriteJSONBody(review, writer, http.StatusOK); err != nil {
+		handleError(ctx, writer, err, logData)
+		return
+	}
+
+	log.Event(ctx, "successfully retrieved review", log.INFO, logData)
 }

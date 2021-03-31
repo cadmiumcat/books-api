@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-//go:generate moq -out datastoretest/datastore.go -pkg datastoretest . DataStore
+//go:generate moq -out mock/datastore.go -pkg mock . DataStore
 //go:generate moq -out mock/healthcheck.go -pkg mock . HealthChecker
 //go:generate moq -out mock/server.go -pkg mock . HTTPServer
 //go:generate moq -out mock/initaliser.go -pkg mock . Initialiser
