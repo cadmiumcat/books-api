@@ -250,6 +250,62 @@ func TestReviewsEndpoints(t *testing.T) {
 				So(mockDataStore.GetReviewsCalls(), ShouldHaveLength, 0)
 			})
 		})
+
+		Convey("When GetReviews returns a database error", func() {
+			mockDataStore := &mock.DataStoreMock{
+				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
+					return &models.Book{ID: bookID1}, nil
+				},
+				GetReviewsFunc: func(ctx context.Context, bookID string) (models.Reviews, error) {
+					return models.Reviews{}, errMongoDB
+				},
+			}
+
+				ctx := context.Background()
+
+				api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
+				response := httptest.NewRecorder()
+
+				request, err := http.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
+				So(err, ShouldBeNil)
+
+				api.router.ServeHTTP(response, request)
+				Convey("Then the HTTP response code is 500", func() {
+				So(response.Code, ShouldEqual, http.StatusInternalServerError)
+			})
+				Convey("And the GetBook and GetReviews functions are called", func() {
+				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
+				So(mockDataStore.GetReviewsCalls(), ShouldHaveLength, 1)
+			})
+		})
+
+		Convey("When GetBook returns a database error", func() {
+			mockDataStore := &mock.DataStoreMock{
+				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
+					return &models.Book{}, errMongoDB
+				},
+				GetReviewsFunc: func(ctx context.Context, bookID string) (models.Reviews, error) {
+					return models.Reviews{}, nil
+				},
+			}
+
+			ctx := context.Background()
+
+			api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
+			response := httptest.NewRecorder()
+
+			request, err := http.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
+			So(err, ShouldBeNil)
+
+			api.router.ServeHTTP(response, request)
+			Convey("Then the HTTP response code is 500", func() {
+				So(response.Code, ShouldEqual, http.StatusInternalServerError)
+			})
+			Convey("And the GetReviews function is not called", func() {
+				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
+				So(mockDataStore.GetReviewsCalls(), ShouldHaveLength, 0)
+			})
+		})
 	})
 }
 
