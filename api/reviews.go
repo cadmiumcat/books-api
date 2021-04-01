@@ -23,6 +23,7 @@ func (api *API) getReviews(writer http.ResponseWriter, request *http.Request) {
 	reviews, err := api.dataStore.GetReviews(ctx, bookID)
 	if err != nil {
 		handleError(ctx, writer, err, logData)
+		return
 	}
 
 	reviews.Count = len(reviews.Items)
