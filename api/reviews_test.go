@@ -261,19 +261,19 @@ func TestReviewsEndpoints(t *testing.T) {
 				},
 			}
 
-				ctx := context.Background()
+			ctx := context.Background()
 
-				api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
-				response := httptest.NewRecorder()
+			api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
+			response := httptest.NewRecorder()
 
-				request, err := http.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
-				So(err, ShouldBeNil)
+			request, err := http.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
+			So(err, ShouldBeNil)
 
-				api.router.ServeHTTP(response, request)
-				Convey("Then the HTTP response code is 500", func() {
+			api.router.ServeHTTP(response, request)
+			Convey("Then the HTTP response code is 500", func() {
 				So(response.Code, ShouldEqual, http.StatusInternalServerError)
 			})
-				Convey("And the GetBook and GetReviews functions are called", func() {
+			Convey("And the GetBook and GetReviews functions are called", func() {
 				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
 				So(mockDataStore.GetReviewsCalls(), ShouldHaveLength, 1)
 			})
@@ -283,9 +283,6 @@ func TestReviewsEndpoints(t *testing.T) {
 			mockDataStore := &mock.DataStoreMock{
 				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
 					return &models.Book{}, errMongoDB
-				},
-				GetReviewsFunc: func(ctx context.Context, bookID string) (models.Reviews, error) {
-					return models.Reviews{}, nil
 				},
 			}
 
