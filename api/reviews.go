@@ -6,6 +6,21 @@ import (
 	"net/http"
 )
 
+func (api *API) addReview(writer http.ResponseWriter, request *http.Request)  {
+	ctx := request.Context()
+	bookID := mux.Vars(request)["id"]
+
+	logData := log.Data{"book_id": bookID}
+
+	// Confirm that book exists. If bookID not found, then a review cannot be added!
+	_, err := api.dataStore.GetBook(ctx, bookID)
+	if err != nil {
+		handleError(ctx, writer, err, logData)
+		return
+	}
+
+}
+
 func (api *API) getReviews(writer http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
 	bookID := mux.Vars(request)["id"]

@@ -35,6 +35,7 @@ func Setup(ctx context.Context, host string, router *mux.Router, dataStore inter
 
 	api.router.HandleFunc("/books/{id}/reviews/{reviewID}", api.getReview).Methods("GET")
 	api.router.HandleFunc("/books/{id}/reviews", api.getReviews).Methods("GET")
+	api.router.HandleFunc("/books/{id}/reviews", api.addReview).Methods("POST")
 
 	api.router.HandleFunc("/health", api.hc.Handler).Methods("GET")
 
