@@ -16,11 +16,12 @@ import (
 const (
 	bookID   = "1"
 	reviewID = "123"
+	emptyID  = ""
 )
 
 var errMongoDB = errors.New("unexpected error in MongoDB")
 
-func TestReviews(t *testing.T) {
+func TestReviewsEndpoints(t *testing.T) {
 	hcMock := mock.HealthCheckerMock{}
 
 	Convey("Given a existing book with at least one review (review_id=123)", t, func() {
@@ -132,4 +133,53 @@ func TestReviews(t *testing.T) {
 			})
 		})
 	})
+}
+
+func TestReviews(t *testing.T) {
+	hcMock := mock.HealthCheckerMock{}
+
+	Convey("Given an HTTP GET request to the /books/{id}/reviews/{review_id} endpoint", t, func() {
+
+		api := &API{
+			host:      host,
+			router:    mux.NewRouter(),
+			dataStore: &mock.DataStoreMock{},
+			hc:        &hcMock,
+		}
+
+		Convey("When the {review_id} is empty", func() {
+			request, err := http.NewRequest("GET", "/books/"+bookID+"/reviews/"+emptyID, nil)
+			So(err, ShouldBeNil)
+
+			response := httptest.NewRecorder()
+
+			api.getReview(response, request)
+			Convey("Then the HTTP response code is 400", func() {
+				So(response.Code, ShouldEqual, http.StatusBadRequest)
+			})
+		})
+	})
+
+	Convey("Given an HTTP GET request to the /books/{id}/reviews/{review_id} endpoint", t, func() {
+
+		api := &API{
+			host:      host,
+			router:    mux.NewRouter(),
+			dataStore: &mock.DataStoreMock{},
+			hc:        &hcMock,
+		}
+
+		Convey("When the {id} is empty", func() {
+			request, err := http.NewRequest("GET", "/books/"+emptyID+"/reviews/"+reviewID, nil)
+			So(err, ShouldBeNil)
+
+			response := httptest.NewRecorder()
+
+			api.getReview(response, request)
+			Convey("Then the HTTP response code is 400", func() {
+				So(response.Code, ShouldEqual, http.StatusBadRequest)
+			})
+		})
+	})
+
 }

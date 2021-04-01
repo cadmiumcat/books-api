@@ -62,7 +62,7 @@ func (api *API) createBook(writer http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
 
 	if request.Body == http.NoBody {
-		handleError(ctx, writer, apierrors.ErrEmptyRequest, nil)
+		handleError(ctx, writer, apierrors.ErrEmptyRequestBody, nil)
 		return
 	}
 
@@ -110,8 +110,12 @@ func (api *API) getBook(writer http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
 
 	id := mux.Vars(request)["id"]
-
 	logData := log.Data{"book_id": id}
+
+	if id == "" {
+		handleError(ctx, writer, apierrors.ErrEmptyBookID, logData)
+		return
+	}
 
 	book, err := api.dataStore.GetBook(ctx, id)
 	if err != nil {

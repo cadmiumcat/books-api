@@ -15,7 +15,7 @@ import (
 
 const host = "localhost:8080"
 
-func TestBooks(t *testing.T) {
+func TestBooksEndpoints(t *testing.T) {
 	t.Parallel()
 	hcMock := mock.HealthCheckerMock{}
 
@@ -41,7 +41,7 @@ func TestBooks(t *testing.T) {
 			})
 
 			Convey("And the response says the request body is missing", func() {
-				So(response.Body.String(), ShouldContainSubstring, apierrors.ErrEmptyRequest.Error())
+				So(response.Body.String(), ShouldContainSubstring, apierrors.ErrEmptyRequestBody.Error())
 			})
 		})
 
@@ -166,4 +166,31 @@ func TestBooks(t *testing.T) {
 			})
 		})
 	})
+}
+
+func TestBooks(t *testing.T) {
+	hcMock := mock.HealthCheckerMock{}
+
+	Convey("Given an HTTP GET request to the /books/{id} endpoint", t, func() {
+
+		api := &API{
+			host:      host,
+			router:    mux.NewRouter(),
+			dataStore: &mock.DataStoreMock{},
+			hc:        &hcMock,
+		}
+
+		Convey("When the {id} is empty", func() {
+			request, err := http.NewRequest("GET", "/books/"+emptyID, nil)
+			So(err, ShouldBeNil)
+
+			response := httptest.NewRecorder()
+
+			api.getBook(response, request)
+			Convey("Then the HTTP response code is 400", func() {
+				So(response.Code, ShouldEqual, http.StatusBadRequest)
+			})
+		})
+	})
+
 }
