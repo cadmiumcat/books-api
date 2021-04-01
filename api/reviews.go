@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/ONSdigital/log.go/log"
+	"github.com/cadmiumcat/books-api/apierrors"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -37,6 +38,7 @@ func (api *API) getReviews(writer http.ResponseWriter, request *http.Request) {
 	reviews, err := api.dataStore.GetReviews(ctx, bookID)
 	if err != nil {
 		handleError(ctx, writer, err, logData)
+		return
 	}
 
 	reviews.Count = len(reviews.Items)
@@ -56,6 +58,11 @@ func (api *API) getReview(writer http.ResponseWriter, request *http.Request) {
 	reviewID := mux.Vars(request)["reviewID"]
 
 	logData := log.Data{"book_id": bookID, "review_id": reviewID}
+
+	if reviewID == "" {
+		handleError(ctx, writer, apierrors.ErrEmptyReviewID, logData)
+		return
+	}
 
 	// Confirm that book exists. If bookID not found, then do not check for the review
 	_, err := api.dataStore.GetBook(ctx, bookID)

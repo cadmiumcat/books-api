@@ -91,7 +91,9 @@ func handleError(ctx context.Context, w http.ResponseWriter, err error, data log
 			apierrors.ErrReviewNotFound:
 			status = http.StatusNotFound
 		case apierrors.ErrRequiredFieldMissing,
-			apierrors.ErrEmptyRequest:
+			apierrors.ErrEmptyRequestBody,
+			apierrors.ErrEmptyBookID,
+			apierrors.ErrEmptyReviewID:
 			status = http.StatusBadRequest
 		default:
 			status = http.StatusInternalServerError

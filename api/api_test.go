@@ -31,7 +31,15 @@ func TestHandleError(t *testing.T) {
 			expected: http.StatusBadRequest,
 		},
 		{
-			input:    apierrors.ErrEmptyRequest,
+			input:    apierrors.ErrEmptyRequestBody,
+			expected: http.StatusBadRequest,
+		},
+		{
+			input:    apierrors.ErrEmptyBookID,
+			expected: http.StatusBadRequest,
+		},
+		{
+			input:    apierrors.ErrEmptyReviewID,
 			expected: http.StatusBadRequest,
 		},
 		{
