@@ -13,6 +13,11 @@ func (api *API) addReview(writer http.ResponseWriter, request *http.Request)  {
 
 	logData := log.Data{"book_id": bookID}
 
+	if bookID == "" {
+		handleError(ctx, writer, apierrors.ErrEmptyBookID, logData)
+		return
+	}
+
 	// Confirm that book exists. If bookID not found, then a review cannot be added!
 	_, err := api.dataStore.GetBook(ctx, bookID)
 	if err != nil {

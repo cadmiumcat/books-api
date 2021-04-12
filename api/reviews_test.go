@@ -353,4 +353,25 @@ func TestReviews(t *testing.T) {
 		})
 	})
 
+	Convey("Given an HTTP POST request to the /books/{id}/reviews endpoint", t, func() {
+		api := &API{
+			host:      host,
+			router:    mux.NewRouter(),
+			dataStore: &mock.DataStoreMock{},
+			hc:        &hcMock,
+		}
+
+		Convey("When the {id} is empty", func() {
+			request, err := http.NewRequest("POST", "/books/"+emptyID+"/reviews", nil)
+			So(err, ShouldBeNil)
+
+			response := httptest.NewRecorder()
+
+			api.addReview(response, request)
+			Convey("Then the HTTP response code is 400", func() {
+				So(response.Code, ShouldEqual, http.StatusBadRequest)
+			})
+		})
+	})
+
 }
