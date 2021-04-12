@@ -21,7 +21,7 @@ const (
 
 var errMongoDB = errors.New("unexpected error in MongoDB")
 
-func TestReviewsEndpoints(t *testing.T) {
+func TestReviewEndpoints(t *testing.T) {
 	hcMock := mock.HealthCheckerMock{}
 
 	Convey("Given an existing book with at least one review (review_id=123)", t, func() {
@@ -135,10 +135,6 @@ func TestReviewsEndpoints(t *testing.T) {
 			})
 		})
 	})
-}
-
-func TestReviews(t *testing.T) {
-	hcMock := mock.HealthCheckerMock{}
 
 	Convey("Given an HTTP GET request to the /books/{id}/reviews/{review_id} endpoint", t, func() {
 
