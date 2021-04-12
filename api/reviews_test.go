@@ -50,6 +50,7 @@ func TestReviewsEndpoints(t *testing.T) {
 			Convey("And the GetReview function is called once", func() {
 				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
 				So(mockDataStore.GetReviewCalls(), ShouldHaveLength, 1)
+				So(response.Body.String(), ShouldEqual, `{"id":"123"}`)
 			})
 		})
 	})
@@ -80,6 +81,7 @@ func TestReviewsEndpoints(t *testing.T) {
 			Convey("And the GetReview function is called once", func() {
 				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
 				So(mockDataStore.GetReviewCalls(), ShouldHaveLength, 1)
+				So(response.Body.String(), ShouldEqual, "review not found\n")
 			})
 		})
 	})
@@ -107,6 +109,7 @@ func TestReviewsEndpoints(t *testing.T) {
 			Convey("And the GetReview function is not called", func() {
 				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
 				So(mockDataStore.GetReviewCalls(), ShouldHaveLength, 0)
+				So(response.Body.String(), ShouldEqual, "book not found\n")
 			})
 		})
 
@@ -128,6 +131,7 @@ func TestReviewsEndpoints(t *testing.T) {
 			api.router.ServeHTTP(response, request)
 			Convey("Then 500 InternalServerError status code is returned", func() {
 				So(response.Code, ShouldEqual, http.StatusInternalServerError)
+				So(response.Body.String(), ShouldEqual, "unexpected error in MongoDB\n")
 			})
 		})
 	})
@@ -154,6 +158,7 @@ func TestReviews(t *testing.T) {
 			api.getReview(response, request)
 			Convey("Then the HTTP response code is 400", func() {
 				So(response.Code, ShouldEqual, http.StatusBadRequest)
+				So(response.Body.String(), ShouldEqual, "empty review ID in request\n")
 			})
 		})
 	})
@@ -176,6 +181,7 @@ func TestReviews(t *testing.T) {
 			api.getReview(response, request)
 			Convey("Then the HTTP response code is 400", func() {
 				So(response.Code, ShouldEqual, http.StatusBadRequest)
+				So(response.Body.String(), ShouldEqual, "empty review ID in request\n")
 			})
 		})
 	})
