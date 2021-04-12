@@ -24,7 +24,7 @@ var errMongoDB = errors.New("unexpected error in MongoDB")
 func TestReviewsEndpoints(t *testing.T) {
 	hcMock := mock.HealthCheckerMock{}
 
-	Convey("Given a existing book with at least one review (review_id=123)", t, func() {
+	Convey("Given an existing book with at least one review (review_id=123)", t, func() {
 		mockDataStore := &mock.DataStoreMock{
 			GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
 				return &models.Book{ID: bookID}, nil
@@ -54,7 +54,7 @@ func TestReviewsEndpoints(t *testing.T) {
 		})
 	})
 
-	Convey("Given a existing book with no reviews", t, func() {
+	Convey("Given an existing book with no reviews", t, func() {
 		mockDataStore := &mock.DataStoreMock{
 			GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
 				return &models.Book{ID: bookID}, nil
