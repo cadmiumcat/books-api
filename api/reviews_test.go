@@ -186,6 +186,12 @@ func TestReviewEndpoints(t *testing.T) {
 		})
 	})
 
+}
+
+func TestGetReviewHandler(t *testing.T) {
+	t.Parallel()
+	hcMock := mock.HealthCheckerMock{}
+
 	Convey("Given an HTTP GET request to the /books/{id}/reviews/{review_id} endpoint", t, func() {
 
 		api := &API{
@@ -199,6 +205,11 @@ func TestReviewEndpoints(t *testing.T) {
 			request, err := http.NewRequest("GET", "/books/"+bookID1+"/reviews/"+emptyID, nil)
 			So(err, ShouldBeNil)
 
+			expectedUrlVars := map[string]string{
+				"id":       bookID1,
+				"reviewID": emptyID,
+			}
+			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
 
 			api.getReview(response, request)
@@ -207,31 +218,25 @@ func TestReviewEndpoints(t *testing.T) {
 				So(response.Body.String(), ShouldEqual, "empty review ID in request\n")
 			})
 		})
-	})
-
-	Convey("Given an HTTP GET request to the /books/{id}/reviews/{review_id} endpoint", t, func() {
-
-		api := &API{
-			host:      host,
-			router:    mux.NewRouter(),
-			dataStore: &mock.DataStoreMock{},
-			hc:        &hcMock,
-		}
 
 		Convey("When the {id} is empty", func() {
 			request, err := http.NewRequest("GET", "/books/"+emptyID+"/reviews/"+reviewID1, nil)
 			So(err, ShouldBeNil)
 
+			expectedUrlVars := map[string]string{
+				"id":       emptyID,
+				"reviewID": reviewID1,
+			}
+			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
 
 			api.getReview(response, request)
 			Convey("Then the HTTP response code is 400", func() {
 				So(response.Code, ShouldEqual, http.StatusBadRequest)
-				So(response.Body.String(), ShouldEqual, "empty review ID in request\n")
+				So(response.Body.String(), ShouldEqual, "empty book ID in request\n")
 			})
 		})
 	})
-
 }
 
 func TestReviewsEndpoint(t *testing.T) {
