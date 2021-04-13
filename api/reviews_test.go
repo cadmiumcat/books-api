@@ -225,9 +225,8 @@ func TestGetReviewHandler(t *testing.T) {
 	})
 }
 
-func TestReviewsEndpoint(t *testing.T) {
+func TestReviewsHandler(t *testing.T) {
 	t.Parallel()
-	hcMock := mock.HealthCheckerMock{}
 
 	Convey("Given a book with one or more reviews", t, func() {
 		mockDataStore := &mock.DataStoreMock{
@@ -244,15 +243,21 @@ func TestReviewsEndpoint(t *testing.T) {
 			},
 		}
 
-		ctx := context.Background()
+		api := &API{
+			dataStore: mockDataStore,
+		}
 
-		api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
 		Convey("When I send an HTTP GET request to /books/1/reviews", func() {
-			response := httptest.NewRecorder()
 
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
 
-			api.router.ServeHTTP(response, request)
+			expectedUrlVars := map[string]string{
+				"id":       bookID1,
+			}
+			request = mux.SetURLVars(request, expectedUrlVars)
+			response := httptest.NewRecorder()
+
+			api.getReviews(response, request)
 			Convey("Then the HTTP response code is 200", func() {
 				So(response.Code, ShouldEqual, http.StatusOK)
 			})
@@ -269,22 +274,29 @@ func TestReviewsEndpoint(t *testing.T) {
 		})
 	})
 
-	Convey("Given a GET request for a list of reviews of a book", t, func() {
-		Convey("When the book does not exist", func() {
+	Convey("Given a GET request for a list of reviews of a book that does not exist", t, func() {
+
+		Convey("When I send an HTTP GET request to /books/1/reviews", func() {
 			mockDataStore := &mock.DataStoreMock{
 				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
 					return nil, apierrors.ErrBookNotFound
 				},
 			}
 
-			ctx := context.Background()
-
-			api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
-			response := httptest.NewRecorder()
+			api := &API{
+				dataStore: mockDataStore,
+			}
 
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
 
-			api.router.ServeHTTP(response, request)
+			expectedUrlVars := map[string]string{
+				"id":       bookID1,
+			}
+			request = mux.SetURLVars(request, expectedUrlVars)
+			response := httptest.NewRecorder()
+
+
+			api.getReviews(response, request)
 			Convey("Then the HTTP response code is 404", func() {
 				So(response.Code, ShouldEqual, http.StatusNotFound)
 			})
@@ -304,14 +316,19 @@ func TestReviewsEndpoint(t *testing.T) {
 				},
 			}
 
-			ctx := context.Background()
-
-			api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
-			response := httptest.NewRecorder()
+			api := &API{
+				dataStore: mockDataStore,
+			}
 
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
 
-			api.router.ServeHTTP(response, request)
+			expectedUrlVars := map[string]string{
+				"id":       bookID1,
+			}
+			request = mux.SetURLVars(request, expectedUrlVars)
+			response := httptest.NewRecorder()
+
+			api.getReviews(response, request)
 			Convey("Then the HTTP response code is 500", func() {
 				So(response.Code, ShouldEqual, http.StatusInternalServerError)
 			})
@@ -328,14 +345,19 @@ func TestReviewsEndpoint(t *testing.T) {
 				},
 			}
 
-			ctx := context.Background()
-
-			api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
-			response := httptest.NewRecorder()
+			api := &API{
+				dataStore: mockDataStore,
+			}
 
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
 
-			api.router.ServeHTTP(response, request)
+			expectedUrlVars := map[string]string{
+				"id":       bookID1,
+			}
+			request = mux.SetURLVars(request, expectedUrlVars)
+			response := httptest.NewRecorder()
+
+			api.getReviews(response, request)
 			Convey("Then the HTTP response code is 500", func() {
 				So(response.Code, ShouldEqual, http.StatusInternalServerError)
 			})
