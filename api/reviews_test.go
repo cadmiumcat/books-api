@@ -43,11 +43,11 @@ var emptyReviews = models.Reviews{
 
 var errMongoDB = errors.New("unexpected error in MongoDB")
 
-func TestReviewsEndpoints(t *testing.T) {
+func TestReviewEndpoints(t *testing.T) {
 	t.Parallel()
 	hcMock := mock.HealthCheckerMock{}
 
-	Convey("Given a existing book with at least one review (review_id=123)", t, func() {
+	Convey("Given an existing book with at least one review (review_id=123)", t, func() {
 		mockDataStore := &mock.DataStoreMock{
 			GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
 				return &models.Book{ID: bookID1}, nil
@@ -73,11 +73,12 @@ func TestReviewsEndpoints(t *testing.T) {
 			Convey("And the GetReview function is called once", func() {
 				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
 				So(mockDataStore.GetReviewCalls(), ShouldHaveLength, 1)
+				So(response.Body.String(), ShouldEqual, `{"id":"123"}`)
 			})
 		})
 	})
 
-	Convey("Given a existing book with no reviews", t, func() {
+	Convey("Given an existing book with no reviews", t, func() {
 		mockDataStore := &mock.DataStoreMock{
 			GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
 				return &models.Book{ID: bookID1}, nil
@@ -106,6 +107,7 @@ func TestReviewsEndpoints(t *testing.T) {
 			Convey("And the GetReview function is called once", func() {
 				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
 				So(mockDataStore.GetReviewCalls(), ShouldHaveLength, 1)
+				So(response.Body.String(), ShouldEqual, "review not found\n")
 			})
 		})
 
@@ -157,32 +159,84 @@ func TestReviewsEndpoints(t *testing.T) {
 			Convey("And the GetReview function is not called", func() {
 				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
 				So(mockDataStore.GetReviewCalls(), ShouldHaveLength, 0)
+				So(response.Body.String(), ShouldEqual, "book not found\n")
 			})
 		})
 
-		Convey("When the database returns a generic error", func() {
-			Convey("When the book do the database returns an unexpected error", func() {
-				mockDataStore := &mock.DataStoreMock{
-					GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
-						return nil, errMongoDB
-					},
-				}
+		Convey("When the database returns an unexpected error", func() {
+			mockDataStore := &mock.DataStoreMock{
+				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
+					return nil, errMongoDB
+				},
+			}
 
-				ctx := context.Background()
+			ctx := context.Background()
 
-				api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
-				response := httptest.NewRecorder()
+			api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
+			response := httptest.NewRecorder()
 
-				request, err := http.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews/"+reviewID1, nil)
-				So(err, ShouldBeNil)
+			request, err := http.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews/"+reviewID1, nil)
+			So(err, ShouldBeNil)
 
-				api.router.ServeHTTP(response, request)
-				Convey("Then 500 InternalServerError status code is returned", func() {
-					So(response.Code, ShouldEqual, http.StatusInternalServerError)
-				})
+			api.router.ServeHTTP(response, request)
+			Convey("Then 500 InternalServerError status code is returned", func() {
+				So(response.Code, ShouldEqual, http.StatusInternalServerError)
+				So(response.Body.String(), ShouldEqual, "unexpected error in MongoDB\n")
 			})
 		})
 	})
+
+	Convey("Given an HTTP GET request to the /books/{id}/reviews/{review_id} endpoint", t, func() {
+
+		api := &API{
+			host:      host,
+			router:    mux.NewRouter(),
+			dataStore: &mock.DataStoreMock{},
+			hc:        &hcMock,
+		}
+
+		Convey("When the {review_id} is empty", func() {
+			request, err := http.NewRequest("GET", "/books/"+bookID1+"/reviews/"+emptyID, nil)
+			So(err, ShouldBeNil)
+
+			response := httptest.NewRecorder()
+
+			api.getReview(response, request)
+			Convey("Then the HTTP response code is 400", func() {
+				So(response.Code, ShouldEqual, http.StatusBadRequest)
+				So(response.Body.String(), ShouldEqual, "empty review ID in request\n")
+			})
+		})
+	})
+
+	Convey("Given an HTTP GET request to the /books/{id}/reviews/{review_id} endpoint", t, func() {
+
+		api := &API{
+			host:      host,
+			router:    mux.NewRouter(),
+			dataStore: &mock.DataStoreMock{},
+			hc:        &hcMock,
+		}
+
+		Convey("When the {id} is empty", func() {
+			request, err := http.NewRequest("GET", "/books/"+emptyID+"/reviews/"+reviewID1, nil)
+			So(err, ShouldBeNil)
+
+			response := httptest.NewRecorder()
+
+			api.getReview(response, request)
+			Convey("Then the HTTP response code is 400", func() {
+				So(response.Code, ShouldEqual, http.StatusBadRequest)
+				So(response.Body.String(), ShouldEqual, "empty review ID in request\n")
+			})
+		})
+	})
+
+}
+
+func TestReviewsEndpoint(t *testing.T) {
+	t.Parallel()
+	hcMock := mock.HealthCheckerMock{}
 
 	Convey("Given a book with one or more reviews", t, func() {
 		mockDataStore := &mock.DataStoreMock{
@@ -304,53 +358,4 @@ func TestReviewsEndpoints(t *testing.T) {
 			})
 		})
 	})
-}
-
-func TestReviews(t *testing.T) {
-	hcMock := mock.HealthCheckerMock{}
-
-	Convey("Given an HTTP GET request to the /books/{id}/reviews/{review_id} endpoint", t, func() {
-
-		api := &API{
-			host:      host,
-			router:    mux.NewRouter(),
-			dataStore: &mock.DataStoreMock{},
-			hc:        &hcMock,
-		}
-
-		Convey("When the {review_id} is empty", func() {
-			request, err := http.NewRequest("GET", "/books/"+bookID1+"/reviews/"+emptyID, nil)
-			So(err, ShouldBeNil)
-
-			response := httptest.NewRecorder()
-
-			api.getReview(response, request)
-			Convey("Then the HTTP response code is 400", func() {
-				So(response.Code, ShouldEqual, http.StatusBadRequest)
-			})
-		})
-	})
-
-	Convey("Given an HTTP GET request to the /books/{id}/reviews/{review_id} endpoint", t, func() {
-
-		api := &API{
-			host:      host,
-			router:    mux.NewRouter(),
-			dataStore: &mock.DataStoreMock{},
-			hc:        &hcMock,
-		}
-
-		Convey("When the {id} is empty", func() {
-			request, err := http.NewRequest("GET", "/books/"+emptyID+"/reviews/"+reviewID1, nil)
-			So(err, ShouldBeNil)
-
-			response := httptest.NewRecorder()
-
-			api.getReview(response, request)
-			Convey("Then the HTTP response code is 400", func() {
-				So(response.Code, ShouldEqual, http.StatusBadRequest)
-			})
-		})
-	})
-
 }
