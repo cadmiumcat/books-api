@@ -113,7 +113,7 @@ func TestReviewEndpoints(t *testing.T) {
 			})
 		})
 
-		Convey("When the database returns a generic error", func() {
+		Convey("When the database returns an unexpected error", func() {
 			mockDataStore := &mock.DataStoreMock{
 				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
 					return nil, errMongoDB
