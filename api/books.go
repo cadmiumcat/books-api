@@ -61,7 +61,7 @@ func checkin(b *models.Book, review int) error {
 func (api *API) createBook(writer http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
 
-	if request.Body == http.NoBody {
+	if request.ContentLength == 0 {
 		handleError(ctx, writer, apierrors.ErrEmptyRequestBody, nil)
 		return
 	}

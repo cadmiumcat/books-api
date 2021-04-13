@@ -63,8 +63,7 @@ func TestReviewEndpoints(t *testing.T) {
 		Convey("When I send an HTTP GET request to /books/1/reviews/123", func() {
 			response := httptest.NewRecorder()
 
-			request, err := http.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews/"+reviewID1, nil)
-			So(err, ShouldBeNil)
+			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews/"+reviewID1, nil)
 
 			api.router.ServeHTTP(response, request)
 			Convey("Then the HTTP response code is 200", func() {
@@ -97,8 +96,7 @@ func TestReviewEndpoints(t *testing.T) {
 		Convey("When I send an HTTP GET request to /books/1/reviews/123", func() {
 			response := httptest.NewRecorder()
 
-			request, err := http.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews/"+reviewID1, nil)
-			So(err, ShouldBeNil)
+			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews/"+reviewID1, nil)
 
 			api.router.ServeHTTP(response, request)
 			Convey("Then the HTTP response code is 404", func() {
@@ -114,8 +112,7 @@ func TestReviewEndpoints(t *testing.T) {
 		Convey("When I send a HTTP GET request to /books/1/reviews", func() {
 			response := httptest.NewRecorder()
 
-			request, err := http.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
-			So(err, ShouldBeNil)
+			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
 
 			api.router.ServeHTTP(response, request)
 			Convey("Then the HTTP response code is 200", func() {
@@ -149,8 +146,7 @@ func TestReviewEndpoints(t *testing.T) {
 			api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
 			response := httptest.NewRecorder()
 
-			request, err := http.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews/"+reviewID1, nil)
-			So(err, ShouldBeNil)
+			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews/"+reviewID1, nil)
 
 			api.router.ServeHTTP(response, request)
 			Convey("Then the HTTP response code is 404", func() {
@@ -175,8 +171,7 @@ func TestReviewEndpoints(t *testing.T) {
 			api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
 			response := httptest.NewRecorder()
 
-			request, err := http.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews/"+reviewID1, nil)
-			So(err, ShouldBeNil)
+			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews/"+reviewID1, nil)
 
 			api.router.ServeHTTP(response, request)
 			Convey("Then 500 InternalServerError status code is returned", func() {
@@ -195,8 +190,7 @@ func TestGetReviewHandler(t *testing.T) {
 		api := &API{}
 
 		Convey("When the {review_id} is empty", func() {
-			request, err := http.NewRequest("GET", "/books/"+bookID1+"/reviews/"+emptyID, nil)
-			So(err, ShouldBeNil)
+			request := httptest.NewRequest("GET", "/books/"+bookID1+"/reviews/"+emptyID, nil)
 
 			expectedUrlVars := map[string]string{
 				"id":       bookID1,
@@ -213,8 +207,7 @@ func TestGetReviewHandler(t *testing.T) {
 		})
 
 		Convey("When the {id} is empty", func() {
-			request, err := http.NewRequest("GET", "/books/"+emptyID+"/reviews/"+reviewID1, nil)
-			So(err, ShouldBeNil)
+			request := httptest.NewRequest("GET", "/books/"+emptyID+"/reviews/"+reviewID1, nil)
 
 			expectedUrlVars := map[string]string{
 				"id":       emptyID,
@@ -257,8 +250,7 @@ func TestReviewsEndpoint(t *testing.T) {
 		Convey("When I send an HTTP GET request to /books/1/reviews", func() {
 			response := httptest.NewRecorder()
 
-			request, err := http.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
-			So(err, ShouldBeNil)
+			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
 
 			api.router.ServeHTTP(response, request)
 			Convey("Then the HTTP response code is 200", func() {
@@ -290,8 +282,7 @@ func TestReviewsEndpoint(t *testing.T) {
 			api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
 			response := httptest.NewRecorder()
 
-			request, err := http.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
-			So(err, ShouldBeNil)
+			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
 
 			api.router.ServeHTTP(response, request)
 			Convey("Then the HTTP response code is 404", func() {
@@ -318,8 +309,7 @@ func TestReviewsEndpoint(t *testing.T) {
 			api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
 			response := httptest.NewRecorder()
 
-			request, err := http.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
-			So(err, ShouldBeNil)
+			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
 
 			api.router.ServeHTTP(response, request)
 			Convey("Then the HTTP response code is 500", func() {
@@ -343,8 +333,7 @@ func TestReviewsEndpoint(t *testing.T) {
 			api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
 			response := httptest.NewRecorder()
 
-			request, err := http.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
-			So(err, ShouldBeNil)
+			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
 
 			api.router.ServeHTTP(response, request)
 			Convey("Then the HTTP response code is 500", func() {
