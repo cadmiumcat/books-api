@@ -190,16 +190,9 @@ func TestReviewEndpoints(t *testing.T) {
 
 func TestGetReviewHandler(t *testing.T) {
 	t.Parallel()
-	hcMock := mock.HealthCheckerMock{}
 
 	Convey("Given an HTTP GET request to the /books/{id}/reviews/{review_id} endpoint", t, func() {
-
-		api := &API{
-			host:      host,
-			router:    mux.NewRouter(),
-			dataStore: &mock.DataStoreMock{},
-			hc:        &hcMock,
-		}
+		api := &API{}
 
 		Convey("When the {review_id} is empty", func() {
 			request, err := http.NewRequest("GET", "/books/"+bookID1+"/reviews/"+emptyID, nil)
