@@ -16,10 +16,12 @@ import (
 )
 
 const (
-	bookID1   = "1"
-	reviewID1 = "123"
-	reviewID2 = "567"
-	emptyID   = ""
+	bookID1          = "1"
+	bookID2          = "2"
+	reviewID1        = "123"
+	reviewID2        = "567"
+	emptyID          = ""
+	bookIDNotInStore = "notInStore"
 )
 
 var bookReview1 = models.Review{

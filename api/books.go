@@ -7,56 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	uuid "github.com/satori/go.uuid"
 	"net/http"
-	"time"
 )
-
-const emptyJson = "{}"
-
-func checkout(b *models.Book, name string) error {
-	h := len(b.History)
-	if h != 0 {
-		lastCheckout := b.History[h-1]
-		if lastCheckout.In.IsZero() {
-			return apierrors.ErrBookCheckedOut
-		}
-	}
-
-	if len(name) == 0 {
-		return apierrors.ErrNameMissing
-	}
-
-	b.History = append(b.History, models.Checkout{
-		Who: name,
-		Out: time.Now(),
-	})
-
-	return nil
-}
-
-func checkin(b *models.Book, review int) error {
-	h := len(b.History)
-	if h == 0 {
-		return apierrors.ErrBookNotCheckedOut
-	}
-
-	if review < 1 || review > 5 {
-		return apierrors.ErrReviewMissing
-	}
-
-	lastCheckout := b.History[h-1]
-	if !lastCheckout.In.IsZero() {
-		return apierrors.ErrBookNotCheckedOut
-	}
-
-	b.History[h-1] = models.Checkout{
-		Who:    lastCheckout.Who,
-		Out:    lastCheckout.Out,
-		In:     time.Now(),
-		Review: review,
-	}
-
-	return nil
-}
 
 func (api *API) addBookHandler(writer http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
