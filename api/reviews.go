@@ -33,6 +33,11 @@ func (api *API) getReviews(writer http.ResponseWriter, request *http.Request) {
 
 	logData := log.Data{"book_id": bookID}
 
+	if bookID == "" {
+		handleError(ctx, writer, apierrors.ErrEmptyBookID, logData)
+		return
+	}
+
 	// Confirm that book exists. If bookID not found, then do not check for the reviews
 	_, err := api.dataStore.GetBook(ctx, bookID)
 	if err != nil {
@@ -63,6 +68,11 @@ func (api *API) getReview(writer http.ResponseWriter, request *http.Request) {
 	reviewID := mux.Vars(request)["reviewID"]
 
 	logData := log.Data{"book_id": bookID, "review_id": reviewID}
+
+	if bookID == "" {
+		handleError(ctx, writer, apierrors.ErrEmptyBookID, logData)
+		return
+	}
 
 	if reviewID == "" {
 		handleError(ctx, writer, apierrors.ErrEmptyReviewID, logData)

@@ -32,8 +32,7 @@ func TestBooksEndpoints(t *testing.T) {
 			response := httptest.NewRecorder()
 
 			body := strings.NewReader(``)
-			request, err := http.NewRequest(http.MethodPost, "/books", body)
-			So(err, ShouldBeNil)
+			request := httptest.NewRequest(http.MethodPost, "/books", body)
 
 			api.router.ServeHTTP(response, request)
 			Convey("Then the HTTP response code is 400", func() {
@@ -49,8 +48,7 @@ func TestBooksEndpoints(t *testing.T) {
 			response := httptest.NewRecorder()
 
 			body := strings.NewReader(`{}`)
-			request, err := http.NewRequest(http.MethodPost, "/books", body)
-			So(err, ShouldBeNil)
+			request := httptest.NewRequest(http.MethodPost, "/books", body)
 
 			api.router.ServeHTTP(response, request)
 
@@ -69,8 +67,7 @@ func TestBooksEndpoints(t *testing.T) {
 			response := httptest.NewRecorder()
 
 			body := strings.NewReader(`{"title":"Girl, Woman, Other", "author":"Bernardine Evaristo" }`)
-			request, err := http.NewRequest(http.MethodPost, "/books", body)
-			So(err, ShouldBeNil)
+			request := httptest.NewRequest(http.MethodPost, "/books", body)
 
 			api.router.ServeHTTP(response, request)
 
@@ -97,8 +94,7 @@ func TestBooksEndpoints(t *testing.T) {
 		Convey("When I send an HTTP GET request to /books/1", func() {
 			response := httptest.NewRecorder()
 
-			request, err := http.NewRequest(http.MethodGet, "/books/"+id, nil)
-			So(err, ShouldBeNil)
+			request := httptest.NewRequest(http.MethodGet, "/books/"+id, nil)
 
 			api.router.ServeHTTP(response, request)
 
@@ -127,8 +123,7 @@ func TestBooksEndpoints(t *testing.T) {
 		Convey("When I send an HTTP GET request to /books/3", func() {
 			response := httptest.NewRecorder()
 
-			request, err := http.NewRequest(http.MethodGet, "/books/"+id, nil)
-			So(err, ShouldBeNil)
+			request := httptest.NewRequest(http.MethodGet, "/books/"+id, nil)
 
 			api.router.ServeHTTP(response, request)
 			Convey("then the HTTP response code is 404", func() {
@@ -153,8 +148,7 @@ func TestBooksEndpoints(t *testing.T) {
 		Convey("When I send an HTTP GET request to /books", func() {
 			response := httptest.NewRecorder()
 
-			request, err := http.NewRequest(http.MethodGet, "/books", nil)
-			So(err, ShouldBeNil)
+			request := httptest.NewRequest(http.MethodGet, "/books", nil)
 
 			api.router.ServeHTTP(response, request)
 
@@ -181,8 +175,7 @@ func TestBooks(t *testing.T) {
 		}
 
 		Convey("When the {id} is empty", func() {
-			request, err := http.NewRequest("GET", "/books/"+emptyID, nil)
-			So(err, ShouldBeNil)
+			request := httptest.NewRequest("GET", "/books/"+emptyID, nil)
 
 			response := httptest.NewRecorder()
 
