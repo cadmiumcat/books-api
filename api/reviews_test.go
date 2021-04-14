@@ -60,7 +60,7 @@ func TestGetReviewHandler(t *testing.T) {
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
 
-			api.getReview(response, request)
+			api.getReviewHandler(response, request)
 			Convey("Then the HTTP response code is 400", func() {
 				So(response.Code, ShouldEqual, http.StatusBadRequest)
 				So(response.Body.String(), ShouldEqual, "empty review ID in request\n")
@@ -78,7 +78,7 @@ func TestGetReviewHandler(t *testing.T) {
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
 
-			api.getReview(response, request)
+			api.getReviewHandler(response, request)
 			Convey("Then the HTTP response code is 400", func() {
 				So(response.Code, ShouldEqual, http.StatusBadRequest)
 				So(response.Body.String(), ShouldEqual, "empty book ID in request\n")
@@ -110,7 +110,7 @@ func TestGetReviewHandler(t *testing.T) {
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
 
-			api.getReview(response, request)
+			api.getReviewHandler(response, request)
 			Convey("Then the HTTP response code is 200", func() {
 				So(response.Code, ShouldEqual, http.StatusOK)
 			})
@@ -146,7 +146,7 @@ func TestGetReviewHandler(t *testing.T) {
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
 
-			api.getReview(response, request)
+			api.getReviewHandler(response, request)
 			Convey("Then the HTTP response code is 404", func() {
 				So(response.Code, ShouldEqual, http.StatusNotFound)
 			})
@@ -179,7 +179,7 @@ func TestGetReviewHandler(t *testing.T) {
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
 
-			api.getReview(response, request)
+			api.getReviewHandler(response, request)
 			Convey("Then the HTTP response code is 404", func() {
 				So(response.Code, ShouldEqual, http.StatusNotFound)
 			})
@@ -212,7 +212,7 @@ func TestGetReviewHandler(t *testing.T) {
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
 
-			api.getReview(response, request)
+			api.getReviewHandler(response, request)
 			Convey("Then 500 InternalServerError status code is returned", func() {
 				So(response.Code, ShouldEqual, http.StatusInternalServerError)
 				So(response.Body.String(), ShouldEqual, "unexpected error in MongoDB\n")
@@ -242,7 +242,7 @@ func TestGetReviewHandler(t *testing.T) {
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
 
-			api.getReview(response, request)
+			api.getReviewHandler(response, request)
 			Convey("Then 500 InternalServerError status code is returned", func() {
 				So(response.Code, ShouldEqual, http.StatusInternalServerError)
 				So(response.Body.String(), ShouldEqual, "unexpected error in MongoDB\n")
@@ -267,7 +267,7 @@ func TestReviewsHandler(t *testing.T) {
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
 
-			api.getReviews(response, request)
+			api.getReviewsHandler(response, request)
 			Convey("Then the HTTP response code is 400", func() {
 				So(response.Code, ShouldEqual, http.StatusBadRequest)
 				So(response.Body.String(), ShouldEqual, "empty book ID in request\n")
@@ -304,7 +304,7 @@ func TestReviewsHandler(t *testing.T) {
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
 
-			api.getReviews(response, request)
+			api.getReviewsHandler(response, request)
 			Convey("Then the HTTP response code is 200", func() {
 				So(response.Code, ShouldEqual, http.StatusOK)
 			})
@@ -344,7 +344,7 @@ func TestReviewsHandler(t *testing.T) {
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
 
-			api.getReviews(response, request)
+			api.getReviewsHandler(response, request)
 			Convey("Then the HTTP response code is 200", func() {
 				So(response.Code, ShouldEqual, http.StatusOK)
 			})
@@ -384,7 +384,7 @@ func TestReviewsHandler(t *testing.T) {
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
 
-			api.getReviews(response, request)
+			api.getReviewsHandler(response, request)
 			Convey("Then the HTTP response code is 404", func() {
 				So(response.Code, ShouldEqual, http.StatusNotFound)
 			})
@@ -418,7 +418,7 @@ func TestReviewsHandler(t *testing.T) {
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
 
-			api.getReviews(response, request)
+			api.getReviewsHandler(response, request)
 			Convey("Then the HTTP response code is 500", func() {
 				So(response.Code, ShouldEqual, http.StatusInternalServerError)
 			})
@@ -447,7 +447,7 @@ func TestReviewsHandler(t *testing.T) {
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
 
-			api.getReviews(response, request)
+			api.getReviewsHandler(response, request)
 			Convey("Then the HTTP response code is 500", func() {
 				So(response.Code, ShouldEqual, http.StatusInternalServerError)
 			})

@@ -14,6 +14,10 @@ import (
 )
 
 const host = "localhost:8080"
+//
+//func TestGet()  {
+//
+//}
 
 func TestBooksEndpoints(t *testing.T) {
 	t.Parallel()
@@ -179,7 +183,7 @@ func TestBooks(t *testing.T) {
 
 			response := httptest.NewRecorder()
 
-			api.getBook(response, request)
+			api.getBookHandler(response, request)
 			Convey("Then the HTTP response code is 400", func() {
 				So(response.Code, ShouldEqual, http.StatusBadRequest)
 			})

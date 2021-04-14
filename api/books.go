@@ -58,7 +58,7 @@ func checkin(b *models.Book, review int) error {
 	return nil
 }
 
-func (api *API) createBook(writer http.ResponseWriter, request *http.Request) {
+func (api *API) addBookHandler(writer http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
 
 	if request.ContentLength == 0 {
@@ -89,7 +89,7 @@ func (api *API) createBook(writer http.ResponseWriter, request *http.Request) {
 	}
 }
 
-func (api *API) listBooks(writer http.ResponseWriter, request *http.Request) {
+func (api *API) getBooksHandler(writer http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
 
 	books, err := api.dataStore.GetBooks(ctx)
@@ -106,7 +106,7 @@ func (api *API) listBooks(writer http.ResponseWriter, request *http.Request) {
 	log.Event(ctx, "successfully retrieved list of books", log.INFO)
 }
 
-func (api *API) getBook(writer http.ResponseWriter, request *http.Request) {
+func (api *API) getBookHandler(writer http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
 
 	id := mux.Vars(request)["id"]

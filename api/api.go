@@ -29,12 +29,12 @@ func Setup(ctx context.Context, host string, router *mux.Router, dataStore inter
 	}
 
 	// Endpoints
-	api.router.HandleFunc("/books", api.createBook).Methods("POST")
-	api.router.HandleFunc("/books", api.listBooks).Methods("GET")
-	api.router.HandleFunc("/books/{id}", api.getBook).Methods("GET")
+	api.router.HandleFunc("/books", api.addBookHandler).Methods("POST")
+	api.router.HandleFunc("/books", api.getBooksHandler).Methods("GET")
+	api.router.HandleFunc("/books/{id}", api.getBookHandler).Methods("GET")
 
-	api.router.HandleFunc("/books/{id}/reviews/{reviewID}", api.getReview).Methods("GET")
-	api.router.HandleFunc("/books/{id}/reviews", api.getReviews).Methods("GET")
+	api.router.HandleFunc("/books/{id}/reviews/{reviewID}", api.getReviewHandler).Methods("GET")
+	api.router.HandleFunc("/books/{id}/reviews", api.getReviewsHandler).Methods("GET")
 
 	api.router.HandleFunc("/health", api.hc.Handler).Methods("GET")
 
