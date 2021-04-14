@@ -267,7 +267,7 @@ func TestReviewsHandler(t *testing.T) {
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
 
-			api.getReview(response, request)
+			api.getReviews(response, request)
 			Convey("Then the HTTP response code is 400", func() {
 				So(response.Code, ShouldEqual, http.StatusBadRequest)
 				So(response.Body.String(), ShouldEqual, "empty book ID in request\n")
