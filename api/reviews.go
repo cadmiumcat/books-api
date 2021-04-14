@@ -18,6 +18,11 @@ func (api *API) addReviewHandler(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 
+	if request.ContentLength == 0 {
+		handleError(ctx, writer, apierrors.ErrEmptyRequestBody, logData)
+		return
+	}
+
 	// Confirm that book exists. If bookID not found, then a review cannot be added!
 	_, err := api.dataStore.GetBook(ctx, bookID)
 	if err != nil {

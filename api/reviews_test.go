@@ -252,7 +252,7 @@ func TestGetReviewHandler(t *testing.T) {
 	})
 }
 
-func TestReviewsHandler(t *testing.T) {
+func TestGetReviewsHandler(t *testing.T) {
 	t.Parallel()
 
 	Convey("Given an HTTP GET request to the /books/{id}/reviews endpoint", t, func() {
@@ -263,7 +263,6 @@ func TestReviewsHandler(t *testing.T) {
 
 			expectedUrlVars := map[string]string{
 				"id":       emptyID,
-				"reviewID": reviewID1,
 			}
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
@@ -458,5 +457,45 @@ func TestReviewsHandler(t *testing.T) {
 			})
 		})
 	})
+}
+
+func TestAddReviewHandler(t *testing.T) {
+	Convey("Given an HTTP POST request to the /books/{id}/reviews endpoint", t, func() {
+
+		Convey("When the {id} is empty", func() {
+			api := &API{}
+			request := httptest.NewRequest("GET", "/books/"+emptyID+"/reviews", nil)
+
+			expectedUrlVars := map[string]string{
+				"id":       emptyID,
+			}
+			request = mux.SetURLVars(request, expectedUrlVars)
+			response := httptest.NewRecorder()
+
+			api.addReviewHandler(response, request)
+			Convey("Then the HTTP response code is 400", func() {
+				So(response.Code, ShouldEqual, http.StatusBadRequest)
+				So(response.Body.String(), ShouldEqual, "empty book ID in request\n")
+			})
+		})
+
+		Convey("When there is no request body", func() {
+			api := &API{}
+			request := httptest.NewRequest("GET", "/books/"+bookID1+"/reviews", nil)
+
+			expectedUrlVars := map[string]string{
+				"id":  bookID1,
+			}
+			request = mux.SetURLVars(request, expectedUrlVars)
+			response := httptest.NewRecorder()
+
+			api.addReviewHandler(response, request)
+			Convey("Then the HTTP response code is 400", func() {
+				So(response.Code, ShouldEqual, http.StatusBadRequest)
+				So(response.Body.String(), ShouldEqual, "empty request body\n")
+			})
+		})
+	})
+
 }
 
