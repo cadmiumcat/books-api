@@ -161,6 +161,7 @@ func TestGetBooksHandler(t *testing.T) {
 			})
 		})
 	})
+
 	Convey("Given a datastore with 2 books", t, func() {
 		mockDataStore := &mock.DataStoreMock{
 			GetBooksFunc: func(ctx context.Context) (models.Books, error) {
@@ -191,6 +192,27 @@ func TestGetBooksHandler(t *testing.T) {
 					So(books.Count, ShouldEqual, 2)
 					So(books.Items, ShouldHaveLength, 2)
 				})
+			})
+		})
+	})
+
+	Convey("Given a GET request for a list of books", t, func() {
+		Convey("When GetBooks returns an unexpected database error", func() {
+			mockDataStore := &mock.DataStoreMock{
+				GetBooksFunc: func(ctx context.Context) (models.Books, error) {
+					return models.Books{}, errMongoDB
+				},
+			}
+			api := &API{dataStore: mockDataStore}
+
+			request := httptest.NewRequest(http.MethodGet, "/books", nil)
+			response := httptest.NewRecorder()
+
+			api.getBooksHandler(response, request)
+
+			Convey("Then 500 InternalServerError status code is returned", func() {
+				So(response.Code, ShouldEqual, http.StatusInternalServerError)
+				So(response.Body.String(), ShouldEqual, "unexpected error in MongoDB\n")
 			})
 		})
 	})

@@ -46,6 +46,7 @@ func (api *API) getBooksHandler(writer http.ResponseWriter, request *http.Reques
 	books, err := api.dataStore.GetBooks(ctx)
 	if err != nil {
 		handleError(ctx, writer, err, nil)
+		return
 	}
 
 	books.Count = len(books.Items)
