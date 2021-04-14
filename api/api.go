@@ -93,7 +93,8 @@ func handleError(ctx context.Context, w http.ResponseWriter, err error, data log
 		case apierrors.ErrRequiredFieldMissing,
 			apierrors.ErrEmptyRequestBody,
 			apierrors.ErrEmptyBookID,
-			apierrors.ErrEmptyReviewID:
+			apierrors.ErrEmptyReviewID,
+			apierrors.ErrInvalidReview:
 			status = http.StatusBadRequest
 		default:
 			status = http.StatusInternalServerError

@@ -12,6 +12,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
@@ -262,7 +263,7 @@ func TestGetReviewsHandler(t *testing.T) {
 			request := httptest.NewRequest("GET", "/books/"+emptyID+"/reviews", nil)
 
 			expectedUrlVars := map[string]string{
-				"id":       emptyID,
+				"id": emptyID,
 			}
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
@@ -464,10 +465,10 @@ func TestAddReviewHandler(t *testing.T) {
 
 		Convey("When the {id} is empty", func() {
 			api := &API{}
-			request := httptest.NewRequest("GET", "/books/"+emptyID+"/reviews", nil)
+			request := httptest.NewRequest("POST", "/books/"+emptyID+"/reviews", nil)
 
 			expectedUrlVars := map[string]string{
-				"id":       emptyID,
+				"id": emptyID,
 			}
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
@@ -481,10 +482,10 @@ func TestAddReviewHandler(t *testing.T) {
 
 		Convey("When there is no request body", func() {
 			api := &API{}
-			request := httptest.NewRequest("GET", "/books/"+bookID1+"/reviews", nil)
+			request := httptest.NewRequest("POST", "/books/"+bookID1+"/reviews", nil)
 
 			expectedUrlVars := map[string]string{
-				"id":  bookID1,
+				"id": bookID1,
 			}
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
@@ -495,7 +496,50 @@ func TestAddReviewHandler(t *testing.T) {
 				So(response.Body.String(), ShouldEqual, "empty request body\n")
 			})
 		})
+
+		Convey("When the book does not exits in the datastore", func() {
+			mockDataStore := mock.DataStoreMock{GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
+				return &models.Book{}, apierrors.ErrBookNotFound
+			}}
+
+			api := &API{dataStore: &mockDataStore}
+			body := strings.NewReader(`{"message": "my review"}`)
+			request := httptest.NewRequest("POST", "/books/"+bookID1+"/reviews", body)
+
+			expectedUrlVars := map[string]string{
+				"id": bookID1,
+			}
+			request = mux.SetURLVars(request, expectedUrlVars)
+			response := httptest.NewRecorder()
+
+			api.addReviewHandler(response, request)
+			Convey("Then the HTTP response is 404", func() {
+				So(response.Code, ShouldEqual, http.StatusNotFound)
+				So(response.Body.String(), ShouldEqual, "book not found\n")
+			})
+		})
+
+		Convey("When the request body is invalid", func() {
+			mockDataStore := mock.DataStoreMock{GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
+				return &models.Book{}, nil
+			}}
+
+			api := &API{dataStore: &mockDataStore}
+			body := strings.NewReader("invalidReviewText")
+			request := httptest.NewRequest("POST", "/books/"+bookID1+"/reviews", body)
+
+			expectedUrlVars := map[string]string{
+				"id": bookID1,
+			}
+			request = mux.SetURLVars(request, expectedUrlVars)
+			response := httptest.NewRecorder()
+
+			api.addReviewHandler(response, request)
+			Convey("Then the HTTP response code is 400", func() {
+				So(response.Code, ShouldEqual, http.StatusBadRequest)
+				So(response.Body.String(), ShouldEqual, "invalid review. Missing required field\n")
+			})
+		})
 	})
 
 }
-

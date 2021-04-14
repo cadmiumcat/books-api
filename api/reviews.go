@@ -3,11 +3,12 @@ package api
 import (
 	"github.com/ONSdigital/log.go/log"
 	"github.com/cadmiumcat/books-api/apierrors"
+	"github.com/cadmiumcat/books-api/models"
 	"github.com/gorilla/mux"
 	"net/http"
 )
 
-func (api *API) addReviewHandler(writer http.ResponseWriter, request *http.Request)  {
+func (api *API) addReviewHandler(writer http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
 	bookID := mux.Vars(request)["id"]
 
@@ -27,6 +28,12 @@ func (api *API) addReviewHandler(writer http.ResponseWriter, request *http.Reque
 	_, err := api.dataStore.GetBook(ctx, bookID)
 	if err != nil {
 		handleError(ctx, writer, err, logData)
+		return
+	}
+
+	review := &models.Review{}
+	if err := ReadJSONBody(ctx, request.Body, review); err != nil {
+		handleError(ctx, writer, apierrors.ErrInvalidReview, logData)
 		return
 	}
 
