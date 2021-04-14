@@ -2,56 +2,260 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/cadmiumcat/books-api/apierrors"
 	"github.com/cadmiumcat/books-api/interfaces/mock"
 	"github.com/cadmiumcat/books-api/models"
 	"github.com/gorilla/mux"
 	. "github.com/smartystreets/goconvey/convey"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 )
 
-const host = "localhost:8080"
+var book1 = models.Book{
+	ID:     bookID1,
+	Title:  "Girl, Woman, Other",
+	Author: "Bernardine Evaristo",
+}
 
-func TestBooksEndpoints(t *testing.T) {
+var book2 = models.Book{
+	ID:     bookID2,
+	Title:  "Girl, Woman, Other",
+	Author: "Bernardine Evaristo",
+}
+
+func TestGetBookHandler(t *testing.T) {
 	t.Parallel()
-	hcMock := mock.HealthCheckerMock{}
+
+	Convey("Given an HTTP GET request to the /books/{id} endpoint", t, func() {
+
+		api := &API{}
+
+		Convey("When the {id} is empty", func() {
+			request := httptest.NewRequest("GET", "/books/"+emptyID, nil)
+
+			response := httptest.NewRecorder()
+
+			api.getBookHandler(response, request)
+			Convey("Then the HTTP response code is 400", func() {
+				So(response.Code, ShouldEqual, http.StatusBadRequest)
+			})
+		})
+	})
+
+	Convey("Given an existing book with book id=1", t, func() {
+		mockDataStore := &mock.DataStoreMock{
+			GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
+				return &models.Book{ID: bookID1}, nil
+			},
+		}
+		api := &API{dataStore: mockDataStore}
+		Convey("When I send an HTTP GET request to /books/1", func() {
+			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1, nil)
+			expectedUrlVars := map[string]string{
+				"id": bookID1,
+			}
+			request = mux.SetURLVars(request, expectedUrlVars)
+			response := httptest.NewRecorder()
+
+			api.getBookHandler(response, request)
+			Convey("Then the HTTP response code is 200", func() {
+				So(response.Code, ShouldEqual, http.StatusOK)
+			})
+			Convey("And the GetBook function is called once", func() {
+				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
+			})
+		})
+
+	})
+
+	Convey("Given a book that does not exist", t, func() {
+		mockDataStore := &mock.DataStoreMock{
+			GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
+				return nil, apierrors.ErrBookNotFound
+			},
+		}
+		api := &API{dataStore: mockDataStore}
+
+		Convey("When I send an HTTP GET request to /books/3", func() {
+
+			request := httptest.NewRequest(http.MethodGet, "/books/"+bookIDNotInStore, nil)
+			expectedUrlVars := map[string]string{
+				"id": bookIDNotInStore,
+			}
+			request = mux.SetURLVars(request, expectedUrlVars)
+			response := httptest.NewRecorder()
+
+			api.getBookHandler(response, request)
+
+			Convey("then the HTTP response code is 404", func() {
+				So(response.Code, ShouldEqual, http.StatusNotFound)
+			})
+			Convey("And the GetBook function is called once", func() {
+				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
+			})
+		})
+	})
+
+	Convey("Given a GET request for a book", t, func() {
+		Convey("When GetBook returns an unexpected database error", func() {
+			mockDataStore := &mock.DataStoreMock{
+				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
+					return nil, errMongoDB
+				},
+			}
+			api := &API{dataStore: mockDataStore}
+
+			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1, nil)
+			expectedUrlVars := map[string]string{
+				"id": bookID1,
+			}
+			request = mux.SetURLVars(request, expectedUrlVars)
+			response := httptest.NewRecorder()
+
+			api.getBookHandler(response, request)
+
+			Convey("Then 500 InternalServerError status code is returned", func() {
+				So(response.Code, ShouldEqual, http.StatusInternalServerError)
+				So(response.Body.String(), ShouldEqual, "unexpected error in MongoDB\n")
+			})
+		})
+	})
+
+}
+
+func TestGetBooksHandler(t *testing.T) {
+	t.Parallel()
+	Convey("Given a datastore with no books", t, func() {
+
+		mockDataStore := &mock.DataStoreMock{
+			GetBooksFunc: func(ctx context.Context) (models.Books, error) {
+				return models.Books{}, nil
+			},
+		}
+
+		api := &API{dataStore: mockDataStore}
+
+		Convey("When I send an HTTP GET request to /books", func() {
+
+			request := httptest.NewRequest(http.MethodGet, "/books", nil)
+			response := httptest.NewRecorder()
+
+			api.getBooksHandler(response, request)
+			Convey("then the HTTP response code is 200", func() {
+				So(response.Code, ShouldEqual, http.StatusOK)
+			})
+			Convey("And the GetBooks function is called once", func() {
+				So(mockDataStore.GetBooksCalls(), ShouldHaveLength, 1)
+				Convey("And the response contains a count of zero and no book items", func() {
+					payload, err := ioutil.ReadAll(response.Body)
+					So(err, ShouldBeNil)
+					books := models.Books{}
+					err = json.Unmarshal(payload, &books)
+					So(books.Count, ShouldEqual, 0)
+					So(books.Items, ShouldBeNil)
+				})
+			})
+		})
+	})
+
+	Convey("Given a datastore with 2 books", t, func() {
+		mockDataStore := &mock.DataStoreMock{
+			GetBooksFunc: func(ctx context.Context) (models.Books, error) {
+				return models.Books{
+					Count: 2,
+					Items: []models.Book{book1, book2},
+				}, nil
+			},
+		}
+
+		api := &API{dataStore: mockDataStore}
+
+		Convey("When I send an HTTP GET request to /books", func() {
+			request := httptest.NewRequest(http.MethodGet, "/books", nil)
+			response := httptest.NewRecorder()
+
+			api.getBooksHandler(response, request)
+			Convey("then the HTTP response code is 200", func() {
+				So(response.Code, ShouldEqual, http.StatusOK)
+			})
+			Convey("And the GetBooks function is called once", func() {
+				So(mockDataStore.GetBooksCalls(), ShouldHaveLength, 1)
+				Convey("And the response contains a count of zero and no book items", func() {
+					payload, err := ioutil.ReadAll(response.Body)
+					So(err, ShouldBeNil)
+					books := models.Books{}
+					err = json.Unmarshal(payload, &books)
+					So(books.Count, ShouldEqual, 2)
+					So(books.Items, ShouldHaveLength, 2)
+				})
+			})
+		})
+	})
+
+	Convey("Given a GET request for a list of books", t, func() {
+		Convey("When GetBooks returns an unexpected database error", func() {
+			mockDataStore := &mock.DataStoreMock{
+				GetBooksFunc: func(ctx context.Context) (models.Books, error) {
+					return models.Books{}, errMongoDB
+				},
+			}
+			api := &API{dataStore: mockDataStore}
+
+			request := httptest.NewRequest(http.MethodGet, "/books", nil)
+			response := httptest.NewRecorder()
+
+			api.getBooksHandler(response, request)
+
+			Convey("Then 500 InternalServerError status code is returned", func() {
+				So(response.Code, ShouldEqual, http.StatusInternalServerError)
+				So(response.Body.String(), ShouldEqual, "unexpected error in MongoDB\n")
+			})
+		})
+	})
+
+}
+
+func TestAddBookHandler(t *testing.T) {
+	t.Parallel()
 
 	Convey("Given a POST request to add a book", t, func() {
 		mockDataStore := &mock.DataStoreMock{
 			AddBookFunc: func(book *models.Book) {},
 		}
 
-		ctx := context.Background()
-
-		api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
-
 		Convey("When there is no request body", func() {
-			response := httptest.NewRecorder()
+			api := &API{}
 
 			body := strings.NewReader(``)
 			request := httptest.NewRequest(http.MethodPost, "/books", body)
 
-			api.router.ServeHTTP(response, request)
+			response := httptest.NewRecorder()
+
+			api.addBookHandler(response, request)
 			Convey("Then the HTTP response code is 400", func() {
 				So(response.Code, ShouldEqual, http.StatusBadRequest)
 			})
-
+			Convey("And there AddBook function is not called", func() {
+				So(mockDataStore.AddBookCalls(), ShouldHaveLength, 0)
+			})
 			Convey("And the response says the request body is missing", func() {
 				So(response.Body.String(), ShouldContainSubstring, apierrors.ErrEmptyRequestBody.Error())
 			})
 		})
 
 		Convey("When the body is empty", func() {
-			response := httptest.NewRecorder()
+			api := &API{}
 
 			body := strings.NewReader(`{}`)
 			request := httptest.NewRequest(http.MethodPost, "/books", body)
 
-			api.router.ServeHTTP(response, request)
+			response := httptest.NewRecorder()
 
+			api.addBookHandler(response, request)
 			Convey("Then the HTTP response code is 400", func() {
 				So(response.Code, ShouldEqual, http.StatusBadRequest)
 			})
@@ -64,13 +268,14 @@ func TestBooksEndpoints(t *testing.T) {
 		})
 
 		Convey("When the body contains a valid book", func() {
-			response := httptest.NewRecorder()
+			api := &API{dataStore: mockDataStore}
 
 			body := strings.NewReader(`{"title":"Girl, Woman, Other", "author":"Bernardine Evaristo" }`)
 			request := httptest.NewRequest(http.MethodPost, "/books", body)
 
-			api.router.ServeHTTP(response, request)
+			response := httptest.NewRecorder()
 
+			api.addBookHandler(response, request)
 			Convey("Then the HTTP response code is 201", func() {
 				So(response.Code, ShouldEqual, http.StatusCreated)
 			})
@@ -79,111 +284,4 @@ func TestBooksEndpoints(t *testing.T) {
 			})
 		})
 	})
-
-	Convey("Given an existing book with book id=1", t, func() {
-		id := "1"
-		ctx := context.Background()
-
-		mockDataStore := &mock.DataStoreMock{
-			GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
-				return &models.Book{ID: "1"}, nil
-			},
-		}
-
-		api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
-		Convey("When I send an HTTP GET request to /books/1", func() {
-			response := httptest.NewRecorder()
-
-			request := httptest.NewRequest(http.MethodGet, "/books/"+id, nil)
-
-			api.router.ServeHTTP(response, request)
-
-			Convey("Then the HTTP response code is 200", func() {
-				So(response.Code, ShouldEqual, http.StatusOK)
-			})
-			Convey("And the GetBook function is called once", func() {
-				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
-			})
-		})
-
-	})
-
-	Convey("Given a book that does not exist with book id=3", t, func() {
-		ctx := context.Background()
-
-		mockDataStore := &mock.DataStoreMock{
-			GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
-				return nil, apierrors.ErrBookNotFound
-			},
-		}
-
-		api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
-
-		id := "3"
-		Convey("When I send an HTTP GET request to /books/3", func() {
-			response := httptest.NewRecorder()
-
-			request := httptest.NewRequest(http.MethodGet, "/books/"+id, nil)
-
-			api.router.ServeHTTP(response, request)
-			Convey("then the HTTP response code is 404", func() {
-				So(response.Code, ShouldEqual, http.StatusNotFound)
-			})
-			Convey("And the GetBook function is called once", func() {
-				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
-			})
-		})
-	})
-
-	Convey("Given ", t, func() {
-		ctx := context.Background()
-
-		mockDataStore := &mock.DataStoreMock{
-			GetBooksFunc: func(ctx context.Context) (models.Books, error) {
-				return models.Books{}, nil
-			},
-		}
-
-		api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
-		Convey("When I send an HTTP GET request to /books", func() {
-			response := httptest.NewRecorder()
-
-			request := httptest.NewRequest(http.MethodGet, "/books", nil)
-
-			api.router.ServeHTTP(response, request)
-
-			Convey("then the HTTP response code is 200", func() {
-				So(response.Code, ShouldEqual, http.StatusOK)
-			})
-			Convey("And the GetBooks function is called once", func() {
-				So(mockDataStore.GetBooksCalls(), ShouldHaveLength, 1)
-			})
-		})
-	})
-}
-
-func TestBooks(t *testing.T) {
-	hcMock := mock.HealthCheckerMock{}
-
-	Convey("Given an HTTP GET request to the /books/{id} endpoint", t, func() {
-
-		api := &API{
-			host:      host,
-			router:    mux.NewRouter(),
-			dataStore: &mock.DataStoreMock{},
-			hc:        &hcMock,
-		}
-
-		Convey("When the {id} is empty", func() {
-			request := httptest.NewRequest("GET", "/books/"+emptyID, nil)
-
-			response := httptest.NewRecorder()
-
-			api.getBook(response, request)
-			Convey("Then the HTTP response code is 400", func() {
-				So(response.Code, ShouldEqual, http.StatusBadRequest)
-			})
-		})
-	})
-
 }

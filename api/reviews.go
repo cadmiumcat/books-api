@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func (api *API) addReview(writer http.ResponseWriter, request *http.Request)  {
+func (api *API) addReviewHandler(writer http.ResponseWriter, request *http.Request)  {
 	ctx := request.Context()
 	bookID := mux.Vars(request)["id"]
 
@@ -27,7 +27,7 @@ func (api *API) addReview(writer http.ResponseWriter, request *http.Request)  {
 
 }
 
-func (api *API) getReviews(writer http.ResponseWriter, request *http.Request) {
+func (api *API) getReviewsHandler(writer http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
 	bookID := mux.Vars(request)["id"]
 
@@ -61,7 +61,7 @@ func (api *API) getReviews(writer http.ResponseWriter, request *http.Request) {
 	log.Event(ctx, "successfully retrieved review", log.INFO, logData)
 }
 
-func (api *API) getReview(writer http.ResponseWriter, request *http.Request) {
+func (api *API) getReviewHandler(writer http.ResponseWriter, request *http.Request) {
 	ctx := request.Context()
 
 	bookID := mux.Vars(request)["id"]
