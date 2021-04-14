@@ -463,6 +463,34 @@ func TestGetReviewsHandler(t *testing.T) {
 func TestAddReviewHandler(t *testing.T) {
 	Convey("Given an HTTP POST request to the /books/{id}/reviews endpoint", t, func() {
 
+		Convey("When the book exists and the review is valid", func() {
+			mockDataStore := &mock.DataStoreMock{
+				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
+					return &book1, nil
+				},
+				AddReviewFunc: func(review *models.Review) {},
+			}
+
+			api := &API{dataStore: mockDataStore}
+			body := strings.NewReader(`{"message": "my review"}`)
+			request := httptest.NewRequest("POST", "/books/"+bookID1+"/reviews", body)
+
+			expectedUrlVars := map[string]string{
+				"id": bookID1,
+			}
+			request = mux.SetURLVars(request, expectedUrlVars)
+			response := httptest.NewRecorder()
+
+			api.addReviewHandler(response, request)
+			Convey("Then the HTTP response code is 201", func() {
+				So(response.Code, ShouldEqual, http.StatusCreated)
+			})
+			Convey("And the AddReview function is called", func() {
+				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
+				So(mockDataStore.AddReviewCalls(), ShouldHaveLength, 1)
+			})
+		})
+
 		Convey("When the {id} is empty", func() {
 			api := &API{}
 			request := httptest.NewRequest("POST", "/books/"+emptyID+"/reviews", nil)

@@ -5,6 +5,7 @@ import (
 	"github.com/cadmiumcat/books-api/apierrors"
 	"github.com/cadmiumcat/books-api/models"
 	"github.com/gorilla/mux"
+	uuid "github.com/satori/go.uuid"
 	"net/http"
 )
 
@@ -34,6 +35,15 @@ func (api *API) addReviewHandler(writer http.ResponseWriter, request *http.Reque
 	review := &models.Review{}
 	if err := ReadJSONBody(ctx, request.Body, review); err != nil {
 		handleError(ctx, writer, apierrors.ErrInvalidReview, logData)
+		return
+	}
+
+	review.ID = uuid.NewV4().String()
+
+	api.dataStore.AddReview(review)
+
+	if err := WriteJSONBody(review, writer, http.StatusCreated); err != nil {
+		handleError(ctx, writer, err, logData)
 		return
 	}
 

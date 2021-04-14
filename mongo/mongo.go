@@ -58,6 +58,11 @@ func (m *Mongo) AddBook(book *models.Book) {
 	return
 }
 
+// AddReview adds a Review to a Book
+func (m *Mongo) AddReview(review *models.Review) {
+	return
+}
+
 // GetBook returns a models.Book for a given ID.
 // It returns an error if the Book is not found
 func (m *Mongo) GetBook(ctx context.Context, ID string) (*models.Book, error) {

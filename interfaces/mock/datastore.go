@@ -24,6 +24,9 @@ var _ interfaces.DataStore = &DataStoreMock{}
 //             AddBookFunc: func(book *models.Book)  {
 // 	               panic("mock out the AddBook method")
 //             },
+//             AddReviewFunc: func(review *models.Review)  {
+// 	               panic("mock out the AddReview method")
+//             },
 //             CloseFunc: func(ctx context.Context) error {
 // 	               panic("mock out the Close method")
 //             },
@@ -52,6 +55,9 @@ type DataStoreMock struct {
 	// AddBookFunc mocks the AddBook method.
 	AddBookFunc func(book *models.Book)
 
+	// AddReviewFunc mocks the AddReview method.
+	AddReviewFunc func(review *models.Review)
+
 	// CloseFunc mocks the Close method.
 	CloseFunc func(ctx context.Context) error
 
@@ -76,6 +82,11 @@ type DataStoreMock struct {
 		AddBook []struct {
 			// Book is the book argument value.
 			Book *models.Book
+		}
+		// AddReview holds details about calls to the AddReview method.
+		AddReview []struct {
+			// Review is the review argument value.
+			Review *models.Review
 		}
 		// Close holds details about calls to the Close method.
 		Close []struct {
@@ -115,6 +126,7 @@ type DataStoreMock struct {
 		}
 	}
 	lockAddBook    sync.RWMutex
+	lockAddReview  sync.RWMutex
 	lockClose      sync.RWMutex
 	lockGetBook    sync.RWMutex
 	lockGetBooks   sync.RWMutex
@@ -151,6 +163,37 @@ func (mock *DataStoreMock) AddBookCalls() []struct {
 	mock.lockAddBook.RLock()
 	calls = mock.calls.AddBook
 	mock.lockAddBook.RUnlock()
+	return calls
+}
+
+// AddReview calls AddReviewFunc.
+func (mock *DataStoreMock) AddReview(review *models.Review) {
+	if mock.AddReviewFunc == nil {
+		panic("DataStoreMock.AddReviewFunc: method is nil but DataStore.AddReview was just called")
+	}
+	callInfo := struct {
+		Review *models.Review
+	}{
+		Review: review,
+	}
+	mock.lockAddReview.Lock()
+	mock.calls.AddReview = append(mock.calls.AddReview, callInfo)
+	mock.lockAddReview.Unlock()
+	mock.AddReviewFunc(review)
+}
+
+// AddReviewCalls gets all the calls that were made to AddReview.
+// Check the length with:
+//     len(mockedDataStore.AddReviewCalls())
+func (mock *DataStoreMock) AddReviewCalls() []struct {
+	Review *models.Review
+} {
+	var calls []struct {
+		Review *models.Review
+	}
+	mock.lockAddReview.RLock()
+	calls = mock.calls.AddReview
+	mock.lockAddReview.RUnlock()
 	return calls
 }
 
