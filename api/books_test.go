@@ -14,48 +14,54 @@ import (
 )
 
 const host = "localhost:8080"
-//
-//func TestGet()  {
-//
-//}
 
-func TestBooksEndpoints(t *testing.T) {
+func TestGetBookHandler(t *testing.T) {
 	t.Parallel()
-	hcMock := mock.HealthCheckerMock{}
+
+}
+
+func TestGetBooksHandler(t *testing.T) {
+	t.Parallel()
+
+}
+
+func TestAddBookHandler(t *testing.T) {
+	t.Parallel()
 
 	Convey("Given a POST request to add a book", t, func() {
 		mockDataStore := &mock.DataStoreMock{
 			AddBookFunc: func(book *models.Book) {},
 		}
 
-		ctx := context.Background()
-
-		api := Setup(ctx, host, mux.NewRouter(), mockDataStore, &hcMock)
-
 		Convey("When there is no request body", func() {
-			response := httptest.NewRecorder()
+			api := &API{}
 
 			body := strings.NewReader(``)
 			request := httptest.NewRequest(http.MethodPost, "/books", body)
 
-			api.router.ServeHTTP(response, request)
+			response := httptest.NewRecorder()
+
+			api.addBookHandler(response, request)
 			Convey("Then the HTTP response code is 400", func() {
 				So(response.Code, ShouldEqual, http.StatusBadRequest)
 			})
-
+			Convey("And there AddBook function is not called", func() {
+				So(mockDataStore.AddBookCalls(), ShouldHaveLength, 0)
+			})
 			Convey("And the response says the request body is missing", func() {
 				So(response.Body.String(), ShouldContainSubstring, apierrors.ErrEmptyRequestBody.Error())
 			})
 		})
 
 		Convey("When the body is empty", func() {
-			response := httptest.NewRecorder()
+			api := &API{}
 
 			body := strings.NewReader(`{}`)
 			request := httptest.NewRequest(http.MethodPost, "/books", body)
 
-			api.router.ServeHTTP(response, request)
+			response := httptest.NewRecorder()
 
+			api.addBookHandler(response, request)
 			Convey("Then the HTTP response code is 400", func() {
 				So(response.Code, ShouldEqual, http.StatusBadRequest)
 			})
@@ -68,13 +74,14 @@ func TestBooksEndpoints(t *testing.T) {
 		})
 
 		Convey("When the body contains a valid book", func() {
-			response := httptest.NewRecorder()
+			api := &API{dataStore: mockDataStore}
 
 			body := strings.NewReader(`{"title":"Girl, Woman, Other", "author":"Bernardine Evaristo" }`)
 			request := httptest.NewRequest(http.MethodPost, "/books", body)
 
-			api.router.ServeHTTP(response, request)
+			response := httptest.NewRecorder()
 
+			api.addBookHandler(response, request)
 			Convey("Then the HTTP response code is 201", func() {
 				So(response.Code, ShouldEqual, http.StatusCreated)
 			})
@@ -83,6 +90,11 @@ func TestBooksEndpoints(t *testing.T) {
 			})
 		})
 	})
+}
+
+func TestBooksEndpoints(t *testing.T) {
+	t.Parallel()
+	hcMock := mock.HealthCheckerMock{}
 
 	Convey("Given an existing book with book id=1", t, func() {
 		id := "1"

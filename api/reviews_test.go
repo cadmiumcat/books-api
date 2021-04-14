@@ -43,7 +43,6 @@ var emptyReviews = models.Reviews{
 
 var errMongoDB = errors.New("unexpected error in MongoDB")
 
-
 func TestGetReviewHandler(t *testing.T) {
 	t.Parallel()
 
