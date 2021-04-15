@@ -491,6 +491,31 @@ func TestAddReviewHandler(t *testing.T) {
 			})
 		})
 
+		Convey("When the book exist, but the review is not valid (empty message)", func() {
+			mockDataStore := &mock.DataStoreMock{
+				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
+					return &book1, nil
+				},
+				AddReviewFunc: func(review *models.Review) {},
+			}
+
+			api := &API{dataStore: mockDataStore}
+			body := strings.NewReader(`{"message": ""}`)
+			request := httptest.NewRequest("POST", "/books/"+bookID1+"/reviews", body)
+
+			expectedUrlVars := map[string]string{
+				"id": bookID1,
+			}
+			request = mux.SetURLVars(request, expectedUrlVars)
+			response := httptest.NewRecorder()
+
+			api.addReviewHandler(response, request)
+			Convey("Then the HTTP response is 400", func() {
+				So(response.Code, ShouldEqual, http.StatusBadRequest)
+				So(response.Body.String(), ShouldEqual, "empty review provided. Please enter a message\n")
+			})
+		})
+
 		Convey("When the {id} is empty", func() {
 			api := &API{}
 			request := httptest.NewRequest("POST", "/books/"+emptyID+"/reviews", nil)

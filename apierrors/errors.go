@@ -8,6 +8,8 @@ import (
 var (
 	ErrInvalidBook          = errors.New("invalid book. Missing required field")
 	ErrInvalidReview        = errors.New("invalid review. Missing required field")
+	ErrEmptyReviewMessage   = errors.New("empty review provided. Please enter a message")
+	ErrLongReviewMessage    = errors.New("review message is too long")
 	ErrEmptyRequestBody     = errors.New("empty request body")
 	ErrEmptyBookID          = errors.New("empty book ID in request")
 	ErrEmptyReviewID        = errors.New("empty review ID in request")

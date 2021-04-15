@@ -38,6 +38,14 @@ func (api *API) addReviewHandler(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 
+	logData["review"] = review
+
+	err = review.Validate()
+	if err != nil {
+		handleError(ctx, writer, err, logData)
+		return
+	}
+
 	review.ID = uuid.NewV4().String()
 
 	api.dataStore.AddReview(review)

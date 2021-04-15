@@ -58,11 +58,6 @@ func (m *Mongo) AddBook(book *models.Book) {
 	return
 }
 
-// AddReview adds a Review to a Book
-func (m *Mongo) AddReview(review *models.Review) {
-	return
-}
-
 // GetBook returns a models.Book for a given ID.
 // It returns an error if the Book is not found
 func (m *Mongo) GetBook(ctx context.Context, ID string) (*models.Book, error) {
@@ -108,6 +103,17 @@ func (m *Mongo) GetBooks(ctx context.Context) (models.Books, error) {
 	}
 
 	return *books, nil
+}
+
+// AddReview adds a Review to a Book
+func (m *Mongo) AddReview(review *models.Review) {
+	session := m.Session.Copy()
+	defer session.Close()
+
+	collection := session.DB(m.Database).C(m.ReviewsCollection)
+	collection.Insert(review)
+
+	return
 }
 
 // GetReview returns a models.Review for a given reviewID.
