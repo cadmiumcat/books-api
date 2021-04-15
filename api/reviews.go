@@ -32,7 +32,7 @@ func (api *API) addReviewHandler(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 
-	review := &models.Review{}
+	review := &models.Review{Links: &models.ReviewLink{}}
 	if err := ReadJSONBody(ctx, request.Body, review); err != nil {
 		handleError(ctx, writer, apierrors.ErrInvalidReview, logData)
 		return
@@ -47,6 +47,8 @@ func (api *API) addReviewHandler(writer http.ResponseWriter, request *http.Reque
 	}
 
 	review.ID = uuid.NewV4().String()
+	review.Links.Self = review.ID
+	review.Links.Book = bookID
 
 	api.dataStore.AddReview(review)
 
