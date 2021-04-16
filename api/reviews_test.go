@@ -17,12 +17,14 @@ import (
 )
 
 const (
-	bookID1          = "1"
-	bookID2          = "2"
-	reviewID1        = "123"
-	reviewID2        = "567"
-	emptyID          = ""
-	bookIDNotInStore = "notInStore"
+	bookID1              = "1"
+	bookID2              = "2"
+	reviewID1            = "123"
+	reviewID2            = "567"
+	emptyID              = ""
+	bookIDNotInStore     = "notInStore"
+	reviewInvalidMessage = `{"message": ""}`
+	reviewValid          = `{"message": "my review"}`
 )
 
 var bookReview1 = models.Review{
@@ -98,9 +100,7 @@ func TestGetReviewHandler(t *testing.T) {
 			},
 		}
 
-		api := &API{
-			dataStore: mockDataStore,
-		}
+		api := &API{dataStore: mockDataStore}
 
 		Convey("When I send an HTTP GET request to /books/1/reviews/123", func() {
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews/"+reviewID1, nil)
@@ -134,9 +134,7 @@ func TestGetReviewHandler(t *testing.T) {
 			},
 		}
 
-		api := &API{
-			dataStore: mockDataStore,
-		}
+		api := &API{dataStore: mockDataStore}
 
 		Convey("When I send an HTTP GET request to /books/1/reviews/123", func() {
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews/"+reviewID1, nil)
@@ -168,9 +166,7 @@ func TestGetReviewHandler(t *testing.T) {
 				},
 			}
 
-			api := &API{
-				dataStore: mockDataStore,
-			}
+			api := &API{dataStore: mockDataStore}
 
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews/"+reviewID1, nil)
 
@@ -201,9 +197,7 @@ func TestGetReviewHandler(t *testing.T) {
 				},
 			}
 
-			api := &API{
-				dataStore: mockDataStore,
-			}
+			api := &API{dataStore: mockDataStore}
 
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews/"+reviewID1, nil)
 
@@ -231,9 +225,7 @@ func TestGetReviewHandler(t *testing.T) {
 				},
 			}
 
-			api := &API{
-				dataStore: mockDataStore,
-			}
+			api := &API{dataStore: mockDataStore}
 
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews/"+reviewID1, nil)
 
@@ -262,9 +254,7 @@ func TestGetReviewsHandler(t *testing.T) {
 			api := &API{}
 			request := httptest.NewRequest("GET", "/books/"+emptyID+"/reviews", nil)
 
-			expectedUrlVars := map[string]string{
-				"id": emptyID,
-			}
+			expectedUrlVars := map[string]string{"id": emptyID}
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
 
@@ -291,17 +281,13 @@ func TestGetReviewsHandler(t *testing.T) {
 			},
 		}
 
-		api := &API{
-			dataStore: mockDataStore,
-		}
+		api := &API{dataStore: mockDataStore}
 
 		Convey("When I send an HTTP GET request to /books/1/reviews", func() {
 
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
 
-			expectedUrlVars := map[string]string{
-				"id": bookID1,
-			}
+			expectedUrlVars := map[string]string{"id": bookID1}
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
 
@@ -339,9 +325,7 @@ func TestGetReviewsHandler(t *testing.T) {
 		Convey("When I send a HTTP GET request to /books/1/reviews", func() {
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
 
-			expectedUrlVars := map[string]string{
-				"id": bookID1,
-			}
+			expectedUrlVars := map[string]string{"id": bookID1}
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
 
@@ -373,15 +357,11 @@ func TestGetReviewsHandler(t *testing.T) {
 				},
 			}
 
-			api := &API{
-				dataStore: mockDataStore,
-			}
+			api := &API{dataStore: mockDataStore}
 
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
 
-			expectedUrlVars := map[string]string{
-				"id": bookID1,
-			}
+			expectedUrlVars := map[string]string{"id": bookID1}
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
 
@@ -407,15 +387,11 @@ func TestGetReviewsHandler(t *testing.T) {
 				},
 			}
 
-			api := &API{
-				dataStore: mockDataStore,
-			}
+			api := &API{dataStore: mockDataStore}
 
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
 
-			expectedUrlVars := map[string]string{
-				"id": bookID1,
-			}
+			expectedUrlVars := map[string]string{"id": bookID1}
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
 
@@ -436,15 +412,11 @@ func TestGetReviewsHandler(t *testing.T) {
 				},
 			}
 
-			api := &API{
-				dataStore: mockDataStore,
-			}
+			api := &API{dataStore: mockDataStore}
 
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
 
-			expectedUrlVars := map[string]string{
-				"id": bookID1,
-			}
+			expectedUrlVars := map[string]string{"id": bookID1}
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
 
@@ -472,12 +444,10 @@ func TestAddReviewHandler(t *testing.T) {
 			}
 
 			api := &API{dataStore: mockDataStore}
-			body := strings.NewReader(`{"message": "my review"}`)
+			body := strings.NewReader(reviewValid)
 			request := httptest.NewRequest("POST", "/books/"+bookID1+"/reviews", body)
 
-			expectedUrlVars := map[string]string{
-				"id": bookID1,
-			}
+			expectedUrlVars := map[string]string{"id": bookID1}
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
 
@@ -500,12 +470,10 @@ func TestAddReviewHandler(t *testing.T) {
 			}
 
 			api := &API{dataStore: mockDataStore}
-			body := strings.NewReader(`{"message": ""}`)
+			body := strings.NewReader(reviewInvalidMessage)
 			request := httptest.NewRequest("POST", "/books/"+bookID1+"/reviews", body)
 
-			expectedUrlVars := map[string]string{
-				"id": bookID1,
-			}
+			expectedUrlVars := map[string]string{"id": bookID1}
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
 
@@ -520,9 +488,7 @@ func TestAddReviewHandler(t *testing.T) {
 			api := &API{}
 			request := httptest.NewRequest("POST", "/books/"+emptyID+"/reviews", nil)
 
-			expectedUrlVars := map[string]string{
-				"id": emptyID,
-			}
+			expectedUrlVars := map[string]string{"id": emptyID}
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
 
@@ -537,9 +503,7 @@ func TestAddReviewHandler(t *testing.T) {
 			api := &API{}
 			request := httptest.NewRequest("POST", "/books/"+bookID1+"/reviews", nil)
 
-			expectedUrlVars := map[string]string{
-				"id": bookID1,
-			}
+			expectedUrlVars := map[string]string{"id": bookID1}
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
 
@@ -556,12 +520,10 @@ func TestAddReviewHandler(t *testing.T) {
 			}}
 
 			api := &API{dataStore: &mockDataStore}
-			body := strings.NewReader(`{"message": "my review"}`)
+			body := strings.NewReader(reviewValid)
 			request := httptest.NewRequest("POST", "/books/"+bookID1+"/reviews", body)
 
-			expectedUrlVars := map[string]string{
-				"id": bookID1,
-			}
+			expectedUrlVars := map[string]string{"id": bookID1}
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
 
@@ -581,9 +543,7 @@ func TestAddReviewHandler(t *testing.T) {
 			body := strings.NewReader("invalidReviewText")
 			request := httptest.NewRequest("POST", "/books/"+bookID1+"/reviews", body)
 
-			expectedUrlVars := map[string]string{
-				"id": bookID1,
-			}
+			expectedUrlVars := map[string]string{"id": bookID1}
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
 
