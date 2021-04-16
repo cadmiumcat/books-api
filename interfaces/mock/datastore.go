@@ -21,7 +21,7 @@ var _ interfaces.DataStore = &DataStoreMock{}
 //
 //         // make and configure a mocked interfaces.DataStore
 //         mockedDataStore := &DataStoreMock{
-//             AddBookFunc: func(book *models.Book) error {
+//             AddBookFunc: func(ctx context.Context, book *models.Book) error {
 // 	               panic("mock out the AddBook method")
 //             },
 //             CloseFunc: func(ctx context.Context) error {
@@ -50,7 +50,7 @@ var _ interfaces.DataStore = &DataStoreMock{}
 //     }
 type DataStoreMock struct {
 	// AddBookFunc mocks the AddBook method.
-	AddBookFunc func(book *models.Book) error
+	AddBookFunc func(ctx context.Context, book *models.Book) error
 
 	// CloseFunc mocks the Close method.
 	CloseFunc func(ctx context.Context) error
@@ -74,6 +74,8 @@ type DataStoreMock struct {
 	calls struct {
 		// AddBook holds details about calls to the AddBook method.
 		AddBook []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
 			// Book is the book argument value.
 			Book *models.Book
 		}
@@ -124,28 +126,32 @@ type DataStoreMock struct {
 }
 
 // AddBook calls AddBookFunc.
-func (mock *DataStoreMock) AddBook(book *models.Book) error {
+func (mock *DataStoreMock) AddBook(ctx context.Context, book *models.Book) error {
 	if mock.AddBookFunc == nil {
 		panic("DataStoreMock.AddBookFunc: method is nil but DataStore.AddBook was just called")
 	}
 	callInfo := struct {
+		Ctx  context.Context
 		Book *models.Book
 	}{
+		Ctx:  ctx,
 		Book: book,
 	}
 	mock.lockAddBook.Lock()
 	mock.calls.AddBook = append(mock.calls.AddBook, callInfo)
 	mock.lockAddBook.Unlock()
-	return mock.AddBookFunc(book)
+	return mock.AddBookFunc(ctx, book)
 }
 
 // AddBookCalls gets all the calls that were made to AddBook.
 // Check the length with:
 //     len(mockedDataStore.AddBookCalls())
 func (mock *DataStoreMock) AddBookCalls() []struct {
+	Ctx  context.Context
 	Book *models.Book
 } {
 	var calls []struct {
+		Ctx  context.Context
 		Book *models.Book
 	}
 	mock.lockAddBook.RLock()

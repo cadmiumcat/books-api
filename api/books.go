@@ -32,7 +32,7 @@ func (api *API) addBookHandler(writer http.ResponseWriter, request *http.Request
 	}
 
 	book.ID = uuid.NewV4().String()
-	api.dataStore.AddBook(book)
+	api.dataStore.AddBook(ctx, book)
 
 	if err := WriteJSONBody(book, writer, http.StatusCreated); err != nil {
 		handleError(ctx, writer, err, logData)

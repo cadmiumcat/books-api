@@ -48,13 +48,18 @@ func (m *Mongo) Close(ctx context.Context) (err error) {
 }
 
 // AddBook adds a Book
-func (m *Mongo) AddBook(book *models.Book) error {
+func (m *Mongo) AddBook(ctx context.Context, book *models.Book) error {
 	session := m.Session.Copy()
 	defer session.Close()
+
+	logData := log.Data{
+		"book" : book,
+	}
 
 	collection := session.DB(m.Database).C(m.BooksCollection)
 	err := collection.Insert(book)
 	if err != nil {
+		log.Event(ctx, apierrors.ErrBookNotFound.Error(), log.ERROR, log.Error(err), logData)
 		return errors.Wrap(err, "unexpected error when adding a book")
 	}
 

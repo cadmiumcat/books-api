@@ -224,7 +224,9 @@ func TestAddBookHandler(t *testing.T) {
 
 	Convey("Given a POST request to add a book", t, func() {
 		mockDataStore := &mock.DataStoreMock{
-			AddBookFunc: func(book *models.Book) {},
+			AddBookFunc: func(ctx context.Context, book *models.Book) error {
+				return nil
+			},
 		}
 
 		Convey("When there is no request body", func() {
