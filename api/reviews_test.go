@@ -388,6 +388,7 @@ func TestReviewsHandler(t *testing.T) {
 			api.getReviewsHandler(response, request)
 			Convey("Then the HTTP response code is 404", func() {
 				So(response.Code, ShouldEqual, http.StatusNotFound)
+				So(response.Body.String(), ShouldContainSubstring, apierrors.ErrBookNotFound.Error())
 			})
 			Convey("And the GetReviews function is not called", func() {
 				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
@@ -403,7 +404,7 @@ func TestReviewsHandler(t *testing.T) {
 					return &models.Book{ID: bookID1}, nil
 				},
 				GetReviewsFunc: func(ctx context.Context, bookID string) (models.Reviews, error) {
-					return models.Reviews{}, errMongoDB
+					return models.Reviews{}, errors.Wrap(errMongoDB, "unexpected error when getting a review")
 				},
 			}
 
@@ -422,6 +423,7 @@ func TestReviewsHandler(t *testing.T) {
 			api.getReviewsHandler(response, request)
 			Convey("Then the HTTP response code is 500", func() {
 				So(response.Code, ShouldEqual, http.StatusInternalServerError)
+				So(response.Body.String(), ShouldEqual, "unexpected error when getting a review: unexpected error in MongoDB\n")
 			})
 			Convey("And the GetBook and GetReviews functions are called", func() {
 				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
@@ -432,7 +434,7 @@ func TestReviewsHandler(t *testing.T) {
 		Convey("When GetBook returns a database error", func() {
 			mockDataStore := &mock.DataStoreMock{
 				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
-					return &models.Book{}, errMongoDB
+					return &models.Book{}, errors.Wrap(errMongoDB, "unexpected error when getting a book")
 				},
 			}
 
@@ -451,6 +453,7 @@ func TestReviewsHandler(t *testing.T) {
 			api.getReviewsHandler(response, request)
 			Convey("Then the HTTP response code is 500", func() {
 				So(response.Code, ShouldEqual, http.StatusInternalServerError)
+				So(response.Body.String(), ShouldEqual, "unexpected error when getting a book: unexpected error in MongoDB\n")
 			})
 			Convey("And the GetReviews function is not called", func() {
 				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
