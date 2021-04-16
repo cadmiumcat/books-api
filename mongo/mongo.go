@@ -48,14 +48,17 @@ func (m *Mongo) Close(ctx context.Context) (err error) {
 }
 
 // AddBook adds a Book
-func (m *Mongo) AddBook(book *models.Book) {
+func (m *Mongo) AddBook(book *models.Book) error {
 	session := m.Session.Copy()
 	defer session.Close()
 
 	collection := session.DB(m.Database).C(m.BooksCollection)
-	collection.Insert(book)
+	err := collection.Insert(book)
+	if err != nil {
+		return errors.Wrap(err, "unexpected error when adding a book")
+	}
 
-	return
+	return nil
 }
 
 // GetBook returns a models.Book for a given ID.
@@ -99,7 +102,7 @@ func (m *Mongo) GetBooks(ctx context.Context) (models.Books, error) {
 	books := &models.Books{}
 	if err := list.All(&books.Items); err != nil {
 		log.Event(ctx, "unable to retrieve books", log.ERROR, log.Error(err), logData)
-		return models.Books{}, err
+		return models.Books{}, errors.Wrap(err, "unexpected error when getting books")
 	}
 
 	return *books, nil
@@ -146,7 +149,7 @@ func (m *Mongo) GetReviews(ctx context.Context, bookID string) (models.Reviews, 
 	review := &models.Reviews{}
 	if err := list.All(&review.Items); err != nil {
 		log.Event(ctx, "unable to retrieve reviews", log.ERROR, log.Error(err), logData)
-		return models.Reviews{}, err
+		return models.Reviews{}, errors.Wrap(err, "unexpected error when getting reviews")
 	}
 
 	return *review, nil

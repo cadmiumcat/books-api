@@ -21,7 +21,7 @@ var _ interfaces.DataStore = &DataStoreMock{}
 //
 //         // make and configure a mocked interfaces.DataStore
 //         mockedDataStore := &DataStoreMock{
-//             AddBookFunc: func(book *models.Book)  {
+//             AddBookFunc: func(book *models.Book) error {
 // 	               panic("mock out the AddBook method")
 //             },
 //             CloseFunc: func(ctx context.Context) error {
@@ -50,7 +50,7 @@ var _ interfaces.DataStore = &DataStoreMock{}
 //     }
 type DataStoreMock struct {
 	// AddBookFunc mocks the AddBook method.
-	AddBookFunc func(book *models.Book)
+	AddBookFunc func(book *models.Book) error
 
 	// CloseFunc mocks the Close method.
 	CloseFunc func(ctx context.Context) error
@@ -124,7 +124,7 @@ type DataStoreMock struct {
 }
 
 // AddBook calls AddBookFunc.
-func (mock *DataStoreMock) AddBook(book *models.Book) {
+func (mock *DataStoreMock) AddBook(book *models.Book) error {
 	if mock.AddBookFunc == nil {
 		panic("DataStoreMock.AddBookFunc: method is nil but DataStore.AddBook was just called")
 	}
@@ -136,7 +136,7 @@ func (mock *DataStoreMock) AddBook(book *models.Book) {
 	mock.lockAddBook.Lock()
 	mock.calls.AddBook = append(mock.calls.AddBook, callInfo)
 	mock.lockAddBook.Unlock()
-	mock.AddBookFunc(book)
+	return mock.AddBookFunc(book)
 }
 
 // AddBookCalls gets all the calls that were made to AddBook.
