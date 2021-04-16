@@ -196,7 +196,7 @@ func TestGetReviewHandler(t *testing.T) {
 		Convey("When GetBook returns an unexpected database error", func() {
 			mockDataStore := &mock.DataStoreMock{
 				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
-					return nil, errMongoDB
+					return nil, errors.Wrap(errMongoDB, "unexpected error when getting a book")
 				},
 			}
 
@@ -216,7 +216,7 @@ func TestGetReviewHandler(t *testing.T) {
 			api.getReviewHandler(response, request)
 			Convey("Then 500 InternalServerError status code is returned", func() {
 				So(response.Code, ShouldEqual, http.StatusInternalServerError)
-				So(response.Body.String(), ShouldEqual, "unexpected error in MongoDB\n")
+				So(response.Body.String(), ShouldEqual, "unexpected error when getting a book: unexpected error in MongoDB\n")
 			})
 		})
 
@@ -226,7 +226,7 @@ func TestGetReviewHandler(t *testing.T) {
 					return &models.Book{ID: bookID1}, nil
 				},
 				GetReviewFunc: func(ctx context.Context, reviewID string) (*models.Review, error) {
-					return nil, errMongoDB
+					return nil, errors.Wrap(errMongoDB, "unexpected error when getting a review")
 				},
 			}
 
@@ -246,7 +246,7 @@ func TestGetReviewHandler(t *testing.T) {
 			api.getReviewHandler(response, request)
 			Convey("Then 500 InternalServerError status code is returned", func() {
 				So(response.Code, ShouldEqual, http.StatusInternalServerError)
-				So(response.Body.String(), ShouldEqual, "unexpected error in MongoDB\n")
+				So(response.Body.String(), ShouldEqual, "unexpected error when getting a review: unexpected error in MongoDB\n")
 			})
 		})
 	})
