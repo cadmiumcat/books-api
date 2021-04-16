@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"github.com/ONSdigital/log.go/log"
 	"github.com/cadmiumcat/books-api/apierrors"
 	"github.com/cadmiumcat/books-api/models"
@@ -47,8 +48,8 @@ func (api *API) addReviewHandler(writer http.ResponseWriter, request *http.Reque
 	}
 
 	review.ID = uuid.NewV4().String()
-	review.Links.Self = review.ID
-	review.Links.Book = bookID
+	review.Links.Self = fmt.Sprintf("/books/%s/reviews/%s", bookID, review.ID)
+	review.Links.Book = fmt.Sprintf("/books/%s", bookID)
 
 	api.dataStore.AddReview(review)
 

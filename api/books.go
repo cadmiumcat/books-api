@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"github.com/ONSdigital/log.go/log"
 	"github.com/cadmiumcat/books-api/apierrors"
 	"github.com/cadmiumcat/books-api/models"
@@ -17,7 +18,7 @@ func (api *API) addBookHandler(writer http.ResponseWriter, request *http.Request
 		return
 	}
 
-	book := &models.Book{}
+	book := &models.Book{Links: &models.Link{}}
 	if err := ReadJSONBody(ctx, request.Body, book); err != nil {
 		handleError(ctx, writer, err, nil)
 		return
@@ -32,6 +33,9 @@ func (api *API) addBookHandler(writer http.ResponseWriter, request *http.Request
 	}
 
 	book.ID = uuid.NewV4().String()
+	book.Links.Self = fmt.Sprintf("/books/%s", book.ID)
+	book.Links.Reviews = fmt.Sprintf("/books/%s/reviews", book.ID)
+
 	api.dataStore.AddBook(book)
 
 	if err := WriteJSONBody(book, writer, http.StatusCreated); err != nil {

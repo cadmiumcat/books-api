@@ -2,6 +2,7 @@ package mongo
 
 import (
 	"context"
+	"fmt"
 	dpMongodb "github.com/ONSdigital/dp-mongodb"
 	dpMongoLock "github.com/ONSdigital/dp-mongodb/dplock"
 	"github.com/ONSdigital/log.go/log"
@@ -152,7 +153,7 @@ func (m *Mongo) GetReviews(ctx context.Context, bookID string) (models.Reviews, 
 		"database":   m.Database,
 		"collection": m.ReviewsCollection}
 
-	list := session.DB(m.Database).C(m.ReviewsCollection).Find(bson.M{"links.book": bookID})
+	list := session.DB(m.Database).C(m.ReviewsCollection).Find(bson.M{"links.book": fmt.Sprintf("/books/%s", bookID)})
 
 	review := &models.Reviews{}
 	if err := list.All(&review.Items); err != nil {

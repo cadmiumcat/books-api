@@ -37,9 +37,9 @@ type Checkout struct {
 
 // Link stores the details of when a someone has borrowed/returned a Book, as well user reviews.
 type Link struct {
-	Self         string
-	Reservations string
-	Reviews      string
+	Self         string `json:"self" bson:"self"`
+	Reservations string `json:"reservations" bson:"reservations"`
+	Reviews      string `json:"reviews" bson:"reviews"`
 }
 
 // Books contains all the items (Book) in the library and a total count of those items

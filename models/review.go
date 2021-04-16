@@ -11,8 +11,8 @@ type Review struct {
 
 // ReviewLink is the relationship between a Book and a Review
 type ReviewLink struct {
-	Self string
-	Book string
+	Self string `json:"self" bson:"self"`
+	Book string `json:"book" bson:"book"`
 }
 
 // Reviews contains all the items (Review) in the library and a total count of those items
