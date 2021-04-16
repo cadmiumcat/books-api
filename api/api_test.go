@@ -118,10 +118,10 @@ func TestReadJSONBody(t *testing.T) {
 
 func TestWriteJSONBody(t *testing.T) {
 	Convey("Given an interface that cannot be marshalled into JSON", t, func() {
-		payload := make(chan int)
+		badPayload := make(chan int)
 
 		Convey("When the WriteJSONBody function is called", func() {
-			err := WriteJSONBody(payload, httptest.NewRecorder(), http.StatusOK)
+			err := WriteJSONBody(badPayload, httptest.NewRecorder(), http.StatusOK)
 
 			Convey("An error is returned", func() {
 				So(err, ShouldBeError)
