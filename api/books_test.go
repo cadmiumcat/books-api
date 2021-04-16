@@ -53,7 +53,7 @@ func TestGetBookHandler(t *testing.T) {
 			},
 		}
 		api := &API{dataStore: mockDataStore}
-		Convey("When I send an HTTP GET request to /books/1", func() {
+		Convey("When a http get request is sent to /books/1", func() {
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1, nil)
 			expectedUrlVars := map[string]string{
 				"id": bookID1,
@@ -80,7 +80,7 @@ func TestGetBookHandler(t *testing.T) {
 		}
 		api := &API{dataStore: mockDataStore}
 
-		Convey("When I send an HTTP GET request to /books/3", func() {
+		Convey("When a http get request is sent to /books/3", func() {
 
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookIDNotInStore, nil)
 			expectedUrlVars := map[string]string{
@@ -139,7 +139,7 @@ func TestGetBooksHandler(t *testing.T) {
 
 		api := &API{dataStore: mockDataStore}
 
-		Convey("When I send an HTTP GET request to /books", func() {
+		Convey("When a http get request is sent to /books", func() {
 
 			request := httptest.NewRequest(http.MethodGet, "/books", nil)
 			response := httptest.NewRecorder()
@@ -174,7 +174,7 @@ func TestGetBooksHandler(t *testing.T) {
 
 		api := &API{dataStore: mockDataStore}
 
-		Convey("When I send an HTTP GET request to /books", func() {
+		Convey("When a http get request is sent to /books", func() {
 			request := httptest.NewRequest(http.MethodGet, "/books", nil)
 			response := httptest.NewRecorder()
 

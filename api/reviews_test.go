@@ -101,7 +101,7 @@ func TestGetReviewHandler(t *testing.T) {
 			dataStore: mockDataStore,
 		}
 
-		Convey("When I send an HTTP GET request to /books/1/reviews/123", func() {
+		Convey("When a http get request is sent to /books/1/reviews/123", func() {
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews/"+reviewID1, nil)
 
 			expectedUrlVars := map[string]string{
@@ -137,7 +137,7 @@ func TestGetReviewHandler(t *testing.T) {
 			dataStore: mockDataStore,
 		}
 
-		Convey("When I send an HTTP GET request to /books/1/reviews/123", func() {
+		Convey("When a http get request is sent to /books/1/reviews/123", func() {
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews/"+reviewID1, nil)
 
 			expectedUrlVars := map[string]string{
@@ -160,7 +160,7 @@ func TestGetReviewHandler(t *testing.T) {
 	})
 
 	Convey("Given a GET request for a review of a book that does not exist", t, func() {
-		Convey("When I send an HTTP GET request to /books/1/reviews/123", func() {
+		Convey("When a http get request is sent to /books/1/reviews/123", func() {
 			mockDataStore := &mock.DataStoreMock{
 				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
 					return nil, apierrors.ErrBookNotFound
@@ -295,7 +295,7 @@ func TestReviewsHandler(t *testing.T) {
 			dataStore: mockDataStore,
 		}
 
-		Convey("When I send an HTTP GET request to /books/1/reviews", func() {
+		Convey("When a http get request is sent to /books/1/reviews", func() {
 
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
 
@@ -336,7 +336,7 @@ func TestReviewsHandler(t *testing.T) {
 			dataStore: mockDataStore,
 		}
 
-		Convey("When I send a HTTP GET request to /books/1/reviews", func() {
+		Convey("When a HTTP GET request is sent to /books/1/reviews", func() {
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
 
 			expectedUrlVars := map[string]string{
@@ -366,7 +366,7 @@ func TestReviewsHandler(t *testing.T) {
 
 	Convey("Given a GET request for a list of reviews of a book that does not exist", t, func() {
 
-		Convey("When I send an HTTP GET request to /books/1/reviews", func() {
+		Convey("When a http get request is sent to /books/1/reviews", func() {
 			mockDataStore := &mock.DataStoreMock{
 				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
 					return nil, apierrors.ErrBookNotFound
