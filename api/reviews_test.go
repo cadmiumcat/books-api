@@ -16,13 +16,13 @@ import (
 )
 
 const (
-	bookID1          = "1"
-	bookID2          = "2"
-	reviewID1        = "123"
-	reviewID2        = "567"
-	emptyID          = ""
-	bookIDNotInStore = "notInStore"
-	internalSeverErrorMessage = "Internal Server Error\n"
+	bookID1                   = "1"
+	bookID2                   = "2"
+	reviewID1                 = "123"
+	reviewID2                 = "567"
+	emptyID                   = ""
+	bookIDNotInStore          = "notInStore"
+	internalSeverErrorMessage = "internal server error\n"
 )
 
 var bookReview1 = models.Review{

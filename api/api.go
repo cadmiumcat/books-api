@@ -84,7 +84,10 @@ func ReadJSONBody(ctx context.Context, body io.ReadCloser, v interface{}) error 
 
 func handleError(ctx context.Context, w http.ResponseWriter, err error, data log.Data) {
 	var status int
+	var apiError error
+
 	if err != nil {
+		apiError = err
 		switch err {
 		case apierrors.ErrBookNotFound,
 			apierrors.ErrReviewNotFound:
@@ -95,6 +98,7 @@ func handleError(ctx context.Context, w http.ResponseWriter, err error, data log
 			apierrors.ErrEmptyReviewID:
 			status = http.StatusBadRequest
 		default:
+			apiError = apierrors.ErrInternalServer
 			status = http.StatusInternalServerError
 		}
 	}
@@ -106,9 +110,5 @@ func handleError(ctx context.Context, w http.ResponseWriter, err error, data log
 	data["response_status"] = status
 	log.Event(ctx, "request unsuccessful", log.ERROR, log.Error(err), data)
 
-	if status == http.StatusInternalServerError {
-		http.Error(w, "Internal Server Error", status)
-		return
-	}
-	http.Error(w, err.Error(), status)
+	http.Error(w, apiError.Error(), status)
 }
