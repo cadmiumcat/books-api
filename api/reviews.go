@@ -33,7 +33,9 @@ func (api *API) addReviewHandler(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 
-	review := &models.Review{Links: &models.ReviewLink{}}
+	review := &models.Review{
+		User:  models.User{},
+		Links: &models.ReviewLink{}}
 	if err := ReadJSONBody(ctx, request.Body, review); err != nil {
 		handleError(ctx, writer, apierrors.ErrInvalidReview, logData)
 		return

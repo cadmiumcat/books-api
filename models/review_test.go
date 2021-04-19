@@ -9,34 +9,37 @@ import (
 )
 
 func TestReview_Validate(t *testing.T) {
-	type review struct {
-		Message string
-	}
+
 	tests := []struct {
 		name     string
-		input    review
+		input    Review
 		expected error
 	}{
 		{
 			name:     "Empty review",
-			input:    review{Message: ""},
+			input:    Review{Message: ""},
 			expected: apierrors.ErrEmptyReviewMessage,
 		},
 		{
-			name:     "Long review",
-			input:    review{Message: RandomString(201)},
+			name: "Long review",
+			input: Review{
+				Message: RandomString(201),
+				User:    User{Forename: "Avid", Surname: "Reader"},
+			},
 			expected: apierrors.ErrLongReviewMessage,
+		},
+		{
+			name:     "Review with no user",
+			input:    Review{Message: "my review"},
+			expected: apierrors.ErrEmptyReviewUser,
 		},
 	}
 
 	Convey("Given a review", t, func() {
 		for _, tt := range tests {
-			r := Review{
-				Message: tt.input.Message,
-			}
-			Convey(fmt.Sprintf("When I validate the review with the message %q", tt.input.Message), func() {
-				err := r.Validate()
-				Convey(fmt.Sprintf("Then the error matches expected %s", tt.expected), func() {
+			Convey(fmt.Sprintf("When I validate the review: %v", tt.input), func() {
+				err := tt.input.Validate()
+				Convey(fmt.Sprintf("Then the error matches: %s", tt.expected), func() {
 					So(err, ShouldBeError, tt.expected)
 				})
 			})
@@ -44,7 +47,12 @@ func TestReview_Validate(t *testing.T) {
 	})
 
 	Convey("Given a review with a valid message", t, func() {
-		review := &Review{Message: "A perfect review. 10/10. Would read again"}
+		review := &Review{
+			Message: "A perfect review. 10/10. Would read again",
+			User: User{
+				Forename: "Reviewer", Surname: "OfBooks",
+			},
+		}
 		Convey("When I validate it", func() {
 			err := review.Validate()
 			Convey("Then I get no errors", func() {

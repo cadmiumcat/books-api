@@ -5,6 +5,7 @@ import "github.com/cadmiumcat/books-api/apierrors"
 // A Review contains the fields that identify a review
 type Review struct {
 	ID      string      `json:"id" bson:"_id"`
+	User    User        `json:"user,omitempty" bson:"user,omitempty"`
 	Message string      `json:"message,omitempty" bson:"message,omitempty"`
 	Links   *ReviewLink `json:"links,omitempty" bson:"links,omitempty"`
 }
@@ -27,9 +28,18 @@ func (r Review) Validate() error {
 		return apierrors.ErrEmptyReviewMessage
 	}
 
+	if r.User.Forename == "" || r.User.Surname == "" {
+		return apierrors.ErrEmptyReviewUser
+	}
+
 	if len(r.Message) > 200 {
 		return apierrors.ErrLongReviewMessage
 	}
 
 	return nil
+}
+
+type User struct {
+	Forename string `json:"forename,omitempty" bson:"forename,omitempty"`
+	Surname  string `json:"surname,omitempty" bson:"surname,omitempty"`
 }

@@ -17,14 +17,14 @@ import (
 )
 
 const (
-	bookID1              = "1"
-	bookID2              = "2"
-	reviewID1            = "123"
-	reviewID2            = "567"
-	emptyID              = ""
-	bookIDNotInStore     = "notInStore"
-	reviewInvalidMessage = `{"message": ""}`
-	reviewValid          = `{"message": "my review"}`
+	bookID1                   = "1"
+	bookID2                   = "2"
+	reviewID1                 = "123"
+	reviewID2                 = "567"
+	emptyID                   = ""
+	bookIDNotInStore          = "notInStore"
+	reviewInvalidMessage      = `{"message": ""}`
+	reviewValid               = `{"message": "my review", "user": {"forename": "name", "surname": "surname"}}`
 	internalSeverErrorMessage = "internal server error\n"
 )
 
@@ -32,6 +32,10 @@ var bookReview1 = models.Review{
 	ID: reviewID1,
 	Links: &models.ReviewLink{
 		Book: bookID1,
+	},
+	User: models.User{
+		Forename: "name",
+		Surname:  "surname",
 	},
 }
 
@@ -48,6 +52,15 @@ var emptyReviews = models.Reviews{
 }
 
 var errMongoDB = errors.New("unexpected error in MongoDB")
+
+func marshalJSON(data interface{}) string {
+	out, err := json.Marshal(data)
+	if err != nil {
+		panic(err)
+	}
+
+	return string(out)
+}
 
 func TestGetReviewHandler(t *testing.T) {
 	t.Parallel()
@@ -97,7 +110,7 @@ func TestGetReviewHandler(t *testing.T) {
 				return &models.Book{ID: bookID1}, nil
 			},
 			GetReviewFunc: func(ctx context.Context, id string) (*models.Review, error) {
-				return &models.Review{ID: reviewID1}, nil
+				return &bookReview1, nil
 			},
 		}
 
@@ -120,7 +133,7 @@ func TestGetReviewHandler(t *testing.T) {
 			Convey("And the GetReview function is called once", func() {
 				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
 				So(mockDataStore.GetReviewCalls(), ShouldHaveLength, 1)
-				So(response.Body.String(), ShouldEqual, `{"id":"123"}`)
+				So(response.Body.String(), ShouldEqual, marshalJSON(bookReview1))
 			})
 		})
 	})
