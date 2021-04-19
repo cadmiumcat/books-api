@@ -54,7 +54,7 @@ func (m *Mongo) AddBook(ctx context.Context, book *models.Book) error {
 	defer session.Close()
 
 	logData := log.Data{
-		"book" : book,
+		"book": book,
 	}
 
 	collection := session.DB(m.Database).C(m.BooksCollection)

@@ -22,4 +22,5 @@ var (
 	ErrUnableToReadMessage  = errors.New("failed to read request body")
 	ErrUnableToParseJSON    = errors.New("failed to parse json body")
 	ErrRequiredFieldMissing = errors.New("invalid book. Missing required field")
+	ErrInternalServer       = errors.New("internal server error")
 )

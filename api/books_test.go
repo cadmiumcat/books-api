@@ -123,7 +123,7 @@ func TestGetBookHandler(t *testing.T) {
 
 			Convey("Then 500 InternalServerError status code is returned", func() {
 				So(response.Code, ShouldEqual, http.StatusInternalServerError)
-				So(response.Body.String(), ShouldEqual, "unexpected error when getting a book: unexpected error in MongoDB\n")
+				So(response.Body.String(), ShouldEqual, internalSeverErrorMessage)
 			})
 		})
 	})
@@ -215,7 +215,7 @@ func TestGetBooksHandler(t *testing.T) {
 
 			Convey("Then 500 InternalServerError status code is returned", func() {
 				So(response.Code, ShouldEqual, http.StatusInternalServerError)
-				So(response.Body.String(), ShouldEqual, "unexpected error when getting books: unexpected error in MongoDB\n")
+				So(response.Body.String(), ShouldEqual, internalSeverErrorMessage)
 			})
 		})
 	})
