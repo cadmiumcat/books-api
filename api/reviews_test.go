@@ -22,6 +22,7 @@ const (
 	reviewID2        = "567"
 	emptyID          = ""
 	bookIDNotInStore = "notInStore"
+	internalSeverErrorMessage = "Internal Server Error\n"
 )
 
 var bookReview1 = models.Review{
@@ -216,7 +217,7 @@ func TestGetReviewHandler(t *testing.T) {
 			api.getReviewHandler(response, request)
 			Convey("Then 500 InternalServerError status code is returned", func() {
 				So(response.Code, ShouldEqual, http.StatusInternalServerError)
-				So(response.Body.String(), ShouldEqual, "unexpected error when getting a book: unexpected error in MongoDB\n")
+				So(response.Body.String(), ShouldEqual, internalSeverErrorMessage)
 			})
 		})
 
@@ -246,7 +247,7 @@ func TestGetReviewHandler(t *testing.T) {
 			api.getReviewHandler(response, request)
 			Convey("Then 500 InternalServerError status code is returned", func() {
 				So(response.Code, ShouldEqual, http.StatusInternalServerError)
-				So(response.Body.String(), ShouldEqual, "unexpected error when getting a review: unexpected error in MongoDB\n")
+				So(response.Body.String(), ShouldEqual, internalSeverErrorMessage)
 			})
 		})
 	})
@@ -423,7 +424,7 @@ func TestReviewsHandler(t *testing.T) {
 			api.getReviewsHandler(response, request)
 			Convey("Then the HTTP response code is 500", func() {
 				So(response.Code, ShouldEqual, http.StatusInternalServerError)
-				So(response.Body.String(), ShouldEqual, "unexpected error when getting a review: unexpected error in MongoDB\n")
+				So(response.Body.String(), ShouldEqual, internalSeverErrorMessage)
 			})
 			Convey("And the GetBook and GetReviews functions are called", func() {
 				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
@@ -453,7 +454,7 @@ func TestReviewsHandler(t *testing.T) {
 			api.getReviewsHandler(response, request)
 			Convey("Then the HTTP response code is 500", func() {
 				So(response.Code, ShouldEqual, http.StatusInternalServerError)
-				So(response.Body.String(), ShouldEqual, "unexpected error when getting a book: unexpected error in MongoDB\n")
+				So(response.Body.String(), ShouldEqual, internalSeverErrorMessage)
 			})
 			Convey("And the GetReviews function is not called", func() {
 				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)

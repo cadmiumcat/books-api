@@ -105,5 +105,10 @@ func handleError(ctx context.Context, w http.ResponseWriter, err error, data log
 
 	data["response_status"] = status
 	log.Event(ctx, "request unsuccessful", log.ERROR, log.Error(err), data)
+
+	if status == http.StatusInternalServerError {
+		http.Error(w, "Internal Server Error", status)
+		return
+	}
 	http.Error(w, err.Error(), status)
 }
