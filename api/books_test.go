@@ -7,6 +7,7 @@ import (
 	"github.com/cadmiumcat/books-api/interfaces/mock"
 	"github.com/cadmiumcat/books-api/models"
 	"github.com/gorilla/mux"
+	"github.com/pkg/errors"
 	. "github.com/smartystreets/goconvey/convey"
 	"io/ioutil"
 	"net/http"
@@ -42,6 +43,7 @@ func TestGetBookHandler(t *testing.T) {
 			api.getBookHandler(response, request)
 			Convey("Then the HTTP response code is 400", func() {
 				So(response.Code, ShouldEqual, http.StatusBadRequest)
+				So(response.Body.String(), ShouldContainSubstring, apierrors.ErrEmptyBookID.Error())
 			})
 		})
 	})
@@ -53,7 +55,7 @@ func TestGetBookHandler(t *testing.T) {
 			},
 		}
 		api := &API{dataStore: mockDataStore}
-		Convey("When I send an HTTP GET request to /books/1", func() {
+		Convey("When a http get request is sent to /books/1", func() {
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1, nil)
 			expectedUrlVars := map[string]string{
 				"id": bookID1,
@@ -80,7 +82,7 @@ func TestGetBookHandler(t *testing.T) {
 		}
 		api := &API{dataStore: mockDataStore}
 
-		Convey("When I send an HTTP GET request to /books/3", func() {
+		Convey("When a http get request is sent to /books/3", func() {
 
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookIDNotInStore, nil)
 			expectedUrlVars := map[string]string{
@@ -93,6 +95,7 @@ func TestGetBookHandler(t *testing.T) {
 
 			Convey("then the HTTP response code is 404", func() {
 				So(response.Code, ShouldEqual, http.StatusNotFound)
+				So(response.Body.String(), ShouldContainSubstring, apierrors.ErrBookNotFound.Error())
 			})
 			Convey("And the GetBook function is called once", func() {
 				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
@@ -104,7 +107,7 @@ func TestGetBookHandler(t *testing.T) {
 		Convey("When GetBook returns an unexpected database error", func() {
 			mockDataStore := &mock.DataStoreMock{
 				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
-					return nil, errMongoDB
+					return nil, errors.Wrap(errMongoDB, "unexpected error when getting a book")
 				},
 			}
 			api := &API{dataStore: mockDataStore}
@@ -120,7 +123,7 @@ func TestGetBookHandler(t *testing.T) {
 
 			Convey("Then 500 InternalServerError status code is returned", func() {
 				So(response.Code, ShouldEqual, http.StatusInternalServerError)
-				So(response.Body.String(), ShouldEqual, "unexpected error in MongoDB\n")
+				So(response.Body.String(), ShouldEqual, "unexpected error when getting a book: unexpected error in MongoDB\n")
 			})
 		})
 	})
@@ -139,7 +142,7 @@ func TestGetBooksHandler(t *testing.T) {
 
 		api := &API{dataStore: mockDataStore}
 
-		Convey("When I send an HTTP GET request to /books", func() {
+		Convey("When a http get request is sent to /books", func() {
 
 			request := httptest.NewRequest(http.MethodGet, "/books", nil)
 			response := httptest.NewRecorder()
@@ -150,14 +153,14 @@ func TestGetBooksHandler(t *testing.T) {
 			})
 			Convey("And the GetBooks function is called once", func() {
 				So(mockDataStore.GetBooksCalls(), ShouldHaveLength, 1)
-				Convey("And the response contains a count of zero and no book items", func() {
-					payload, err := ioutil.ReadAll(response.Body)
-					So(err, ShouldBeNil)
-					books := models.Books{}
-					err = json.Unmarshal(payload, &books)
-					So(books.Count, ShouldEqual, 0)
-					So(books.Items, ShouldBeNil)
-				})
+			})
+			Convey("And the response contains a count of zero and no book items", func() {
+				payload, err := ioutil.ReadAll(response.Body)
+				So(err, ShouldBeNil)
+				books := models.Books{}
+				err = json.Unmarshal(payload, &books)
+				So(books.Count, ShouldEqual, 0)
+				So(books.Items, ShouldBeNil)
 			})
 		})
 	})
@@ -174,7 +177,7 @@ func TestGetBooksHandler(t *testing.T) {
 
 		api := &API{dataStore: mockDataStore}
 
-		Convey("When I send an HTTP GET request to /books", func() {
+		Convey("When a http get request is sent to /books", func() {
 			request := httptest.NewRequest(http.MethodGet, "/books", nil)
 			response := httptest.NewRecorder()
 
@@ -184,14 +187,14 @@ func TestGetBooksHandler(t *testing.T) {
 			})
 			Convey("And the GetBooks function is called once", func() {
 				So(mockDataStore.GetBooksCalls(), ShouldHaveLength, 1)
-				Convey("And the response contains a count of zero and no book items", func() {
-					payload, err := ioutil.ReadAll(response.Body)
-					So(err, ShouldBeNil)
-					books := models.Books{}
-					err = json.Unmarshal(payload, &books)
-					So(books.Count, ShouldEqual, 2)
-					So(books.Items, ShouldHaveLength, 2)
-				})
+			})
+			Convey("And the response contains a count of zero and no book items", func() {
+				payload, err := ioutil.ReadAll(response.Body)
+				So(err, ShouldBeNil)
+				books := models.Books{}
+				err = json.Unmarshal(payload, &books)
+				So(books.Count, ShouldEqual, 2)
+				So(books.Items, ShouldHaveLength, 2)
 			})
 		})
 	})
@@ -200,7 +203,7 @@ func TestGetBooksHandler(t *testing.T) {
 		Convey("When GetBooks returns an unexpected database error", func() {
 			mockDataStore := &mock.DataStoreMock{
 				GetBooksFunc: func(ctx context.Context) (models.Books, error) {
-					return models.Books{}, errMongoDB
+					return models.Books{}, errors.Wrap(errMongoDB, "unexpected error when getting books")
 				},
 			}
 			api := &API{dataStore: mockDataStore}
@@ -212,7 +215,7 @@ func TestGetBooksHandler(t *testing.T) {
 
 			Convey("Then 500 InternalServerError status code is returned", func() {
 				So(response.Code, ShouldEqual, http.StatusInternalServerError)
-				So(response.Body.String(), ShouldEqual, "unexpected error in MongoDB\n")
+				So(response.Body.String(), ShouldEqual, "unexpected error when getting books: unexpected error in MongoDB\n")
 			})
 		})
 	})
@@ -224,7 +227,9 @@ func TestAddBookHandler(t *testing.T) {
 
 	Convey("Given a POST request to add a book", t, func() {
 		mockDataStore := &mock.DataStoreMock{
-			AddBookFunc: func(book *models.Book) {},
+			AddBookFunc: func(ctx context.Context, book *models.Book) error {
+				return nil
+			},
 		}
 
 		Convey("When there is no request body", func() {

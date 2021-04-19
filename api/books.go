@@ -36,7 +36,7 @@ func (api *API) addBookHandler(writer http.ResponseWriter, request *http.Request
 	book.Links.Self = fmt.Sprintf("/books/%s", book.ID)
 	book.Links.Reviews = fmt.Sprintf("/books/%s/reviews", book.ID)
 
-	api.dataStore.AddBook(book)
+	api.dataStore.AddBook(ctx, book)
 
 	if err := WriteJSONBody(book, writer, http.StatusCreated); err != nil {
 		handleError(ctx, writer, err, logData)

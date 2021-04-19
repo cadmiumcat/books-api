@@ -55,7 +55,7 @@ func TestHandleError(t *testing.T) {
 		for _, test := range cases {
 			ctx := context.Background()
 			err := test.input
-			Convey("When I pass the "+test.input.Error()+" error to the handleError function", func() {
+			Convey("When the "+test.input.Error()+" error is passed to the handleError function", func() {
 				writer := httptest.NewRecorder()
 				handleError(ctx, writer, err, nil)
 
@@ -98,7 +98,7 @@ func TestReadJSONBody(t *testing.T) {
 
 		Convey("When the ReadJSONBody function is called", func() {
 			err := ReadJSONBody(nil, request.Body, nil)
-			Convey("Then I get error saying it was unable to read the message", func() {
+			Convey("Then an error is returned saying it was unable to read the message", func() {
 				So(err, ShouldBeError, apierrors.ErrUnableToReadMessage)
 			})
 		})
@@ -109,7 +109,7 @@ func TestReadJSONBody(t *testing.T) {
 
 		Convey("When the ReadJSONBody function is called", func() {
 			err := ReadJSONBody(nil, request.Body, &fakeBook{})
-			Convey("Then I get error saying it was unable to read the message", func() {
+			Convey("Then an error is returned saying it was unable to read the message", func() {
 				So(err, ShouldBeError, apierrors.ErrUnableToParseJSON)
 			})
 		})
@@ -118,10 +118,10 @@ func TestReadJSONBody(t *testing.T) {
 
 func TestWriteJSONBody(t *testing.T) {
 	Convey("Given an interface that cannot be marshalled into JSON", t, func() {
-		payload := make(chan int)
+		badPayload := make(chan int)
 
 		Convey("When the WriteJSONBody function is called", func() {
-			err := WriteJSONBody(payload, httptest.NewRecorder(), http.StatusOK)
+			err := WriteJSONBody(badPayload, httptest.NewRecorder(), http.StatusOK)
 
 			Convey("An error is returned", func() {
 				So(err, ShouldBeError)

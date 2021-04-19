@@ -11,9 +11,9 @@ func TestBook_Validate(t *testing.T) {
 			Title:  "Kindred",
 			Author: "Octavia E. Butler",
 		}
-		Convey("When I validate the book", func() {
+		Convey("When the book is validated", func() {
 			err := book.Validate()
-			Convey("Then I get no errors", func() {
+			Convey("Then no errors are returned", func() {
 				So(err, ShouldBeNil)
 			})
 		})
@@ -23,9 +23,9 @@ func TestBook_Validate(t *testing.T) {
 		book := Book{
 			Author: "Octavia E. Butler",
 		}
-		Convey("When I validate the book", func() {
+		Convey("When the book is validated", func() {
 			err := book.Validate()
-			Convey("Then I get an error that tells me the book is invalid", func() {
+			Convey("Then an invalid book error is returned", func() {
 				So(err, ShouldBeError, "invalid book. Missing required field")
 			})
 		})
@@ -35,9 +35,9 @@ func TestBook_Validate(t *testing.T) {
 		book := Book{
 			Title: "Kindred",
 		}
-		Convey("When I validate the book", func() {
+		Convey("When the book is validated", func() {
 			err := book.Validate()
-			Convey("Then I get an error that tells me the book is invalid", func() {
+			Convey("Then an invalid book error is returned", func() {
 				So(err, ShouldBeError, "invalid book. Missing required field")
 			})
 		})
@@ -45,9 +45,9 @@ func TestBook_Validate(t *testing.T) {
 
 	Convey("Given a book without any required fields", t, func() {
 		book := Book{}
-		Convey("When I validate the book", func() {
+		Convey("When the book is validated", func() {
 			err := book.Validate()
-			Convey("Then I get an error that tells me the book is invalid", func() {
+			Convey("Then an invalid book error is returned", func() {
 				So(err, ShouldBeError, "invalid book. Missing required field")
 			})
 		})

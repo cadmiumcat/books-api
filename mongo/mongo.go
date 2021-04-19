@@ -49,14 +49,22 @@ func (m *Mongo) Close(ctx context.Context) (err error) {
 }
 
 // AddBook adds a Book
-func (m *Mongo) AddBook(book *models.Book) {
+func (m *Mongo) AddBook(ctx context.Context, book *models.Book) error {
 	session := m.Session.Copy()
 	defer session.Close()
 
-	collection := session.DB(m.Database).C(m.BooksCollection)
-	collection.Insert(book)
+	logData := log.Data{
+		"book" : book,
+	}
 
-	return
+	collection := session.DB(m.Database).C(m.BooksCollection)
+	err := collection.Insert(book)
+	if err != nil {
+		log.Event(ctx, apierrors.ErrBookNotFound.Error(), log.ERROR, log.Error(err), logData)
+		return errors.Wrap(err, "unexpected error when adding a book")
+	}
+
+	return nil
 }
 
 // GetBook returns a models.Book for a given ID.
@@ -100,7 +108,7 @@ func (m *Mongo) GetBooks(ctx context.Context) (models.Books, error) {
 	books := &models.Books{}
 	if err := list.All(&books.Items); err != nil {
 		log.Event(ctx, "unable to retrieve books", log.ERROR, log.Error(err), logData)
-		return models.Books{}, err
+		return models.Books{}, errors.Wrap(err, "unexpected error when getting books")
 	}
 
 	return *books, nil
@@ -158,7 +166,7 @@ func (m *Mongo) GetReviews(ctx context.Context, bookID string) (models.Reviews, 
 	review := &models.Reviews{}
 	if err := list.All(&review.Items); err != nil {
 		log.Event(ctx, "unable to retrieve reviews", log.ERROR, log.Error(err), logData)
-		return models.Reviews{}, err
+		return models.Reviews{}, errors.Wrap(err, "unexpected error when getting reviews")
 	}
 
 	return *review, nil
