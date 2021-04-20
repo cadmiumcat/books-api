@@ -134,3 +134,8 @@ func (api *API) getReviewHandler(writer http.ResponseWriter, request *http.Reque
 
 	log.Event(ctx, "successfully retrieved review", log.INFO, logData)
 }
+
+
+func (api *API) updateReviewHandler(writer http.ResponseWriter, request *http.Request) {
+
+}

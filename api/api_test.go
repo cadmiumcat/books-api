@@ -33,7 +33,7 @@ func TestSetup(t *testing.T) {
 			So(hasRoute(api.router, "/books/{id}/reviews", "GET"), ShouldBeTrue)
 			So(hasRoute(api.router, "/books/{id}/reviews", "POST"), ShouldBeTrue)
 			So(hasRoute(api.router, "/books/{id}/reviews/{review_id}", "GET"), ShouldBeTrue)
-
+			So(hasRoute(api.router, "/books/{id}/reviews/{review_id}", "PUT"), ShouldBeTrue)
 		})
 	})
 }
