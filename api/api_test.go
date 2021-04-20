@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/cadmiumcat/books-api/apierrors"
+	"github.com/cadmiumcat/books-api/interfaces/mock"
+	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	. "github.com/smartystreets/goconvey/convey"
 	"net/http"
@@ -11,6 +13,30 @@ import (
 	"strings"
 	"testing"
 )
+
+func hasRoute(r *mux.Router, path, method string) bool {
+	req := httptest.NewRequest(method, path, nil)
+	match := &mux.RouteMatch{}
+	return r.Match(req, match)
+}
+
+func TestSetup(t *testing.T) {
+	Convey("Given an API instance", t, func() {
+		r := mux.NewRouter()
+		ctx := context.Background()
+		api := Setup(ctx, "", r, &mock.DataStoreMock{}, &mock.HealthCheckerMock{})
+
+		Convey("When created the following routes should have been added", func() {
+			So(hasRoute(api.router, "/books", "GET"), ShouldBeTrue)
+			So(hasRoute(api.router, "/books", "POST"), ShouldBeTrue)
+			So(hasRoute(api.router, "/books/{id}", "GET"), ShouldBeTrue)
+			So(hasRoute(api.router, "/books/{id}/reviews", "GET"), ShouldBeTrue)
+			So(hasRoute(api.router, "/books/{id}/reviews", "POST"), ShouldBeTrue)
+			So(hasRoute(api.router, "/books/{id}/reviews/{review_id}", "GET"), ShouldBeTrue)
+
+		})
+	})
+}
 
 func TestHandleError(t *testing.T) {
 	t.Parallel()
