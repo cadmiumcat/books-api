@@ -14,7 +14,8 @@ import (
 	"testing"
 )
 
-func hasRoute(r *mux.Router, path, method string) bool {
+func hasRoute(t *testing.T, r *mux.Router, path, method string) bool {
+	t.Helper()
 	req := httptest.NewRequest(method, path, nil)
 	match := &mux.RouteMatch{}
 	return r.Match(req, match)
@@ -27,12 +28,12 @@ func TestSetup(t *testing.T) {
 		api := Setup(ctx, "", r, &mock.DataStoreMock{}, &mock.HealthCheckerMock{})
 
 		Convey("When created the following routes should have been added", func() {
-			So(hasRoute(api.router, "/books", "GET"), ShouldBeTrue)
-			So(hasRoute(api.router, "/books", "POST"), ShouldBeTrue)
-			So(hasRoute(api.router, "/books/{id}", "GET"), ShouldBeTrue)
-			So(hasRoute(api.router, "/books/{id}/reviews", "GET"), ShouldBeTrue)
-			So(hasRoute(api.router, "/books/{id}/reviews", "POST"), ShouldBeTrue)
-			So(hasRoute(api.router, "/books/{id}/reviews/{review_id}", "GET"), ShouldBeTrue)
+			So(hasRoute(t, api.router, "/books", "GET"), ShouldBeTrue)
+			So(hasRoute(t, api.router, "/books", "POST"), ShouldBeTrue)
+			So(hasRoute(t, api.router, "/books/{id}", "GET"), ShouldBeTrue)
+			So(hasRoute(t, api.router, "/books/{id}/reviews", "GET"), ShouldBeTrue)
+			So(hasRoute(t, api.router, "/books/{id}/reviews", "POST"), ShouldBeTrue)
+			So(hasRoute(t, api.router, "/books/{id}/reviews/{review_id}", "GET"), ShouldBeTrue)
 
 		})
 	})

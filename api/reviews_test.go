@@ -53,10 +53,11 @@ var emptyReviews = models.Reviews{
 
 var errMongoDB = errors.New("unexpected error in MongoDB")
 
-func marshalJSON(data interface{}) string {
+func marshalJSON(t *testing.T, data interface{}) string {
+	t.Helper()
 	out, err := json.Marshal(data)
 	if err != nil {
-		panic(err)
+		t.Fatalf("err: %s", err)
 	}
 
 	return string(out)
@@ -133,7 +134,7 @@ func TestGetReviewHandler(t *testing.T) {
 			Convey("And the GetReview function is called once", func() {
 				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
 				So(mockDataStore.GetReviewCalls(), ShouldHaveLength, 1)
-				So(response.Body.String(), ShouldEqual, marshalJSON(bookReview1))
+				So(response.Body.String(), ShouldEqual, marshalJSON(t, bookReview1))
 			})
 		})
 	})
