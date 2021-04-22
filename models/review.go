@@ -10,6 +10,7 @@ type Review struct {
 	ID          string      `json:"id" bson:"_id"`
 	User        User        `json:"user,omitempty" bson:"user,omitempty"`
 	Message     string      `json:"message,omitempty" bson:"message,omitempty"`
+	BookID      string      `json:"book_id" bson:"book_id"`
 	Links       *ReviewLink `json:"links,omitempty" bson:"links,omitempty"`
 	LastUpdated time.Time   `json:"last_updated" bson:"last_updated"`
 }

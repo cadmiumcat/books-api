@@ -51,6 +51,7 @@ func (api *API) addReviewHandler(writer http.ResponseWriter, request *http.Reque
 	}
 
 	review.ID = uuid.NewV4().String()
+	review.BookID = bookID
 	review.Links.Self = fmt.Sprintf("/books/%s/reviews/%s", bookID, review.ID)
 	review.Links.Book = fmt.Sprintf("/books/%s", bookID)
 	review.LastUpdated = time.Now().UTC()
