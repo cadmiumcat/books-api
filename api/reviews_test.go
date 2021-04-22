@@ -25,6 +25,7 @@ const (
 	emptyID                   = ""
 	bookIDNotInStore          = "notInStore"
 	reviewInvalidMessage      = `{"message": ""}`
+	reviewInvalidUpdate       = `{""`
 	reviewValid               = `{"message": "my review", "user": {"forenames": "name", "surname": "surname"}}`
 	internalSeverErrorMessage = "internal server error\n"
 )
@@ -595,7 +596,8 @@ func TestAddReviewHandler(t *testing.T) {
 func TestUpdateReviewHandler(t *testing.T) {
 	Convey("Given an HTTP PUT request to the /books/{id}/reviews/{review_id} endpoint", t, func() {
 
-		Convey("When the book and review exists, and the review update is valid", func() {
+		Convey("When the book and review exist, and the review update is valid", func() {
+			// TODO - how can I get GetReviewFunc to return a different value depending on how many times it has been called?
 			mockDataStore := mock.DataStoreMock{
 				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
 					return nil, nil
@@ -622,10 +624,48 @@ func TestUpdateReviewHandler(t *testing.T) {
 			api.updateReviewHandler(response, request)
 			Convey("Then the HTTP response code is 200", func() {
 				So(response.Code, ShouldEqual, http.StatusOK)
+				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
+				So(mockDataStore.GetReviewCalls(), ShouldHaveLength, 2)
+				So(mockDataStore.UpdateReviewCalls(), ShouldHaveLength, 1)
 			})
 			Convey("And the response body contains the updated review", func() {
 				So(response.Body.String(), ShouldEqual, marshalJSON(t, reviewUpdated))
 			})
 		})
+
+		Convey("When the book and review exist, but the review update is not valid", func() {
+			mockDataStore := mock.DataStoreMock{
+				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
+					return nil, nil
+				},
+				GetReviewFunc: func(ctx context.Context, reviewID string) (*models.Review, error) {
+					return &models.Review{}, nil
+				},
+			}
+			api := API{dataStore: &mockDataStore}
+
+			body := strings.NewReader(reviewInvalidUpdate)
+			request := httptest.NewRequest("PUT", "/books/"+bookID1+"/reviews"+reviewID1, body)
+
+			expectedUrlVars := map[string]string{
+				"id":       bookID1,
+				"reviewID": reviewID1,
+			}
+			request = mux.SetURLVars(request, expectedUrlVars)
+			response := httptest.NewRecorder()
+
+			api.updateReviewHandler(response, request)
+			Convey("Then the HTTP response code is 400", func() {
+				So(response.Code, ShouldEqual, http.StatusBadRequest)
+			})
+			Convey("And it returns an error saying the review is invalid", func() {
+				So(response.Body.String(), ShouldEqual, "invalid review\n")
+				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
+				So(mockDataStore.GetReviewCalls(), ShouldHaveLength, 1)
+				So(mockDataStore.UpdateReviewCalls(), ShouldHaveLength, 0)
+			})
+		})
+
 	})
+
 }
