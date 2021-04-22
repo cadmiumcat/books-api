@@ -126,7 +126,7 @@ func (m *Mongo) AddReview(review *models.Review) {
 	return
 }
 
-func (m *Mongo) UpdateReview(reviewID string, review *models.Review) {
+func (m *Mongo) UpdateReview(reviewID string, review *models.Review) error {
 	s := m.Session.Copy()
 	defer s.Close()
 
@@ -150,8 +150,10 @@ func (m *Mongo) UpdateReview(reviewID string, review *models.Review) {
 
 	update := bson.M{"$set": updates}
 	if err := s.DB(m.Database).C(m.ReviewsCollection).UpdateId(reviewID, update); err != nil {
-		return
+		return err
 	}
+
+	return nil
 }
 
 // GetReview returns a models.Review for a given reviewID.

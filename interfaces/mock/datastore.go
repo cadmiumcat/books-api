@@ -45,7 +45,7 @@ var _ interfaces.DataStore = &DataStoreMock{}
 //             InitFunc: func(in1 config.MongoConfig) error {
 // 	               panic("mock out the Init method")
 //             },
-//             UpdateReviewFunc: func(reviewID string, review *models.Review)  {
+//             UpdateReviewFunc: func(reviewID string, review *models.Review) error {
 // 	               panic("mock out the UpdateReview method")
 //             },
 //         }
@@ -80,7 +80,7 @@ type DataStoreMock struct {
 	InitFunc func(in1 config.MongoConfig) error
 
 	// UpdateReviewFunc mocks the UpdateReview method.
-	UpdateReviewFunc func(reviewID string, review *models.Review)
+	UpdateReviewFunc func(reviewID string, review *models.Review) error
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -416,7 +416,7 @@ func (mock *DataStoreMock) InitCalls() []struct {
 }
 
 // UpdateReview calls UpdateReviewFunc.
-func (mock *DataStoreMock) UpdateReview(reviewID string, review *models.Review) {
+func (mock *DataStoreMock) UpdateReview(reviewID string, review *models.Review) error {
 	if mock.UpdateReviewFunc == nil {
 		panic("DataStoreMock.UpdateReviewFunc: method is nil but DataStore.UpdateReview was just called")
 	}
@@ -430,7 +430,7 @@ func (mock *DataStoreMock) UpdateReview(reviewID string, review *models.Review) 
 	mock.lockUpdateReview.Lock()
 	mock.calls.UpdateReview = append(mock.calls.UpdateReview, callInfo)
 	mock.lockUpdateReview.Unlock()
-	mock.UpdateReviewFunc(reviewID, review)
+	return mock.UpdateReviewFunc(reviewID, review)
 }
 
 // UpdateReviewCalls gets all the calls that were made to UpdateReview.

@@ -14,6 +14,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 const (
@@ -49,6 +50,23 @@ var bookReview2 = models.Review{
 var emptyReviews = models.Reviews{
 	Count: 0,
 	Items: nil,
+}
+
+var reviewUpdated = models.Review{
+	ID: reviewID1,
+	User: models.User{
+		Forenames: "new name",
+		Surname:   "old surname",
+	},
+	Message:     "old review",
+	LastUpdated: time.Now(),
+}
+
+var reviewUpdate = models.Review{
+	User: models.User{
+		Forenames: "new Name",
+	},
+	Message: "",
 }
 
 var errMongoDB = errors.New("unexpected error in MongoDB")
@@ -572,5 +590,42 @@ func TestAddReviewHandler(t *testing.T) {
 			})
 		})
 	})
+}
 
+func TestUpdateReviewHandler(t *testing.T) {
+	Convey("Given an HTTP PUT request to the /books/{id}/reviews/{review_id} endpoint", t, func() {
+
+		Convey("When the book and review exists, and the review update is valid", func() {
+			mockDataStore := mock.DataStoreMock{
+				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
+					return nil, nil
+				},
+				GetReviewFunc: func(ctx context.Context, reviewID string) (*models.Review, error) {
+					return &reviewUpdated, nil
+				},
+				UpdateReviewFunc: func(reviewID string, review *models.Review) error {
+					return nil
+				},
+			}
+			api := API{dataStore: &mockDataStore}
+
+			body := strings.NewReader(marshalJSON(t, reviewUpdate))
+			request := httptest.NewRequest("PUT", "/books/"+bookID1+"/reviews"+reviewID1, body)
+
+			expectedUrlVars := map[string]string{
+				"id":       bookID1,
+				"reviewID": reviewID1,
+			}
+			request = mux.SetURLVars(request, expectedUrlVars)
+			response := httptest.NewRecorder()
+
+			api.updateReviewHandler(response, request)
+			Convey("Then the HTTP response code is 200", func() {
+				So(response.Code, ShouldEqual, http.StatusOK)
+			})
+			Convey("And the response body contains the updated review", func() {
+				So(response.Body.String(), ShouldEqual, marshalJSON(t, reviewUpdated))
+			})
+		})
+	})
 }

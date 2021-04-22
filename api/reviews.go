@@ -185,7 +185,7 @@ func (api *API) updateReviewHandler(writer http.ResponseWriter, request *http.Re
 		return
 	}
 
-	if err := WriteJSONBody(review, writer, http.StatusCreated); err != nil {
+	if err := WriteJSONBody(review, writer, http.StatusOK); err != nil {
 		handleError(ctx, writer, err, logData)
 		return
 	}
