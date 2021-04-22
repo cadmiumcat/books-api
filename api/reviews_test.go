@@ -666,6 +666,183 @@ func TestUpdateReviewHandler(t *testing.T) {
 			})
 		})
 
+		Convey("When the book does not exist", func() {
+			mockDataStore := mock.DataStoreMock{
+				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
+					return nil, apierrors.ErrBookNotFound
+				},
+			}
+			api := API{dataStore: &mockDataStore}
+
+			body := strings.NewReader(reviewInvalidUpdate)
+			request := httptest.NewRequest("PUT", "/books/"+bookID1+"/reviews"+reviewID1, body)
+
+			expectedUrlVars := map[string]string{
+				"id":       bookID1,
+				"reviewID": reviewID1,
+			}
+			request = mux.SetURLVars(request, expectedUrlVars)
+			response := httptest.NewRecorder()
+
+			api.updateReviewHandler(response, request)
+			Convey("Then the HTTP response code is 404", func() {
+				So(response.Code, ShouldEqual, http.StatusNotFound)
+			})
+			Convey("And it returns an error saying the book was not found", func() {
+				So(response.Body.String(), ShouldEqual, "book not found\n")
+				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
+				So(mockDataStore.GetReviewCalls(), ShouldHaveLength, 0)
+				So(mockDataStore.UpdateReviewCalls(), ShouldHaveLength, 0)
+			})
+		})
+
+		Convey("When the review does not exist", func() {
+			mockDataStore := mock.DataStoreMock{
+				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
+					return nil, nil
+				},
+				GetReviewFunc: func(ctx context.Context, reviewID string) (*models.Review, error) {
+					return nil, apierrors.ErrReviewNotFound
+				},
+			}
+			api := API{dataStore: &mockDataStore}
+
+			body := strings.NewReader(reviewInvalidUpdate)
+			request := httptest.NewRequest("PUT", "/books/"+bookID1+"/reviews"+reviewID1, body)
+
+			expectedUrlVars := map[string]string{
+				"id":       bookID1,
+				"reviewID": reviewID1,
+			}
+			request = mux.SetURLVars(request, expectedUrlVars)
+			response := httptest.NewRecorder()
+
+			api.updateReviewHandler(response, request)
+			Convey("Then the HTTP response code is 404", func() {
+				So(response.Code, ShouldEqual, http.StatusNotFound)
+			})
+			Convey("And it returns an error saying the review was not found", func() {
+				So(response.Body.String(), ShouldEqual, "review not found\n")
+				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
+				So(mockDataStore.GetReviewCalls(), ShouldHaveLength, 1)
+				So(mockDataStore.UpdateReviewCalls(), ShouldHaveLength, 0)
+			})
+		})
+
+		Convey("When the {id} is empty", func() {
+			mockDataStore := &mock.DataStoreMock{}
+			api := API{dataStore: mockDataStore}
+
+			body := strings.NewReader(reviewInvalidUpdate)
+			request := httptest.NewRequest("PUT", "/books/"+emptyID+"/reviews"+reviewID1, body)
+
+			expectedUrlVars := map[string]string{
+				"id":       emptyID,
+				"reviewID": reviewID1,
+			}
+			request = mux.SetURLVars(request, expectedUrlVars)
+			response := httptest.NewRecorder()
+
+			api.updateReviewHandler(response, request)
+			Convey("Then the HTTP response code is 400", func() {
+				So(response.Code, ShouldEqual, http.StatusBadRequest)
+			})
+			Convey("And it returns an error saying the book ID is empty", func() {
+				So(response.Body.String(), ShouldEqual, "empty book ID in request\n")
+				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 0)
+				So(mockDataStore.GetReviewCalls(), ShouldHaveLength, 0)
+				So(mockDataStore.UpdateReviewCalls(), ShouldHaveLength, 0)
+			})
+		})
+
+		Convey("When the {review_id} is empty", func() {
+			mockDataStore := &mock.DataStoreMock{}
+			api := API{dataStore: mockDataStore}
+
+			body := strings.NewReader(reviewInvalidUpdate)
+			request := httptest.NewRequest("PUT", "/books/"+bookID1+"/reviews"+emptyID, body)
+
+			expectedUrlVars := map[string]string{
+				"id":       bookID1,
+				"reviewID": emptyID,
+			}
+			request = mux.SetURLVars(request, expectedUrlVars)
+			response := httptest.NewRecorder()
+
+			api.updateReviewHandler(response, request)
+			Convey("Then the HTTP response code is 400", func() {
+				So(response.Code, ShouldEqual, http.StatusBadRequest)
+			})
+			Convey("And it returns an error saying the review ID is empty", func() {
+				So(response.Body.String(), ShouldEqual, "empty review ID in request\n")
+				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 0)
+				So(mockDataStore.GetReviewCalls(), ShouldHaveLength, 0)
+				So(mockDataStore.UpdateReviewCalls(), ShouldHaveLength, 0)
+			})
+		})
+
+		Convey("When the GetBook returns an error", func() {
+			mockDataStore := mock.DataStoreMock{
+				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
+					return nil, errMongoDB
+				},
+			}
+			api := API{dataStore: &mockDataStore}
+
+			body := strings.NewReader(marshalJSON(t, reviewUpdate))
+			request := httptest.NewRequest("PUT", "/books/"+bookID1+"/reviews"+reviewID1, body)
+
+			expectedUrlVars := map[string]string{
+				"id":       bookID1,
+				"reviewID": reviewID1,
+			}
+			request = mux.SetURLVars(request, expectedUrlVars)
+			response := httptest.NewRecorder()
+
+			api.updateReviewHandler(response, request)
+			Convey("Then the HTTP response code is 500", func() {
+				So(response.Code, ShouldEqual, http.StatusInternalServerError)
+			})
+			Convey("And it returns an internal server error", func() {
+				So(response.Body.String(), ShouldEqual, "internal server error\n")
+				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
+				So(mockDataStore.GetReviewCalls(), ShouldHaveLength, 0)
+				So(mockDataStore.UpdateReviewCalls(), ShouldHaveLength, 0)
+			})
+		})
+
+		Convey("When the GetReview returns an error", func() {
+			mockDataStore := mock.DataStoreMock{
+				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
+					return nil, nil
+				},
+				GetReviewFunc: func(ctx context.Context, reviewID string) (*models.Review, error) {
+					return nil, apierrors.ErrInternalServer
+				},
+			}
+			api := API{dataStore: &mockDataStore}
+
+			body := strings.NewReader(marshalJSON(t, reviewUpdate))
+			request := httptest.NewRequest("PUT", "/books/"+bookID1+"/reviews"+reviewID1, body)
+
+			expectedUrlVars := map[string]string{
+				"id":       bookID1,
+				"reviewID": reviewID1,
+			}
+			request = mux.SetURLVars(request, expectedUrlVars)
+			response := httptest.NewRecorder()
+
+			api.updateReviewHandler(response, request)
+			Convey("Then the HTTP response code is 500", func() {
+				So(response.Code, ShouldEqual, http.StatusInternalServerError)
+			})
+			Convey("And it returns an internal server error", func() {
+				So(response.Body.String(), ShouldEqual, "internal server error\n")
+				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
+				So(mockDataStore.GetReviewCalls(), ShouldHaveLength, 1)
+				So(mockDataStore.UpdateReviewCalls(), ShouldHaveLength, 0)
+			})
+		})
 	})
 
 }
