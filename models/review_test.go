@@ -23,7 +23,7 @@ func TestReview_Validate(t *testing.T) {
 		{
 			name: "Long review",
 			input: Review{
-				Message: RandomString(201),
+				Message: RandomString(t,201),
 				User:    User{Forename: "Avid", Surname: "Reader"},
 			},
 			expected: apierrors.ErrLongReviewMessage,
@@ -62,7 +62,8 @@ func TestReview_Validate(t *testing.T) {
 	})
 }
 
-func RandomString(n int) string {
+func RandomString(t *testing.T, n int) string {
+	t.Helper()
 	var letter = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 
 	b := make([]rune, n)
