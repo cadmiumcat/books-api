@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	uuid "github.com/satori/go.uuid"
 	"net/http"
+	"time"
 )
 
 func (api *API) addReviewHandler(writer http.ResponseWriter, request *http.Request) {
@@ -52,6 +53,7 @@ func (api *API) addReviewHandler(writer http.ResponseWriter, request *http.Reque
 	review.ID = uuid.NewV4().String()
 	review.Links.Self = fmt.Sprintf("/books/%s/reviews/%s", bookID, review.ID)
 	review.Links.Book = fmt.Sprintf("/books/%s", bookID)
+	review.LastUpdated = time.Now().UTC()
 
 	api.dataStore.AddReview(review)
 
@@ -135,7 +137,57 @@ func (api *API) getReviewHandler(writer http.ResponseWriter, request *http.Reque
 	log.Event(ctx, "successfully retrieved review", log.INFO, logData)
 }
 
-
 func (api *API) updateReviewHandler(writer http.ResponseWriter, request *http.Request) {
+	ctx := request.Context()
+
+	bookID := mux.Vars(request)["id"]
+	reviewID := mux.Vars(request)["reviewID"]
+
+	logData := log.Data{"book_id": bookID, "review_id": reviewID}
+
+	if bookID == "" {
+		handleError(ctx, writer, apierrors.ErrEmptyBookID, logData)
+		return
+	}
+
+	if reviewID == "" {
+		handleError(ctx, writer, apierrors.ErrEmptyReviewID, logData)
+		return
+	}
+
+	// Confirm that book exists. If bookID not found, then do not check for the review
+	_, err := api.dataStore.GetBook(ctx, bookID)
+	if err != nil {
+		handleError(ctx, writer, err, logData)
+		return
+	}
+
+	// Confirm that the review exists
+	_, err = api.dataStore.GetReview(ctx, reviewID)
+	if err != nil {
+		handleError(ctx, writer, err, logData)
+		return
+	}
+
+	review := &models.Review{User: models.User{}}
+	if err := ReadJSONBody(ctx, request.Body, review); err != nil {
+		handleError(ctx, writer, apierrors.ErrInvalidReview, logData)
+		return
+	}
+
+	logData["review"] = review
+
+	api.dataStore.UpdateReview(reviewID, review)
+
+	review, err = api.dataStore.GetReview(ctx, reviewID)
+	if err != nil {
+		handleError(ctx, writer, err, logData)
+		return
+	}
+
+	if err := WriteJSONBody(review, writer, http.StatusCreated); err != nil {
+		handleError(ctx, writer, err, logData)
+		return
+	}
 
 }

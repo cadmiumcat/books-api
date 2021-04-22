@@ -24,7 +24,7 @@ const (
 	emptyID                   = ""
 	bookIDNotInStore          = "notInStore"
 	reviewInvalidMessage      = `{"message": ""}`
-	reviewValid               = `{"message": "my review", "user": {"forename": "name", "surname": "surname"}}`
+	reviewValid               = `{"message": "my review", "user": {"forenames": "name", "surname": "surname"}}`
 	internalSeverErrorMessage = "internal server error\n"
 )
 
@@ -34,8 +34,8 @@ var bookReview1 = models.Review{
 		Book: bookID1,
 	},
 	User: models.User{
-		Forename: "name",
-		Surname:  "surname",
+		Forenames: "name",
+		Surname:   "surname",
 	},
 }
 
@@ -568,7 +568,7 @@ func TestAddReviewHandler(t *testing.T) {
 			api.addReviewHandler(response, request)
 			Convey("Then the HTTP response code is 400", func() {
 				So(response.Code, ShouldEqual, http.StatusBadRequest)
-				So(response.Body.String(), ShouldEqual, "invalid review. Missing required field\n")
+				So(response.Body.String(), ShouldEqual, "invalid review\n")
 			})
 		})
 	})

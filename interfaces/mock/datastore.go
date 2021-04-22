@@ -45,6 +45,9 @@ var _ interfaces.DataStore = &DataStoreMock{}
 //             InitFunc: func(in1 config.MongoConfig) error {
 // 	               panic("mock out the Init method")
 //             },
+//             UpdateReviewFunc: func(reviewID string, review *models.Review)  {
+// 	               panic("mock out the UpdateReview method")
+//             },
 //         }
 //
 //         // use mockedDataStore in code that requires interfaces.DataStore
@@ -75,6 +78,9 @@ type DataStoreMock struct {
 
 	// InitFunc mocks the Init method.
 	InitFunc func(in1 config.MongoConfig) error
+
+	// UpdateReviewFunc mocks the UpdateReview method.
+	UpdateReviewFunc func(reviewID string, review *models.Review)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -126,15 +132,23 @@ type DataStoreMock struct {
 			// In1 is the in1 argument value.
 			In1 config.MongoConfig
 		}
+		// UpdateReview holds details about calls to the UpdateReview method.
+		UpdateReview []struct {
+			// ReviewID is the reviewID argument value.
+			ReviewID string
+			// Review is the review argument value.
+			Review *models.Review
+		}
 	}
-	lockAddBook    sync.RWMutex
-	lockAddReview  sync.RWMutex
-	lockClose      sync.RWMutex
-	lockGetBook    sync.RWMutex
-	lockGetBooks   sync.RWMutex
-	lockGetReview  sync.RWMutex
-	lockGetReviews sync.RWMutex
-	lockInit       sync.RWMutex
+	lockAddBook      sync.RWMutex
+	lockAddReview    sync.RWMutex
+	lockClose        sync.RWMutex
+	lockGetBook      sync.RWMutex
+	lockGetBooks     sync.RWMutex
+	lockGetReview    sync.RWMutex
+	lockGetReviews   sync.RWMutex
+	lockInit         sync.RWMutex
+	lockUpdateReview sync.RWMutex
 }
 
 // AddBook calls AddBookFunc.
@@ -398,5 +412,40 @@ func (mock *DataStoreMock) InitCalls() []struct {
 	mock.lockInit.RLock()
 	calls = mock.calls.Init
 	mock.lockInit.RUnlock()
+	return calls
+}
+
+// UpdateReview calls UpdateReviewFunc.
+func (mock *DataStoreMock) UpdateReview(reviewID string, review *models.Review) {
+	if mock.UpdateReviewFunc == nil {
+		panic("DataStoreMock.UpdateReviewFunc: method is nil but DataStore.UpdateReview was just called")
+	}
+	callInfo := struct {
+		ReviewID string
+		Review   *models.Review
+	}{
+		ReviewID: reviewID,
+		Review:   review,
+	}
+	mock.lockUpdateReview.Lock()
+	mock.calls.UpdateReview = append(mock.calls.UpdateReview, callInfo)
+	mock.lockUpdateReview.Unlock()
+	mock.UpdateReviewFunc(reviewID, review)
+}
+
+// UpdateReviewCalls gets all the calls that were made to UpdateReview.
+// Check the length with:
+//     len(mockedDataStore.UpdateReviewCalls())
+func (mock *DataStoreMock) UpdateReviewCalls() []struct {
+	ReviewID string
+	Review   *models.Review
+} {
+	var calls []struct {
+		ReviewID string
+		Review   *models.Review
+	}
+	mock.lockUpdateReview.RLock()
+	calls = mock.calls.UpdateReview
+	mock.lockUpdateReview.RUnlock()
 	return calls
 }

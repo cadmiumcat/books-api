@@ -12,6 +12,7 @@ import (
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"github.com/pkg/errors"
+	"time"
 )
 
 // Mongo contains the information needed to create and interact with a mongo session
@@ -123,6 +124,34 @@ func (m *Mongo) AddReview(review *models.Review) {
 	collection.Insert(review)
 
 	return
+}
+
+func (m *Mongo) UpdateReview(reviewID string, review *models.Review) {
+	s := m.Session.Copy()
+	defer s.Close()
+
+	updates := make(bson.M)
+	if review.Message != "" {
+		updates["message"] = review.Message
+	}
+
+	if review.User != (models.User{}) {
+		if review.User.Forenames != "" {
+			updates["user.forenames"] = review.User.Forenames
+		}
+		if review.User.Surname != "" {
+			updates["user.surname"] = review.User.Surname
+		}
+	}
+
+	if len(updates) > 0 {
+		updates["last_updated"] = time.Now().UTC()
+	}
+
+	update := bson.M{"$set": updates}
+	if err := s.DB(m.Database).C(m.ReviewsCollection).UpdateId(reviewID, update); err != nil {
+		return
+	}
 }
 
 // GetReview returns a models.Review for a given reviewID.

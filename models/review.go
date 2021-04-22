@@ -1,13 +1,17 @@
 package models
 
-import "github.com/cadmiumcat/books-api/apierrors"
+import (
+	"github.com/cadmiumcat/books-api/apierrors"
+	"time"
+)
 
 // A Review contains the fields that identify a review
 type Review struct {
-	ID      string      `json:"id" bson:"_id"`
-	User    User        `json:"user,omitempty" bson:"user,omitempty"`
-	Message string      `json:"message,omitempty" bson:"message,omitempty"`
-	Links   *ReviewLink `json:"links,omitempty" bson:"links,omitempty"`
+	ID          string      `json:"id" bson:"_id"`
+	User        User        `json:"user,omitempty" bson:"user,omitempty"`
+	Message     string      `json:"message,omitempty" bson:"message,omitempty"`
+	Links       *ReviewLink `json:"links,omitempty" bson:"links,omitempty"`
+	LastUpdated time.Time   `json:"last_updated" bson:"last_updated"`
 }
 
 // ReviewLink is the relationship between a Book and a Review
@@ -23,12 +27,11 @@ type Reviews struct {
 }
 
 func (r Review) Validate() error {
-
 	if r.Message == "" {
 		return apierrors.ErrEmptyReviewMessage
 	}
 
-	if r.User.Forename == "" || r.User.Surname == "" {
+	if r.User.Forenames == "" || r.User.Surname == "" {
 		return apierrors.ErrEmptyReviewUser
 	}
 
@@ -40,6 +43,6 @@ func (r Review) Validate() error {
 }
 
 type User struct {
-	Forename string `json:"forename,omitempty" bson:"forename,omitempty"`
-	Surname  string `json:"surname,omitempty" bson:"surname,omitempty"`
+	Forenames string `json:"forenames,omitempty" bson:"forenames,omitempty"`
+	Surname   string `json:"surname,omitempty" bson:"surname,omitempty"`
 }

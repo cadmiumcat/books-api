@@ -6,9 +6,9 @@ import (
 
 // Error messages for the books-api
 var (
-	ErrInvalidReview        = errors.New("invalid review. Missing required field")
+	ErrInvalidReview        = errors.New("invalid review")
 	ErrEmptyReviewMessage   = errors.New("empty review provided. Please enter a message")
-	ErrEmptyReviewUser      = errors.New("empty forename/surname provided. Please enter a valid user")
+	ErrEmptyReviewUser      = errors.New("empty forenames/surname provided. Please enter a valid user")
 	ErrLongReviewMessage    = errors.New("review message is too long")
 	ErrEmptyRequestBody     = errors.New("empty request body")
 	ErrEmptyBookID          = errors.New("empty book ID in request")

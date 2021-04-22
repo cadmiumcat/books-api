@@ -17,14 +17,14 @@ func TestReview_Validate(t *testing.T) {
 	}{
 		{
 			name:     "Empty review",
-			input:    Review{Message: ""},
+			input:    Review{},
 			expected: apierrors.ErrEmptyReviewMessage,
 		},
 		{
 			name: "Long review",
 			input: Review{
-				Message: RandomString(t,201),
-				User:    User{Forename: "Avid", Surname: "Reader"},
+				Message: RandomString(t, 201),
+				User:    User{Forenames: "Avid", Surname: "Reader"},
 			},
 			expected: apierrors.ErrLongReviewMessage,
 		},
@@ -50,7 +50,7 @@ func TestReview_Validate(t *testing.T) {
 		review := &Review{
 			Message: "A perfect review. 10/10. Would read again",
 			User: User{
-				Forename: "Reviewer", Surname: "OfBooks",
+				Forenames: "Reviewer", Surname: "OfBooks",
 			},
 		}
 		Convey("When I validate it", func() {
