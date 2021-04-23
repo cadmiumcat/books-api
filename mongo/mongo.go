@@ -125,6 +125,7 @@ func (m *Mongo) AddReview(review *models.Review) {
 
 	return
 }
+
 // UpdateReview updates an existing Review.
 // Only the message and user can be updated.
 // It returns an error if the review is not found
@@ -151,9 +152,11 @@ func (m *Mongo) UpdateReview(ctx context.Context, reviewID string, review *model
 		}
 	}
 
-	if len(updates) > 0 {
-		updates["last_updated"] = time.Now().UTC()
+	if len(updates) == 0 {
+		return nil
 	}
+
+	updates["last_updated"] = time.Now().UTC()
 
 	update := bson.M{"$set": updates}
 	if err := s.DB(m.Database).C(m.ReviewsCollection).UpdateId(reviewID, update); err != nil {
