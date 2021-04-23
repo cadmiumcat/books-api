@@ -125,10 +125,17 @@ func (m *Mongo) AddReview(review *models.Review) {
 
 	return
 }
-
-func (m *Mongo) UpdateReview(reviewID string, review *models.Review) error {
+// UpdateReview updates an existing Review.
+// Only the message and user can be updated.
+// It returns an error if the review is not found
+func (m *Mongo) UpdateReview(ctx context.Context, reviewID string, review *models.Review) error {
 	s := m.Session.Copy()
 	defer s.Close()
+
+	logData := log.Data{
+		"review_id":  reviewID,
+		"database":   m.Database,
+		"collection": m.ReviewsCollection}
 
 	updates := make(bson.M)
 	if review.Message != "" {
@@ -150,6 +157,10 @@ func (m *Mongo) UpdateReview(reviewID string, review *models.Review) error {
 
 	update := bson.M{"$set": updates}
 	if err := s.DB(m.Database).C(m.ReviewsCollection).UpdateId(reviewID, update); err != nil {
+		if err == mgo.ErrNotFound {
+			log.Event(ctx, apierrors.ErrReviewNotFound.Error(), log.ERROR, log.Error(err), logData)
+			return apierrors.ErrReviewNotFound
+		}
 		return err
 	}
 

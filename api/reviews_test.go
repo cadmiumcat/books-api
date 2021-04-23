@@ -605,7 +605,7 @@ func TestUpdateReviewHandler(t *testing.T) {
 				GetReviewFunc: func(ctx context.Context, reviewID string) (*models.Review, error) {
 					return &reviewUpdated, nil
 				},
-				UpdateReviewFunc: func(reviewID string, review *models.Review) error {
+				UpdateReviewFunc: func(ctx context.Context, reviewID string, review *models.Review) error {
 					return nil
 				},
 			}

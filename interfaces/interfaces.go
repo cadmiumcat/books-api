@@ -23,7 +23,7 @@ type DataStore interface {
 	GetReview(ctx context.Context, reviewID string) (*models.Review, error)
 	GetReviews(ctx context.Context, bookID string) (models.Reviews, error)
 	AddReview(review *models.Review)
-	UpdateReview(reviewID string, review *models.Review) (err error)
+	UpdateReview(ctx context.Context, reviewID string, review *models.Review) (err error)
 }
 
 // HealthChecker defines the required methods from Healthcheck

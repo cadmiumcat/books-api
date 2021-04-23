@@ -178,7 +178,11 @@ func (api *API) updateReviewHandler(writer http.ResponseWriter, request *http.Re
 
 	logData["review"] = review
 
-	api.dataStore.UpdateReview(reviewID, review)
+	err = api.dataStore.UpdateReview(ctx, reviewID, review)
+	if err != nil {
+		handleError(ctx, writer, err, logData)
+		return
+	}
 
 	review, err = api.dataStore.GetReview(ctx, reviewID)
 	if err != nil {
@@ -190,5 +194,4 @@ func (api *API) updateReviewHandler(writer http.ResponseWriter, request *http.Re
 		handleError(ctx, writer, err, logData)
 		return
 	}
-
 }

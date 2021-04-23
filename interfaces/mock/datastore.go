@@ -45,7 +45,7 @@ var _ interfaces.DataStore = &DataStoreMock{}
 //             InitFunc: func(in1 config.MongoConfig) error {
 // 	               panic("mock out the Init method")
 //             },
-//             UpdateReviewFunc: func(reviewID string, review *models.Review) error {
+//             UpdateReviewFunc: func(ctx context.Context, reviewID string, review *models.Review) error {
 // 	               panic("mock out the UpdateReview method")
 //             },
 //         }
@@ -80,7 +80,7 @@ type DataStoreMock struct {
 	InitFunc func(in1 config.MongoConfig) error
 
 	// UpdateReviewFunc mocks the UpdateReview method.
-	UpdateReviewFunc func(reviewID string, review *models.Review) error
+	UpdateReviewFunc func(ctx context.Context, reviewID string, review *models.Review) error
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -134,6 +134,8 @@ type DataStoreMock struct {
 		}
 		// UpdateReview holds details about calls to the UpdateReview method.
 		UpdateReview []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
 			// ReviewID is the reviewID argument value.
 			ReviewID string
 			// Review is the review argument value.
@@ -416,31 +418,35 @@ func (mock *DataStoreMock) InitCalls() []struct {
 }
 
 // UpdateReview calls UpdateReviewFunc.
-func (mock *DataStoreMock) UpdateReview(reviewID string, review *models.Review) error {
+func (mock *DataStoreMock) UpdateReview(ctx context.Context, reviewID string, review *models.Review) error {
 	if mock.UpdateReviewFunc == nil {
 		panic("DataStoreMock.UpdateReviewFunc: method is nil but DataStore.UpdateReview was just called")
 	}
 	callInfo := struct {
+		Ctx      context.Context
 		ReviewID string
 		Review   *models.Review
 	}{
+		Ctx:      ctx,
 		ReviewID: reviewID,
 		Review:   review,
 	}
 	mock.lockUpdateReview.Lock()
 	mock.calls.UpdateReview = append(mock.calls.UpdateReview, callInfo)
 	mock.lockUpdateReview.Unlock()
-	return mock.UpdateReviewFunc(reviewID, review)
+	return mock.UpdateReviewFunc(ctx, reviewID, review)
 }
 
 // UpdateReviewCalls gets all the calls that were made to UpdateReview.
 // Check the length with:
 //     len(mockedDataStore.UpdateReviewCalls())
 func (mock *DataStoreMock) UpdateReviewCalls() []struct {
+	Ctx      context.Context
 	ReviewID string
 	Review   *models.Review
 } {
 	var calls []struct {
+		Ctx      context.Context
 		ReviewID string
 		Review   *models.Review
 	}
