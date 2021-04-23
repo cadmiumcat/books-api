@@ -477,7 +477,9 @@ func TestAddReviewHandler(t *testing.T) {
 				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
 					return &book1, nil
 				},
-				AddReviewFunc: func(review *models.Review) {},
+				AddReviewFunc: func(ctx context.Context, review *models.Review) error {
+					return nil
+				},
 			}
 
 			api := &API{dataStore: mockDataStore}
@@ -503,7 +505,9 @@ func TestAddReviewHandler(t *testing.T) {
 				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
 					return &book1, nil
 				},
-				AddReviewFunc: func(review *models.Review) {},
+				AddReviewFunc: func(ctx context.Context, review *models.Review) error {
+					return nil
+				},
 			}
 
 			api := &API{dataStore: mockDataStore}
@@ -620,7 +624,6 @@ func TestUpdateReviewHandler(t *testing.T) {
 			}
 			request = mux.SetURLVars(request, expectedUrlVars)
 			response := httptest.NewRecorder()
-
 			api.updateReviewHandler(response, request)
 			Convey("Then the HTTP response code is 200", func() {
 				So(response.Code, ShouldEqual, http.StatusOK)

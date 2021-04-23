@@ -24,7 +24,7 @@ var _ interfaces.DataStore = &DataStoreMock{}
 //             AddBookFunc: func(ctx context.Context, book *models.Book) error {
 // 	               panic("mock out the AddBook method")
 //             },
-//             AddReviewFunc: func(review *models.Review)  {
+//             AddReviewFunc: func(ctx context.Context, review *models.Review) error {
 // 	               panic("mock out the AddReview method")
 //             },
 //             CloseFunc: func(ctx context.Context) error {
@@ -59,7 +59,7 @@ type DataStoreMock struct {
 	AddBookFunc func(ctx context.Context, book *models.Book) error
 
 	// AddReviewFunc mocks the AddReview method.
-	AddReviewFunc func(review *models.Review)
+	AddReviewFunc func(ctx context.Context, review *models.Review) error
 
 	// CloseFunc mocks the Close method.
 	CloseFunc func(ctx context.Context) error
@@ -93,6 +93,8 @@ type DataStoreMock struct {
 		}
 		// AddReview holds details about calls to the AddReview method.
 		AddReview []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
 			// Review is the review argument value.
 			Review *models.Review
 		}
@@ -189,28 +191,32 @@ func (mock *DataStoreMock) AddBookCalls() []struct {
 }
 
 // AddReview calls AddReviewFunc.
-func (mock *DataStoreMock) AddReview(review *models.Review) {
+func (mock *DataStoreMock) AddReview(ctx context.Context, review *models.Review) error {
 	if mock.AddReviewFunc == nil {
 		panic("DataStoreMock.AddReviewFunc: method is nil but DataStore.AddReview was just called")
 	}
 	callInfo := struct {
+		Ctx    context.Context
 		Review *models.Review
 	}{
+		Ctx:    ctx,
 		Review: review,
 	}
 	mock.lockAddReview.Lock()
 	mock.calls.AddReview = append(mock.calls.AddReview, callInfo)
 	mock.lockAddReview.Unlock()
-	mock.AddReviewFunc(review)
+	return mock.AddReviewFunc(ctx, review)
 }
 
 // AddReviewCalls gets all the calls that were made to AddReview.
 // Check the length with:
 //     len(mockedDataStore.AddReviewCalls())
 func (mock *DataStoreMock) AddReviewCalls() []struct {
+	Ctx    context.Context
 	Review *models.Review
 } {
 	var calls []struct {
+		Ctx    context.Context
 		Review *models.Review
 	}
 	mock.lockAddReview.RLock()

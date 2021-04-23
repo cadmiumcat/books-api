@@ -6,7 +6,6 @@ import (
 	dpMongodb "github.com/ONSdigital/dp-mongodb"
 	dpMongoLock "github.com/ONSdigital/dp-mongodb/dplock"
 	"github.com/ONSdigital/log.go/log"
-	"github.com/cadmiumcat/books-api/apierrors"
 	"github.com/cadmiumcat/books-api/config"
 	"github.com/cadmiumcat/books-api/models"
 	"github.com/globalsign/mgo"
@@ -61,7 +60,7 @@ func (m *Mongo) AddBook(ctx context.Context, book *models.Book) error {
 	collection := session.DB(m.Database).C(m.BooksCollection)
 	err := collection.Insert(book)
 	if err != nil {
-		log.Event(ctx, apierrors.ErrBookNotFound.Error(), log.ERROR, log.Error(err), logData)
+		log.Event(ctx, "unexpected error when adding a book", log.ERROR, log.Error(err), logData)
 		return errors.Wrap(err, "unexpected error when adding a book")
 	}
 
@@ -84,9 +83,10 @@ func (m *Mongo) GetBook(ctx context.Context, ID string) (*models.Book, error) {
 
 	if err != nil {
 		if err == mgo.ErrNotFound {
-			log.Event(ctx, apierrors.ErrBookNotFound.Error(), log.ERROR, log.Error(err), logData)
-			return nil, apierrors.ErrBookNotFound
+			log.Event(ctx, ErrBookNotFound.Error(), log.ERROR, log.Error(err), logData)
+			return nil, ErrBookNotFound
 		}
+		log.Event(ctx, "unexpected error when getting a book", log.ERROR, log.Error(err), logData)
 		return nil, errors.Wrap(err, "unexpected error when getting a book")
 	}
 
@@ -116,14 +116,23 @@ func (m *Mongo) GetBooks(ctx context.Context) (models.Books, error) {
 }
 
 // AddReview adds a Review to a Book
-func (m *Mongo) AddReview(review *models.Review) {
+func (m *Mongo) AddReview(ctx context.Context, review *models.Review) error {
 	session := m.Session.Copy()
 	defer session.Close()
 
-	collection := session.DB(m.Database).C(m.ReviewsCollection)
-	collection.Insert(review)
+	logData := log.Data{
+		"review": review,
+	}
 
-	return
+	collection := session.DB(m.Database).C(m.ReviewsCollection)
+	err := collection.Insert(review)
+
+	if err != nil {
+		log.Event(ctx, "unexpected error when adding a book", log.ERROR, log.Error(err), logData)
+		return errors.Wrap(err, "unexpected error when adding a book")
+	}
+
+	return nil
 }
 
 // UpdateReview updates an existing Review.
@@ -161,8 +170,8 @@ func (m *Mongo) UpdateReview(ctx context.Context, reviewID string, review *model
 	update := bson.M{"$set": updates}
 	if err := s.DB(m.Database).C(m.ReviewsCollection).UpdateId(reviewID, update); err != nil {
 		if err == mgo.ErrNotFound {
-			log.Event(ctx, apierrors.ErrReviewNotFound.Error(), log.ERROR, log.Error(err), logData)
-			return apierrors.ErrReviewNotFound
+			log.Event(ctx, ErrReviewNotFound.Error(), log.ERROR, log.Error(err), logData)
+			return ErrReviewNotFound
 		}
 		return err
 	}
@@ -186,8 +195,8 @@ func (m *Mongo) GetReview(ctx context.Context, reviewID string) (*models.Review,
 
 	if err != nil {
 		if err == mgo.ErrNotFound {
-			log.Event(ctx, apierrors.ErrReviewNotFound.Error(), log.ERROR, log.Error(err), logData)
-			return nil, apierrors.ErrReviewNotFound
+			log.Event(ctx, ErrReviewNotFound.Error(), log.ERROR, log.Error(err), logData)
+			return nil, ErrReviewNotFound
 		}
 		return nil, errors.Wrap(err, "unexpected error when getting a review")
 	}

@@ -56,7 +56,7 @@ func (api *API) addReviewHandler(writer http.ResponseWriter, request *http.Reque
 	review.Links.Book = fmt.Sprintf("/books/%s", bookID)
 	review.LastUpdated = time.Now().UTC()
 
-	api.dataStore.AddReview(review)
+	api.dataStore.AddReview(ctx, review)
 
 	if err := WriteJSONBody(review, writer, http.StatusCreated); err != nil {
 		handleError(ctx, writer, err, logData)
