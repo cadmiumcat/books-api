@@ -8,6 +8,8 @@ import (
 	"testing"
 )
 
+const bookID = "123"
+
 func TestReview_Validate(t *testing.T) {
 
 	tests := []struct {
@@ -60,6 +62,27 @@ func TestReview_Validate(t *testing.T) {
 			})
 		})
 	})
+}
+
+func TestNewReview(t *testing.T) {
+	Convey("Given a bookID", t, func() {
+		Convey("When a new review is created for that book", func() {
+			review := NewReview(bookID)
+			Convey("Then the review ID should not be empty", func() {
+				So(review.ID, ShouldNotBeEmpty)
+			})
+			Convey("And the review's BookID should match the given bookID", func() {
+				So(review.BookID, ShouldEqual, bookID)
+			})
+			Convey("And the review's book link is correct", func() {
+				So(review.Links.Book, ShouldEqual, fmt.Sprintf("/books/%s", bookID))
+			})
+			Convey("And the review's self link should have the correct structure", func() {
+				So(review.Links.Self, ShouldStartWith, fmt.Sprintf("/books/%s/reviews/", bookID))
+			})
+		})
+	})
+
 }
 
 func RandomString(t *testing.T, n int) string {

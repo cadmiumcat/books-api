@@ -1,14 +1,11 @@
 package api
 
 import (
-	"fmt"
 	"github.com/ONSdigital/log.go/log"
 	"github.com/cadmiumcat/books-api/apierrors"
 	"github.com/cadmiumcat/books-api/models"
 	"github.com/gorilla/mux"
-	uuid "github.com/satori/go.uuid"
 	"net/http"
-	"time"
 )
 
 func (api *API) addReviewHandler(writer http.ResponseWriter, request *http.Request) {
@@ -34,9 +31,8 @@ func (api *API) addReviewHandler(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 
-	review := &models.Review{
-		User:  models.User{},
-		Links: &models.ReviewLink{}}
+	review := models.NewReview(bookID)
+
 	if err := ReadJSONBody(ctx, request.Body, review); err != nil {
 		handleError(ctx, writer, apierrors.ErrInvalidReview, logData)
 		return
@@ -49,12 +45,6 @@ func (api *API) addReviewHandler(writer http.ResponseWriter, request *http.Reque
 		handleError(ctx, writer, err, logData)
 		return
 	}
-
-	review.ID = uuid.NewV4().String()
-	review.BookID = bookID
-	review.Links.Self = fmt.Sprintf("/books/%s/reviews/%s", bookID, review.ID)
-	review.Links.Book = fmt.Sprintf("/books/%s", bookID)
-	review.LastUpdated = time.Now().UTC()
 
 	api.dataStore.AddReview(ctx, review)
 

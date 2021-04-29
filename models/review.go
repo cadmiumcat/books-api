@@ -1,7 +1,9 @@
 package models
 
 import (
+	"fmt"
 	"github.com/cadmiumcat/books-api/apierrors"
+	uuid "github.com/satori/go.uuid"
 	"time"
 )
 
@@ -46,4 +48,19 @@ func (r Review) Validate() error {
 type User struct {
 	Forenames string `json:"forenames,omitempty" bson:"forenames,omitempty"`
 	Surname   string `json:"surname,omitempty" bson:"surname,omitempty"`
+}
+
+// NewReview returns a Review structure based on a bookID
+func NewReview(bookID string) *Review {
+	reviewID := uuid.NewV4().String()
+
+	return &Review{
+		ID:     reviewID,
+		BookID: bookID,
+		Links: &ReviewLink{
+			Self: fmt.Sprintf("/books/%s/reviews/%s", bookID, reviewID),
+			Book: fmt.Sprintf("/books/%s", bookID),
+		},
+		LastUpdated: time.Now().UTC(),
+	}
 }
