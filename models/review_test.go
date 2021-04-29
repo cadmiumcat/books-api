@@ -82,7 +82,6 @@ func TestNewReview(t *testing.T) {
 			})
 		})
 	})
-
 }
 
 func RandomString(t *testing.T, n int) string {

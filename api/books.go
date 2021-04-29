@@ -1,12 +1,10 @@
 package api
 
 import (
-	"fmt"
 	"github.com/ONSdigital/log.go/log"
 	"github.com/cadmiumcat/books-api/apierrors"
 	"github.com/cadmiumcat/books-api/models"
 	"github.com/gorilla/mux"
-	uuid "github.com/satori/go.uuid"
 	"net/http"
 )
 
@@ -18,7 +16,7 @@ func (api *API) addBookHandler(writer http.ResponseWriter, request *http.Request
 		return
 	}
 
-	book := &models.Book{Links: &models.Link{}}
+	book := models.NewBook()
 	if err := ReadJSONBody(ctx, request.Body, book); err != nil {
 		handleError(ctx, writer, err, nil)
 		return
@@ -31,10 +29,6 @@ func (api *API) addBookHandler(writer http.ResponseWriter, request *http.Request
 		handleError(ctx, writer, err, logData)
 		return
 	}
-
-	book.ID = uuid.NewV4().String()
-	book.Links.Self = fmt.Sprintf("/books/%s", book.ID)
-	book.Links.Reviews = fmt.Sprintf("/books/%s/reviews", book.ID)
 
 	api.dataStore.AddBook(ctx, book)
 

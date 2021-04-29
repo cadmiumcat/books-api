@@ -52,5 +52,22 @@ func TestBook_Validate(t *testing.T) {
 			})
 		})
 	})
+}
 
+func TestNewBook(t *testing.T) {
+	Convey("Given a new book is required", t, func() {
+		Convey("When NewBook() is called", func() {
+			book := NewBook()
+			Convey("Then the book ID should not be empty", func() {
+				So(book.ID, ShouldNotBeEmpty)
+			})
+			Convey("And the book's reviews link should have the correct structure", func() {
+				So(book.Links.Reviews, ShouldStartWith, "/books/")
+				So(book.Links.Reviews, ShouldEndWith, "/reviews")
+			})
+			Convey("And the book's self link should have the correct structure", func() {
+				So(book.Links.Self, ShouldStartWith, "/books/")
+			})
+		})
+	})
 }

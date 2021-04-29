@@ -1,7 +1,9 @@
 package models
 
 import (
+	"fmt"
 	"github.com/cadmiumcat/books-api/apierrors"
+	uuid "github.com/satori/go.uuid"
 	"time"
 )
 
@@ -46,4 +48,15 @@ type Link struct {
 type Books struct {
 	Count int    `json:"totalCount"`
 	Items []Book `json:"items"`
+}
+
+func NewBook() *Book {
+	bookID := uuid.NewV4().String()
+	return &Book{
+		ID: bookID,
+		Links: &Link{
+			Self:    fmt.Sprintf("/books/%s", bookID),
+			Reviews: fmt.Sprintf("/books/%s/reviews", bookID),
+		},
+	}
 }
