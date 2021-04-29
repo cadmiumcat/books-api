@@ -50,6 +50,7 @@ type Books struct {
 	Items []Book `json:"items"`
 }
 
+// NewBook returns a Book structure
 func NewBook() *Book {
 	bookID := uuid.NewV4().String()
 	return &Book{
