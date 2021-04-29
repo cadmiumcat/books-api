@@ -156,14 +156,14 @@ func (api *API) updateReviewHandler(writer http.ResponseWriter, request *http.Re
 		return
 	}
 
-	// Confirm that book exists. If bookID not found, then do not check for the review
+	// Confirm that book exists. If bookID not found, or there's another error, then return
 	_, err := api.dataStore.GetBook(ctx, bookID)
 	if err != nil {
 		handleError(ctx, writer, err, logData)
 		return
 	}
 
-	// Confirm that the review exists
+	// Confirm that the review exists. If reviewID not found, or there's another error, then return
 	_, err = api.dataStore.GetReview(ctx, reviewID)
 	if err != nil {
 		handleError(ctx, writer, err, logData)
