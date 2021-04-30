@@ -116,8 +116,6 @@ paths:
       responses:
         200:
           description: "Successfully updated review for the book"
-          schema:
-            $ref: "#/definitions/Review"
         400:
           description: "Bad request. Invalid book or review id supplied"
         500:

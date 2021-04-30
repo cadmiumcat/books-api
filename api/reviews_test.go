@@ -601,7 +601,6 @@ func TestUpdateReviewHandler(t *testing.T) {
 	Convey("Given an HTTP PUT request to the /books/{id}/reviews/{review_id} endpoint", t, func() {
 
 		Convey("When the book and review exist, and the review update is valid", func() {
-			// TODO - how can I get GetReviewFunc to return a different value depending on how many times it has been called?
 			mockDataStore := mock.DataStoreMock{
 				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
 					return nil, nil
@@ -628,11 +627,8 @@ func TestUpdateReviewHandler(t *testing.T) {
 			Convey("Then the HTTP response code is 200", func() {
 				So(response.Code, ShouldEqual, http.StatusOK)
 				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
-				So(mockDataStore.GetReviewCalls(), ShouldHaveLength, 2)
+				So(mockDataStore.GetReviewCalls(), ShouldHaveLength, 1)
 				So(mockDataStore.UpdateReviewCalls(), ShouldHaveLength, 1)
-			})
-			Convey("And the response body contains the updated review", func() {
-				So(response.Body.String(), ShouldEqual, marshalJSON(t, reviewUpdated))
 			})
 		})
 
