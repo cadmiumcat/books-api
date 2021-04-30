@@ -21,6 +21,9 @@ func TestConfig(t *testing.T) {
 				So(cfg.MongoConfig.ReviewsCollection, ShouldEqual, "reviews")
 				So(cfg.HealthCheckInterval, ShouldEqual, 30*time.Second)
 				So(cfg.HealthCheckCriticalTimeout, ShouldEqual, 90*time.Second)
+				So(cfg.DefaultMaximumLimit, ShouldEqual, 1000)
+				So(cfg.DefaultLimit, ShouldEqual, 20)
+				So(cfg.DefaultOffset, ShouldEqual, 0)
 			})
 			Convey("And there should be no errors", func() {
 				So(err, ShouldBeNil)

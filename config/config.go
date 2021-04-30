@@ -10,6 +10,9 @@ type Configuration struct {
 	HealthCheckCriticalTimeout time.Duration
 	HealthCheckInterval        time.Duration
 	MongoConfig                MongoConfig
+	DefaultMaximumLimit        int `envconfig:"DEFAULT_MAXIMUM_LIMIT"`
+	DefaultLimit               int `envconfig:"DEFAULT_LIMIT"`
+	DefaultOffset              int `envconfig:"DEFAULT_OFFSET"`
 }
 
 type MongoConfig struct {
@@ -37,6 +40,9 @@ func Get() (*Configuration, error) {
 			BooksCollection:   "books",
 			ReviewsCollection: "reviews",
 		},
+		DefaultMaximumLimit: 1000,
+		DefaultLimit:        20,
+		DefaultOffset:       0,
 	}
 
 	err := envconfig.Process("", cfg)
