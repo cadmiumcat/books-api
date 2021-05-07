@@ -6,6 +6,7 @@ import (
 	"github.com/cadmiumcat/books-api/apierrors"
 	"github.com/cadmiumcat/books-api/interfaces/mock"
 	"github.com/cadmiumcat/books-api/models"
+	"github.com/cadmiumcat/books-api/mongo"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	. "github.com/smartystreets/goconvey/convey"
@@ -77,7 +78,7 @@ func TestGetBookHandler(t *testing.T) {
 	Convey("Given a book that does not exist", t, func() {
 		mockDataStore := &mock.DataStoreMock{
 			GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
-				return nil, apierrors.ErrBookNotFound
+				return nil, mongo.ErrBookNotFound
 			},
 		}
 		api := &API{dataStore: mockDataStore}
@@ -95,7 +96,7 @@ func TestGetBookHandler(t *testing.T) {
 
 			Convey("then the HTTP response code is 404", func() {
 				So(response.Code, ShouldEqual, http.StatusNotFound)
-				So(response.Body.String(), ShouldContainSubstring, apierrors.ErrBookNotFound.Error())
+				So(response.Body.String(), ShouldContainSubstring, mongo.ErrBookNotFound.Error())
 			})
 			Convey("And the GetBook function is called once", func() {
 				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)

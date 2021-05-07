@@ -6,7 +6,9 @@ import (
 	"github.com/ONSdigital/log.go/log"
 	"github.com/cadmiumcat/books-api/apierrors"
 	"github.com/cadmiumcat/books-api/interfaces"
+	"github.com/cadmiumcat/books-api/mongo"
 	"github.com/gorilla/mux"
+	"github.com/pkg/errors"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -90,18 +92,18 @@ func handleError(ctx context.Context, w http.ResponseWriter, err error, data log
 
 	if err != nil {
 		apiError = err
-		switch err {
-		case apierrors.ErrBookNotFound,
-			apierrors.ErrReviewNotFound:
+		switch {
+		case errors.Is(err, mongo.ErrBookNotFound),
+			errors.Is(err, mongo.ErrReviewNotFound):
 			status = http.StatusNotFound
-		case apierrors.ErrRequiredFieldMissing,
-			apierrors.ErrEmptyRequestBody,
-			apierrors.ErrEmptyBookID,
-			apierrors.ErrEmptyReviewID,
-			apierrors.ErrInvalidReview,
-			apierrors.ErrEmptyReviewMessage,
-			apierrors.ErrEmptyReviewUser,
-			apierrors.ErrLongReviewMessage:
+		case errors.Is(err, apierrors.ErrRequiredFieldMissing),
+			errors.Is(err, apierrors.ErrEmptyRequestBody),
+			errors.Is(err, apierrors.ErrEmptyBookID),
+			errors.Is(err, apierrors.ErrEmptyReviewID),
+			errors.Is(err, apierrors.ErrInvalidReview),
+			errors.Is(err, apierrors.ErrEmptyReviewMessage),
+			errors.Is(err, apierrors.ErrEmptyReviewUser),
+			errors.Is(err, apierrors.ErrLongReviewMessage):
 			status = http.StatusBadRequest
 		default:
 			apiError = apierrors.ErrInternalServer

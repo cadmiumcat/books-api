@@ -6,6 +6,7 @@ import (
 	"github.com/cadmiumcat/books-api/apierrors"
 	"github.com/cadmiumcat/books-api/interfaces/mock"
 	"github.com/cadmiumcat/books-api/models"
+	"github.com/cadmiumcat/books-api/mongo"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	. "github.com/smartystreets/goconvey/convey"
@@ -164,7 +165,7 @@ func TestGetReviewHandler(t *testing.T) {
 				return &models.Book{ID: bookID1}, nil
 			},
 			GetReviewFunc: func(ctx context.Context, reviewID string) (*models.Review, error) {
-				return nil, apierrors.ErrReviewNotFound
+				return nil, mongo.ErrReviewNotFound
 			},
 		}
 
@@ -196,7 +197,7 @@ func TestGetReviewHandler(t *testing.T) {
 		Convey("When a http get request is sent to /books/1/reviews/123", func() {
 			mockDataStore := &mock.DataStoreMock{
 				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
-					return nil, apierrors.ErrBookNotFound
+					return nil, mongo.ErrBookNotFound
 				},
 			}
 
@@ -387,7 +388,7 @@ func TestGetReviewsHandler(t *testing.T) {
 		Convey("When a http get request is sent to /books/1/reviews", func() {
 			mockDataStore := &mock.DataStoreMock{
 				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
-					return nil, apierrors.ErrBookNotFound
+					return nil, mongo.ErrBookNotFound
 				},
 			}
 
@@ -402,7 +403,7 @@ func TestGetReviewsHandler(t *testing.T) {
 			api.getReviewsHandler(response, request)
 			Convey("Then the HTTP response code is 404", func() {
 				So(response.Code, ShouldEqual, http.StatusNotFound)
-				So(response.Body.String(), ShouldContainSubstring, apierrors.ErrBookNotFound.Error())
+				So(response.Body.String(), ShouldContainSubstring, mongo.ErrBookNotFound.Error())
 			})
 			Convey("And the GetReviews function is not called", func() {
 				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
@@ -557,7 +558,7 @@ func TestAddReviewHandler(t *testing.T) {
 
 		Convey("When the book does not exits in the datastore", func() {
 			mockDataStore := mock.DataStoreMock{GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
-				return &models.Book{}, apierrors.ErrBookNotFound
+				return &models.Book{}, mongo.ErrBookNotFound
 			}}
 
 			api := &API{dataStore: &mockDataStore}
@@ -668,7 +669,7 @@ func TestUpdateReviewHandler(t *testing.T) {
 		Convey("When the book does not exist", func() {
 			mockDataStore := mock.DataStoreMock{
 				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
-					return nil, apierrors.ErrBookNotFound
+					return nil, mongo.ErrBookNotFound
 				},
 			}
 			api := API{dataStore: &mockDataStore}
@@ -701,7 +702,7 @@ func TestUpdateReviewHandler(t *testing.T) {
 					return nil, nil
 				},
 				GetReviewFunc: func(ctx context.Context, reviewID string) (*models.Review, error) {
-					return nil, apierrors.ErrReviewNotFound
+					return nil, mongo.ErrReviewNotFound
 				},
 			}
 			api := API{dataStore: &mockDataStore}
