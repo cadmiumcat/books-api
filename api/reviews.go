@@ -174,14 +174,7 @@ func (api *API) updateReviewHandler(writer http.ResponseWriter, request *http.Re
 		return
 	}
 
-	review, err = api.dataStore.GetReview(ctx, reviewID)
-	if err != nil {
-		handleError(ctx, writer, err, logData)
-		return
-	}
+	writer.Header().Set("Content-Type", "application/json; charset=utf-8")
+	writer.WriteHeader(http.StatusOK)
 
-	if err := WriteJSONBody(review, writer, http.StatusOK); err != nil {
-		handleError(ctx, writer, err, logData)
-		return
-	}
 }

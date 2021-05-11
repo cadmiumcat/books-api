@@ -6,6 +6,7 @@ import (
 	"github.com/ONSdigital/log.go/log"
 	"github.com/cadmiumcat/books-api/apierrors"
 	"github.com/cadmiumcat/books-api/interfaces"
+	"github.com/cadmiumcat/books-api/mongo"
 	"github.com/gorilla/mux"
 	"io"
 	"io/ioutil"
@@ -91,8 +92,8 @@ func handleError(ctx context.Context, w http.ResponseWriter, err error, data log
 	if err != nil {
 		apiError = err
 		switch err {
-		case apierrors.ErrBookNotFound,
-			apierrors.ErrReviewNotFound:
+		case mongo.ErrBookNotFound,
+			mongo.ErrReviewNotFound:
 			status = http.StatusNotFound
 		case apierrors.ErrRequiredFieldMissing,
 			apierrors.ErrEmptyRequestBody,

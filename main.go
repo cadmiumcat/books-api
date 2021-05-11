@@ -24,7 +24,7 @@ var (
 	// Version represents the version of the service that is running
 	Version string
 
-	// Errors
+	// ErrRegisterHealthCheck represents an error when registering a health checker to the healthcheck
 	ErrRegisterHealthCheck = errors.New("error registering checkers for healthcheck")
 )
 
