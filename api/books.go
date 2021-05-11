@@ -49,10 +49,6 @@ func (api *API) getBooksHandler(writer http.ResponseWriter, request *http.Reques
 
 	books.Count = len(books.Items)
 
-	if err := WriteJSONBody(books, writer, http.StatusOK); err != nil {
-		handleError(ctx, writer, err, nil)
-		return nil, 0, err
-	}
 	log.Event(ctx, "successfully retrieved list of books", log.INFO)
 	return books, totalCount, nil
 }
