@@ -137,7 +137,7 @@ func TestGetBooksHandler(t *testing.T) {
 
 		mockDataStore := &mock.DataStoreMock{
 			GetBooksFunc: func(ctx context.Context, offset int, limit int) (models.Books, int, error) {
-				return models.Books{}, 0,  nil
+				return models.Books{}, 0, nil
 			},
 		}
 
@@ -149,7 +149,7 @@ func TestGetBooksHandler(t *testing.T) {
 			response := httptest.NewRecorder()
 
 			// When I wrapped the handler with a pagination one, then the marshalling happens at the paginator level
-			api.getBooksHandler(response, request, 0, 20 )
+			api.getBooksHandler(response, request, 0, 20)
 			Convey("then the HTTP response code is 200", func() {
 				So(response.Code, ShouldEqual, http.StatusOK)
 			})
@@ -207,14 +207,13 @@ func TestGetBooksHandler(t *testing.T) {
 				GetBooksFunc: func(ctx context.Context, offset int, limit int) (models.Books, int, error) {
 					return models.Books{}, 0, errors.Wrap(errMongoDB, "unexpected error when getting books")
 				},
-
 			}
 			api := &API{dataStore: mockDataStore}
 
 			request := httptest.NewRequest(http.MethodGet, "/books", nil)
 			response := httptest.NewRecorder()
 
-			api.getBooksHandler(response, request ,0 ,20)
+			api.getBooksHandler(response, request, 0, 20)
 
 			Convey("Then 500 InternalServerError status code is returned", func() {
 				So(response.Code, ShouldEqual, http.StatusInternalServerError)

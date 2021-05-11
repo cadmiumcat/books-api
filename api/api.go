@@ -30,7 +30,6 @@ func Setup(ctx context.Context, host string, router *mux.Router, dataStore inter
 		hc:        hc,
 	}
 
-
 	// Endpoints
 	api.router.HandleFunc("/books", api.addBookHandler).Methods("POST")
 	api.router.HandleFunc("/books", paginator.Paginate(api.getBooksHandler)).Methods("GET")

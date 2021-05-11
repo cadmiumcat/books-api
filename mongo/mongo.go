@@ -107,7 +107,7 @@ func (m *Mongo) GetBooks(ctx context.Context, offset, limit int) (models.Books, 
 	list := session.DB(m.Database).C(m.BooksCollection).Find(nil)
 
 	totalCount, err := list.Count()
-	if err!= nil {
+	if err != nil {
 		log.Event(ctx, "error counting items", log.ERROR, log.Error(err))
 		if err == mgo.ErrNotFound {
 			return models.Books{}, totalCount, nil
