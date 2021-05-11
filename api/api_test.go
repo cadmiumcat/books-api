@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/cadmiumcat/books-api/apierrors"
 	"github.com/cadmiumcat/books-api/interfaces/mock"
+	"github.com/cadmiumcat/books-api/mongo"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	. "github.com/smartystreets/goconvey/convey"
@@ -47,11 +48,11 @@ func TestHandleError(t *testing.T) {
 		expected    int
 	}{
 		{
-			input:    apierrors.ErrBookNotFound,
+			input:    mongo.ErrBookNotFound,
 			expected: http.StatusNotFound,
 		},
 		{
-			input:    apierrors.ErrReviewNotFound,
+			input:    mongo.ErrReviewNotFound,
 			expected: http.StatusNotFound,
 		},
 		{

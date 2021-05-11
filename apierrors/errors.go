@@ -13,8 +13,6 @@ var (
 	ErrEmptyRequestBody     = errors.New("empty request body")
 	ErrEmptyBookID          = errors.New("empty book ID in request")
 	ErrEmptyReviewID        = errors.New("empty review ID in request")
-	ErrBookNotFound         = errors.New("book not found")
-	ErrReviewNotFound       = errors.New("review not found")
 	ErrUnableToReadMessage  = errors.New("failed to read request body")
 	ErrUnableToParseJSON    = errors.New("failed to parse json body")
 	ErrRequiredFieldMissing = errors.New("invalid book. Missing required field")
