@@ -4,7 +4,17 @@ import (
 	"encoding/json"
 	"github.com/ONSdigital/log.go/log"
 	"net/http"
+	"reflect"
+	"strconv"
 )
+
+type page struct {
+	Items      interface{} `json:"items"`
+	Count      int         `json:"count"`
+	Offset     int         `json:"offset"`
+	Limit      int         `json:"limit"`
+	TotalCount int         `json:"total_count"`
+}
 
 type Handler func(w http.ResponseWriter, r *http.Request, offset int, limit int) (list interface{}, totalCount int, err error)
 
@@ -25,13 +35,26 @@ func NewPaginator(defaultLimit, defaultOffset, defaultMaximumLimit int) *Paginat
 func (p *Paginator) Paginate(handler Handler) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		offset := p.DefaultOffset
-		limit := p.DefaultLimit
-		list, _, err := handler(w, r, offset, limit)
+		offsetParameter := r.URL.Query().Get("offset")
+		limitParameter := r.URL.Query().Get("limit")
+
+		offset, err := strconv.Atoi(offsetParameter)
+		limit, err := strconv.Atoi(limitParameter)
+		//offset := p.DefaultOffset
+		//limit := p.DefaultLimit
+		list, totalCount, err := handler(w, r, offset, limit)
+
+		page := &page{
+			Items:      list,
+			Count:      reflect.ValueOf(list).Len(),
+			Offset:     offset,
+			Limit:      limit,
+			TotalCount: totalCount,
+		}
 
 		logData := log.Data{"offset": offset, "limit": limit}
 
-		b, err := json.Marshal(list)
+		b, err := json.Marshal(page)
 
 		if err != nil {
 			log.Event(r.Context(), "api endpoint failed to marshal resource into bytes", log.ERROR, log.Error(err), logData)
