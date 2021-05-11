@@ -38,22 +38,23 @@ func (api *API) addBookHandler(writer http.ResponseWriter, request *http.Request
 	}
 }
 
-func (api *API) getBooksHandler(writer http.ResponseWriter, request *http.Request) {
+func (api *API) getBooksHandler(writer http.ResponseWriter, request *http.Request, offset int, limit int) (interface{}, int, error) {
 	ctx := request.Context()
 
-	books, err := api.dataStore.GetBooks(ctx)
+	books, totalCount, err := api.dataStore.GetBooks(ctx, offset, limit)
 	if err != nil {
 		handleError(ctx, writer, err, nil)
-		return
+		return nil, 0, err
 	}
 
 	books.Count = len(books.Items)
 
 	if err := WriteJSONBody(books, writer, http.StatusOK); err != nil {
 		handleError(ctx, writer, err, nil)
-		return
+		return nil, 0, err
 	}
 	log.Event(ctx, "successfully retrieved list of books", log.INFO)
+	return books, totalCount, nil
 }
 
 func (api *API) getBookHandler(writer http.ResponseWriter, request *http.Request) {

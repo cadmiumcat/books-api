@@ -33,7 +33,7 @@ var _ interfaces.DataStore = &DataStoreMock{}
 //             GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
 // 	               panic("mock out the GetBook method")
 //             },
-//             GetBooksFunc: func(ctx context.Context) (models.Books, error) {
+//             GetBooksFunc: func(ctx context.Context, offset int, limit int) (models.Books, int, error) {
 // 	               panic("mock out the GetBooks method")
 //             },
 //             GetReviewFunc: func(ctx context.Context, reviewID string) (*models.Review, error) {
@@ -68,7 +68,7 @@ type DataStoreMock struct {
 	GetBookFunc func(ctx context.Context, id string) (*models.Book, error)
 
 	// GetBooksFunc mocks the GetBooks method.
-	GetBooksFunc func(ctx context.Context) (models.Books, error)
+	GetBooksFunc func(ctx context.Context, offset int, limit int) (models.Books, int, error)
 
 	// GetReviewFunc mocks the GetReview method.
 	GetReviewFunc func(ctx context.Context, reviewID string) (*models.Review, error)
@@ -114,6 +114,10 @@ type DataStoreMock struct {
 		GetBooks []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
+			// Offset is the offset argument value.
+			Offset int
+			// Limit is the limit argument value.
+			Limit int
 		}
 		// GetReview holds details about calls to the GetReview method.
 		GetReview []struct {
@@ -292,29 +296,37 @@ func (mock *DataStoreMock) GetBookCalls() []struct {
 }
 
 // GetBooks calls GetBooksFunc.
-func (mock *DataStoreMock) GetBooks(ctx context.Context) (models.Books, error) {
+func (mock *DataStoreMock) GetBooks(ctx context.Context, offset int, limit int) (models.Books, int, error) {
 	if mock.GetBooksFunc == nil {
 		panic("DataStoreMock.GetBooksFunc: method is nil but DataStore.GetBooks was just called")
 	}
 	callInfo := struct {
-		Ctx context.Context
+		Ctx    context.Context
+		Offset int
+		Limit  int
 	}{
-		Ctx: ctx,
+		Ctx:    ctx,
+		Offset: offset,
+		Limit:  limit,
 	}
 	mock.lockGetBooks.Lock()
 	mock.calls.GetBooks = append(mock.calls.GetBooks, callInfo)
 	mock.lockGetBooks.Unlock()
-	return mock.GetBooksFunc(ctx)
+	return mock.GetBooksFunc(ctx, offset, limit)
 }
 
 // GetBooksCalls gets all the calls that were made to GetBooks.
 // Check the length with:
 //     len(mockedDataStore.GetBooksCalls())
 func (mock *DataStoreMock) GetBooksCalls() []struct {
-	Ctx context.Context
+	Ctx    context.Context
+	Offset int
+	Limit  int
 } {
 	var calls []struct {
-		Ctx context.Context
+		Ctx    context.Context
+		Offset int
+		Limit  int
 	}
 	mock.lockGetBooks.RLock()
 	calls = mock.calls.GetBooks

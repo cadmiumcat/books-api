@@ -6,6 +6,7 @@ import (
 	"github.com/cadmiumcat/books-api/apierrors"
 	"github.com/cadmiumcat/books-api/interfaces/mock"
 	"github.com/cadmiumcat/books-api/mongo"
+	"github.com/cadmiumcat/books-api/pagination"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	. "github.com/smartystreets/goconvey/convey"
@@ -26,7 +27,7 @@ func TestSetup(t *testing.T) {
 	Convey("Given an API instance", t, func() {
 		r := mux.NewRouter()
 		ctx := context.Background()
-		api := Setup(ctx, "", r, &mock.DataStoreMock{}, &mock.HealthCheckerMock{})
+		api := Setup(ctx, "", r, &mock.DataStoreMock{}, &mock.HealthCheckerMock{}, &pagination.Paginator{})
 
 		Convey("When created the following routes should have been added", func() {
 			So(hasRoute(t, api.router, "/books", "GET"), ShouldBeTrue)

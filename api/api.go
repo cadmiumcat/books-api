@@ -7,6 +7,7 @@ import (
 	"github.com/cadmiumcat/books-api/apierrors"
 	"github.com/cadmiumcat/books-api/interfaces"
 	"github.com/cadmiumcat/books-api/mongo"
+	"github.com/cadmiumcat/books-api/pagination"
 	"github.com/gorilla/mux"
 	"io"
 	"io/ioutil"
@@ -21,7 +22,7 @@ type API struct {
 }
 
 // Setup sets up the endpoints.
-func Setup(ctx context.Context, host string, router *mux.Router, dataStore interfaces.DataStore, hc interfaces.HealthChecker) *API {
+func Setup(ctx context.Context, host string, router *mux.Router, dataStore interfaces.DataStore, hc interfaces.HealthChecker, paginator *pagination.Paginator) *API {
 	api := &API{
 		host:      host,
 		router:    router,
@@ -29,9 +30,10 @@ func Setup(ctx context.Context, host string, router *mux.Router, dataStore inter
 		hc:        hc,
 	}
 
+
 	// Endpoints
 	api.router.HandleFunc("/books", api.addBookHandler).Methods("POST")
-	api.router.HandleFunc("/books", api.getBooksHandler).Methods("GET")
+	api.router.HandleFunc("/books", paginator.Paginate(api.getBooksHandler)).Methods("GET")
 	api.router.HandleFunc("/books/{id}", api.getBookHandler).Methods("GET")
 
 	api.router.HandleFunc("/books/{id}/reviews", api.getReviewsHandler).Methods("GET")
