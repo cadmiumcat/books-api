@@ -33,7 +33,7 @@ var _ interfaces.DataStore = &DataStoreMock{}
 //             GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
 // 	               panic("mock out the GetBook method")
 //             },
-//             GetBooksFunc: func(ctx context.Context, offset int, limit int) (models.Books, int, error) {
+//             GetBooksFunc: func(ctx context.Context, offset int, limit int) ([]models.Book, int, error) {
 // 	               panic("mock out the GetBooks method")
 //             },
 //             GetReviewFunc: func(ctx context.Context, reviewID string) (*models.Review, error) {
@@ -68,7 +68,7 @@ type DataStoreMock struct {
 	GetBookFunc func(ctx context.Context, id string) (*models.Book, error)
 
 	// GetBooksFunc mocks the GetBooks method.
-	GetBooksFunc func(ctx context.Context, offset int, limit int) (models.Books, int, error)
+	GetBooksFunc func(ctx context.Context, offset int, limit int) ([]models.Book, int, error)
 
 	// GetReviewFunc mocks the GetReview method.
 	GetReviewFunc func(ctx context.Context, reviewID string) (*models.Review, error)
@@ -296,7 +296,7 @@ func (mock *DataStoreMock) GetBookCalls() []struct {
 }
 
 // GetBooks calls GetBooksFunc.
-func (mock *DataStoreMock) GetBooks(ctx context.Context, offset int, limit int) (models.Books, int, error) {
+func (mock *DataStoreMock) GetBooks(ctx context.Context, offset int, limit int) ([]models.Book, int, error) {
 	if mock.GetBooksFunc == nil {
 		panic("DataStoreMock.GetBooksFunc: method is nil but DataStore.GetBooks was just called")
 	}

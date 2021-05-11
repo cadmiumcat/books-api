@@ -47,11 +47,6 @@ func (api *API) getBooksHandler(writer http.ResponseWriter, request *http.Reques
 		return nil, 0, err
 	}
 
-	books.TotalCount = totalCount
-	books.Count = len(books.Items)
-	books.Limit = limit
-	books.Offset = offset
-
 	log.Event(ctx, "successfully retrieved list of books", log.INFO)
 	return books, totalCount, nil
 }

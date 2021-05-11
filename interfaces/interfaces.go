@@ -19,7 +19,7 @@ type DataStore interface {
 	Close(ctx context.Context) (err error)
 	AddBook(ctx context.Context, book *models.Book) (err error)
 	GetBook(ctx context.Context, id string) (*models.Book, error)
-	GetBooks(ctx context.Context, offset, limit int) (models.Books, int, error)
+	GetBooks(ctx context.Context, offset, limit int) ([]models.Book, int, error)
 	GetReview(ctx context.Context, reviewID string) (*models.Review, error)
 	GetReviews(ctx context.Context, bookID string) (models.Reviews, error)
 	AddReview(ctx context.Context, review *models.Review) (err error)

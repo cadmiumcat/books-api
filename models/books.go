@@ -44,15 +44,6 @@ type Link struct {
 	Reviews      string `json:"reviews" bson:"reviews"`
 }
 
-// Books contains all the items (Book) in the library and a total count of those items
-type Books struct {
-	Count      int    `json:"count"`
-	Limit      int    `json:"limit"`
-	Offset     int    `json:"offset"`
-	TotalCount int    `json:"totalCount"`
-	Items      []Book `json:"items"`
-}
-
 // NewBook returns a Book structure
 func NewBook() *Book {
 	bookID := uuid.NewV4().String()
