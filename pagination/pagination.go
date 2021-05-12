@@ -36,7 +36,7 @@ func NewPaginator(defaultLimit, defaultOffset, defaultMaximumLimit int) *Paginat
 func (p *Paginator) Paginate(handler Handler) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		offset, limit, err := validateQueryParameters(r)
+		offset, limit, err := p.validateQueryParameters(r)
 		logData := log.Data{"offset": offset, "limit": limit}
 		if err != nil {
 			log.Event(r.Context(), "api endpoint failed to paginate results", log.ERROR, log.Error(err), logData)
@@ -76,24 +76,31 @@ func (p *Paginator) Paginate(handler Handler) func(w http.ResponseWriter, r *htt
 	}
 }
 
-func validateQueryParameters(r *http.Request) (int, int, error) {
+func (p *Paginator) validateQueryParameters(r *http.Request) (offset int, limit int, err error) {
 	logData := log.Data{}
 
 	offsetParameter := r.URL.Query().Get("offset")
 	limitParameter := r.URL.Query().Get("limit")
 
-	offset, err := strconv.Atoi(offsetParameter)
-	if err != nil || offset < 0 {
-		return 0, 0, errors.New("invalid query parameter: offset")
+	offset = p.DefaultOffset
+	limit = p.DefaultLimit
+
+	if offsetParameter != "" {
+		offset, err = strconv.Atoi(offsetParameter)
+		if err != nil || offset < 0 {
+			return 0, 0, errors.New("invalid query parameter: offset")
+		}
 	}
 
-	limit, err := strconv.Atoi(limitParameter)
-	if err != nil || limit < 0 {
-		return 0, 0, errors.New("invalid query parameter: limit")
+	if limitParameter != "" {
+		limit, err = strconv.Atoi(limitParameter)
+		if err != nil || limit < 0 {
+			return 0, 0, errors.New("invalid query parameter: limit")
+		}
 	}
 
 	logData["offset"] = offsetParameter
 	logData["limit"] = limitParameter
 
-	return offset, limit, err
+	return
 }
