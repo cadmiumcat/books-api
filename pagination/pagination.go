@@ -10,17 +10,30 @@ import (
 )
 
 var (
+	errInvalidQueryParameter     = errors.New("invalid query parameter")
 	errInvalidQueryOffset        = errors.New("invalid query parameter: offset")
 	errInvalidQueryLimit         = errors.New("invalid query parameter: limit")
 	errInvalidQueryLimitTooLarge = errors.New("invalid query parameter: limit exceeds maximum limit allowed")
 )
 
+// A page is a section of paginated items, as well as the parameters used to determine the items that belong to the it
 type page struct {
 	Items      interface{} `json:"items"`
 	Count      int         `json:"count"`
 	Offset     int         `json:"offset"`
 	Limit      int         `json:"limit"`
 	TotalCount int         `json:"total_count"`
+}
+
+// newPage creates a page based on the parameters provided
+func newPage(items interface{}, offset, limit, totalCount int) *page {
+	return &page{
+		Items:      items,
+		Count:      reflect.ValueOf(items).Len(),
+		Offset:     offset,
+		Limit:      limit,
+		TotalCount: totalCount,
+	}
 }
 
 // Handler is an interface for an endpoint that returns a list of values to be paginated
@@ -48,25 +61,24 @@ func (p *Paginator) Paginate(handler Handler) func(w http.ResponseWriter, r *htt
 		offset, limit, err := p.validateQueryParameters(r)
 		logData := log.Data{"offset": offset, "limit": limit}
 		if err != nil {
-			log.Event(r.Context(), "api endpoint failed to paginate results", log.ERROR, log.Error(err), logData)
-			http.Error(w, "invalid query parameters", http.StatusBadRequest)
+			log.Event(r.Context(), "api endpoint found invalid query parameters", log.ERROR, log.Error(err), logData)
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
 		}
 
 		list, totalCount, err := handler(w, r, offset, limit)
-
-		page := &page{
-			Items:      list,
-			Count:      reflect.ValueOf(list).Len(),
-			Offset:     offset,
-			Limit:      limit,
-			TotalCount: totalCount,
+		if err != nil {
+			log.Event(r.Context(), "api endpoint found an error with the handler", log.ERROR, log.Error(err))
+			return
 		}
 
-		b, err := json.Marshal(page)
+		page := newPage(list, offset, limit, totalCount)
 
+		// Return paginated results
+		b, err := json.Marshal(page)
 		if err != nil {
 			log.Event(r.Context(), "api endpoint failed to marshal resource into bytes", log.ERROR, log.Error(err), logData)
-			http.Error(w, "internal error", http.StatusInternalServerError)
+			http.Error(w, "internal server error", http.StatusInternalServerError)
 			return
 		}
 
@@ -78,7 +90,6 @@ func (p *Paginator) Paginate(handler Handler) func(w http.ResponseWriter, r *htt
 			return
 		}
 		log.Event(r.Context(), "api endpoint request successful", log.INFO, logData)
-
 	}
 }
 
@@ -99,7 +110,7 @@ func (p *Paginator) validateQueryParameters(r *http.Request) (offset int, limit 
 		logData["offset"] = offsetParameter
 		offset, err = strconv.Atoi(offsetParameter)
 		if err != nil || offset < 0 {
-			log.Event(r.Context(), errInvalidQueryOffset.Error(), log.ERROR, logData)
+			log.Event(r.Context(), errInvalidQueryParameter.Error(), log.ERROR, log.Error(errInvalidQueryOffset), logData)
 			return 0, 0, errInvalidQueryOffset
 		}
 	}
@@ -108,13 +119,13 @@ func (p *Paginator) validateQueryParameters(r *http.Request) (offset int, limit 
 		logData["limit"] = limitParameter
 		limit, err = strconv.Atoi(limitParameter)
 		if err != nil || limit < 0 {
-			log.Event(r.Context(), errInvalidQueryLimit.Error(), log.ERROR, logData)
+			log.Event(r.Context(), errInvalidQueryParameter.Error(), log.ERROR, log.Error(errInvalidQueryOffset), logData)
 			return 0, 0, errInvalidQueryLimit
 		}
 	}
 
 	if limit > p.DefaultMaximumLimit {
-		log.Event(r.Context(), errInvalidQueryLimitTooLarge.Error(), log.ERROR, logData)
+		log.Event(r.Context(), errInvalidQueryParameter.Error(), log.ERROR, log.Error(errInvalidQueryLimitTooLarge), logData)
 		return 0, 0, errInvalidQueryLimitTooLarge
 	}
 
