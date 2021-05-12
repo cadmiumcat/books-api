@@ -23,6 +23,7 @@ type page struct {
 	TotalCount int         `json:"total_count"`
 }
 
+// Handler is an interface for an endpoint that returns a list of values to be paginated
 type Handler func(w http.ResponseWriter, r *http.Request, offset int, limit int) (list interface{}, totalCount int, err error)
 
 type Paginator struct {
@@ -31,6 +32,7 @@ type Paginator struct {
 	DefaultMaximumLimit int
 }
 
+// NewPaginator creates a new instance of a Paginator with the specified default values
 func NewPaginator(defaultLimit, defaultOffset, defaultMaximumLimit int) *Paginator {
 	return &Paginator{
 		DefaultLimit:        defaultLimit,
@@ -40,7 +42,6 @@ func NewPaginator(defaultLimit, defaultOffset, defaultMaximumLimit int) *Paginat
 }
 
 // Paginate wraps an HTTP endpoint to return a paginated list from the list returned by the provided Handler
-//
 func (p *Paginator) Paginate(handler Handler) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 
@@ -95,25 +96,27 @@ func (p *Paginator) validateQueryParameters(r *http.Request) (offset int, limit 
 	limit = p.DefaultLimit
 
 	if offsetParameter != "" {
+		logData["offset"] = offsetParameter
 		offset, err = strconv.Atoi(offsetParameter)
 		if err != nil || offset < 0 {
+			log.Event(r.Context(), errInvalidQueryOffset.Error(), log.ERROR, logData)
 			return 0, 0, errInvalidQueryOffset
 		}
 	}
 
 	if limitParameter != "" {
+		logData["limit"] = limitParameter
 		limit, err = strconv.Atoi(limitParameter)
 		if err != nil || limit < 0 {
+			log.Event(r.Context(), errInvalidQueryLimit.Error(), log.ERROR, logData)
 			return 0, 0, errInvalidQueryLimit
 		}
 	}
 
 	if limit > p.DefaultMaximumLimit {
+		log.Event(r.Context(), errInvalidQueryLimitTooLarge.Error(), log.ERROR, logData)
 		return 0, 0, errInvalidQueryLimitTooLarge
 	}
-
-	logData["offset"] = offsetParameter
-	logData["limit"] = limitParameter
 
 	return
 }
