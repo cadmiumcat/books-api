@@ -134,8 +134,8 @@ func TestGetBooksHandler(t *testing.T) {
 	Convey("Given a datastore with no books", t, func() {
 
 		mockDataStore := &mock.DataStoreMock{
-			GetBooksFunc: func(ctx context.Context, offset int, limit int) ([]models.Book, int, error) {
-				return []models.Book{}, 0, nil
+			GetBooksFunc: func(ctx context.Context, offset int, limit int) ([]*models.Book, int, error) {
+				return []*models.Book{}, 0, nil
 			},
 		}
 
@@ -154,21 +154,16 @@ func TestGetBooksHandler(t *testing.T) {
 			Convey("And the GetBooks function is called once", func() {
 				So(mockDataStore.GetBooksCalls(), ShouldHaveLength, 1)
 			})
-			//Convey("And the response contains a count of zero and no book items", func() {
-			//	payload, err := ioutil.ReadAll(response.Body)
-			//	So(err, ShouldBeNil)
-			//	books := []models.Book{}
-			//	err = json.Unmarshal(payload, &books)
-			//	So(books.Count, ShouldEqual, 0)
-			//	So(books.Items, ShouldBeNil)
-			//})
+			Convey("And the response body should be empty", func() {
+				So(response.Body.String(), ShouldBeEmpty)
+			})
 		})
 	})
 
 	Convey("Given a datastore with 2 books", t, func() {
 		mockDataStore := &mock.DataStoreMock{
-			GetBooksFunc: func(ctx context.Context, offset int, limit int) ([]models.Book, int, error) {
-				return []models.Book{book1, book2}, 2, nil
+			GetBooksFunc: func(ctx context.Context, offset int, limit int) ([]*models.Book, int, error) {
+				return []*models.Book{&book1, &book2}, 2, nil
 			},
 		}
 
@@ -185,13 +180,8 @@ func TestGetBooksHandler(t *testing.T) {
 			Convey("And the GetBooks function is called once", func() {
 				So(mockDataStore.GetBooksCalls(), ShouldHaveLength, 1)
 			})
-			Convey("And the response contains a count of 2 and 2 book items", func() {
-				//payload, err := ioutil.ReadAll(response.Body)
-				//So(err, ShouldBeNil)
-				//books := []models.book{}
-				//err = json.Unmarshal(payload, &books)
-				//So(books.Count, ShouldEqual, 2)
-				//So(books.Items, ShouldHaveLength, 2)
+			Convey("And the response body should be empty", func() {
+				So(response.Body.String(), ShouldBeEmpty)
 			})
 		})
 	})
@@ -199,8 +189,8 @@ func TestGetBooksHandler(t *testing.T) {
 	Convey("Given a GET request for a list of books", t, func() {
 		Convey("When GetBooks returns an unexpected database error", func() {
 			mockDataStore := &mock.DataStoreMock{
-				GetBooksFunc: func(ctx context.Context, offset int, limit int) ([]models.Book, int, error) {
-					return []models.Book{}, 0, errors.Wrap(errMongoDB, "unexpected error when getting books")
+				GetBooksFunc: func(ctx context.Context, offset int, limit int) ([]*models.Book, int, error) {
+					return []*models.Book{}, 0, errors.Wrap(errMongoDB, "unexpected error when getting books")
 				},
 			}
 			api := &API{dataStore: mockDataStore}

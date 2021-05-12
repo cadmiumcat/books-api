@@ -95,7 +95,7 @@ func (m *Mongo) GetBook(ctx context.Context, ID string) (*models.Book, error) {
 
 // GetBooks returns all the existing []models.book.
 // It returns an error if the []models.book cannot be listed.
-func (m *Mongo) GetBooks(ctx context.Context, offset, limit int) ([]models.Book, int, error) {
+func (m *Mongo) GetBooks(ctx context.Context, offset, limit int) ([]*models.Book, int, error) {
 
 	session := m.Session.Copy()
 	defer session.Close()
@@ -110,15 +110,15 @@ func (m *Mongo) GetBooks(ctx context.Context, offset, limit int) ([]models.Book,
 	if err != nil {
 		log.Event(ctx, "error counting items", log.ERROR, log.Error(err))
 		if err == mgo.ErrNotFound {
-			return []models.Book{}, totalCount, nil
+			return []*models.Book{}, totalCount, nil
 		}
 	}
 	iter := list.Sort().Skip(offset).Limit(limit).Iter()
 
-	var books []models.Book
+	var books []*models.Book
 	if err := iter.All(&books); err != nil {
 		log.Event(ctx, "unable to retrieve books", log.ERROR, log.Error(err), logData)
-		return []models.Book{}, totalCount, errors.Wrap(err, "unexpected error when getting books")
+		return []*models.Book{}, totalCount, errors.Wrap(err, "unexpected error when getting books")
 	}
 
 	return books, totalCount, nil
