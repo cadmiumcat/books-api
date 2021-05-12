@@ -155,6 +155,14 @@ func Test_validateQueryParameters(t *testing.T) {
 			wantErrMessage: errors.New("invalid query parameter: offset"),
 		},
 		{
+			name:           "a limit which exceeds the DefaultMaximumLimit",
+			args:           args{httptest.NewRequest("GET", "/test?limit=101&offset=1", nil)},
+			wantOffset:     0,
+			wantLimit:      0,
+			wantErr:        true,
+			wantErrMessage: errors.New("invalid query parameter: limit exceeds maximum limit allowed"),
+		},
+		{
 			name:           "no limit/offset",
 			args:           args{httptest.NewRequest("GET", "/test1", nil)},
 			wantOffset:     1,

@@ -9,6 +9,12 @@ import (
 	"strconv"
 )
 
+var (
+	errInvalidQueryOffset        = errors.New("invalid query parameter: offset")
+	errInvalidQueryLimit         = errors.New("invalid query parameter: limit")
+	errInvalidQueryLimitTooLarge = errors.New("invalid query parameter: limit exceeds maximum limit allowed")
+)
+
 type page struct {
 	Items      interface{} `json:"items"`
 	Count      int         `json:"count"`
@@ -33,6 +39,8 @@ func NewPaginator(defaultLimit, defaultOffset, defaultMaximumLimit int) *Paginat
 	}
 }
 
+// Paginate wraps an HTTP endpoint to return a paginated list from the list returned by the provided Handler
+//
 func (p *Paginator) Paginate(handler Handler) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 
@@ -42,9 +50,6 @@ func (p *Paginator) Paginate(handler Handler) func(w http.ResponseWriter, r *htt
 			log.Event(r.Context(), "api endpoint failed to paginate results", log.ERROR, log.Error(err), logData)
 			http.Error(w, "invalid query parameters", http.StatusBadRequest)
 		}
-
-		//offset := p.DefaultOffset
-		//limit := p.DefaultLimit
 
 		list, totalCount, err := handler(w, r, offset, limit)
 
@@ -76,6 +81,10 @@ func (p *Paginator) Paginate(handler Handler) func(w http.ResponseWriter, r *htt
 	}
 }
 
+// validateQueryParameters retrieves the offset and limit parameters in a query and returns them when they are valid
+// If no parameters are provided, they are set to the default value in the Paginator
+// An error is returned if the offset/limit is not a valid positive integer,
+// or if the limit exceeds the DefaultMaximumLimit set by the Paginator
 func (p *Paginator) validateQueryParameters(r *http.Request) (offset int, limit int, err error) {
 	logData := log.Data{}
 
@@ -88,15 +97,19 @@ func (p *Paginator) validateQueryParameters(r *http.Request) (offset int, limit 
 	if offsetParameter != "" {
 		offset, err = strconv.Atoi(offsetParameter)
 		if err != nil || offset < 0 {
-			return 0, 0, errors.New("invalid query parameter: offset")
+			return 0, 0, errInvalidQueryOffset
 		}
 	}
 
 	if limitParameter != "" {
 		limit, err = strconv.Atoi(limitParameter)
 		if err != nil || limit < 0 {
-			return 0, 0, errors.New("invalid query parameter: limit")
+			return 0, 0, errInvalidQueryLimit
 		}
+	}
+
+	if limit > p.DefaultMaximumLimit {
+		return 0, 0, errInvalidQueryLimitTooLarge
 	}
 
 	logData["offset"] = offsetParameter
