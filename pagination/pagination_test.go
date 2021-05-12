@@ -2,6 +2,8 @@ package pagination
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/pkg/errors"
 	. "github.com/smartystreets/goconvey/convey"
 	"io/ioutil"
 	"net/http"
@@ -40,13 +42,12 @@ func TestPaginator_Paginate(t *testing.T) {
 		}
 
 		expectedPage := page{
-			Items:      []int{2,1},
+			Items:      []int{2, 1},
 			Count:      2,
 			Offset:     2,
 			Limit:      1,
 			TotalCount: 10,
 		}
-
 
 		Convey("When paginate is called", func() {
 			paginatedHandler := paginator.Paginate(handler)
@@ -60,5 +61,103 @@ func TestPaginator_Paginate(t *testing.T) {
 				So(string(content), ShouldEqual, string(expectedContent))
 			})
 		})
+	})
+
+	//Convey("Given a GET request with invalid limit parameter", t, func() {
+	//	r := httptest.NewRequest("GET", "/test?limit=-1&offset=1", nil)
+	//	w := httptest.NewRecorder()
+	//
+	//	handler := func(w http.ResponseWriter, r *http.Request, offset int, limit int) (interface{}, int, error) {
+	//		return []int{offset, limit}, 0, errors.New("invalid query parameter: limit")
+	//	}
+	//
+	//	paginator := Paginator{
+	//		DefaultLimit:        10,
+	//		DefaultOffset:       0,
+	//		DefaultMaximumLimit: 100,
+	//	}
+	//
+	//	Convey("When paginate is called", func() {
+	//		paginateHandler := paginator.Paginate(handler)
+	//		paginateHandler(w, r)
+	//		Convey("Then the response code is 400", func() {
+	//			So(w.Code, ShouldEqual, http.StatusBadRequest)
+	//		})
+	//	})
+	//})
+	//
+	//Convey("Given a GET request with invalid limit parameter", t, func() {
+	//	r := httptest.NewRequest("GET", "/test?limit=1&offset=-1", nil)
+	//	w := httptest.NewRecorder()
+	//
+	//	handler := func(w http.ResponseWriter, r *http.Request, offset int, limit int) (interface{}, int, error) {
+	//		return []int{offset, limit}, 0, errors.New("invalid query parameter: offset")
+	//	}
+	//
+	//	paginator := Paginator{
+	//		DefaultLimit:        10,
+	//		DefaultOffset:       0,
+	//		DefaultMaximumLimit: 100,
+	//	}
+	//
+	//	Convey("When paginate is called", func() {
+	//		paginateHandler := paginator.Paginate(handler)
+	//		paginateHandler(w, r)
+	//		Convey("Then the response code is 400", func() {
+	//			So(w.Code, ShouldEqual, http.StatusBadRequest)
+	//		})
+	//	})
+	//})
+}
+
+func Test_validateQueryParameters(t *testing.T) {
+	type args struct {
+		r *http.Request
+	}
+	tests := []struct {
+		name       string
+		args       args
+		wantOffset int
+		wantLimit  int
+		wantErr    error
+	}{
+		{
+			name:       "an invalid offset (negative)",
+			args:       args{httptest.NewRequest("GET", "/test?limit=1&offset=-1", nil)},
+			wantOffset: 0,
+			wantLimit:  0,
+			wantErr:    errors.New("invalid query parameter: offset"),
+		},
+		{
+			name:       "an invalid limit (negative)",
+			args:       args{httptest.NewRequest("GET", "/test?limit=-1&offset=1", nil)},
+			wantOffset: 0,
+			wantLimit:  0,
+			wantErr:    errors.New("invalid query parameter: limit"),
+		},
+		{
+			name:       "an invalid limit (not an integer)",
+			args:       args{httptest.NewRequest("GET", "/test?limit=words&offset=1", nil)},
+			wantOffset: 0,
+			wantLimit:  0,
+			wantErr:    errors.New("invalid query parameter: limit"),
+		},
+	}
+
+	Convey("Given a GET request with parameters", t, func() {
+		for _, tt := range tests {
+			Convey(fmt.Sprintf("When the parameters contain %s", tt.name), func() {
+				gotOffset, gotLimit, err := validateQueryParameters(tt.args.r)
+				Convey(fmt.Sprintf("Then the error matches %s", tt.wantErr), func() {
+					So(err, ShouldBeError, tt.wantErr)
+				})
+				Convey(fmt.Sprintf("And the offset is set to %v", tt.wantOffset), func() {
+					So(gotOffset, ShouldEqual, tt.wantOffset)
+				})
+				Convey(fmt.Sprintf("And the limit is set to %v", tt.wantLimit), func() {
+					So(gotLimit, ShouldEqual, tt.wantLimit)
+				})
+			})
+		}
 	})
 }

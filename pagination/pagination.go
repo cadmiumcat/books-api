@@ -2,6 +2,7 @@ package pagination
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/ONSdigital/log.go/log"
 	"net/http"
 	"reflect"
@@ -35,13 +36,16 @@ func NewPaginator(defaultLimit, defaultOffset, defaultMaximumLimit int) *Paginat
 func (p *Paginator) Paginate(handler Handler) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		offsetParameter := r.URL.Query().Get("offset")
-		limitParameter := r.URL.Query().Get("limit")
+		offset, limit, err := validateQueryParameters(r)
+		logData := log.Data{"offset": offset, "limit": limit}
+		if err != nil {
+			log.Event(r.Context(), "api endpoint failed to paginate results", log.ERROR, log.Error(err), logData)
+			http.Error(w, "invalid query parameters", http.StatusBadRequest)
+		}
 
-		offset, err := strconv.Atoi(offsetParameter)
-		limit, err := strconv.Atoi(limitParameter)
 		//offset := p.DefaultOffset
 		//limit := p.DefaultLimit
+
 		list, totalCount, err := handler(w, r, offset, limit)
 
 		page := &page{
@@ -51,8 +55,6 @@ func (p *Paginator) Paginate(handler Handler) func(w http.ResponseWriter, r *htt
 			Limit:      limit,
 			TotalCount: totalCount,
 		}
-
-		logData := log.Data{"offset": offset, "limit": limit}
 
 		b, err := json.Marshal(page)
 
@@ -72,4 +74,26 @@ func (p *Paginator) Paginate(handler Handler) func(w http.ResponseWriter, r *htt
 		log.Event(r.Context(), "api endpoint request successful", log.INFO, logData)
 
 	}
+}
+
+func validateQueryParameters(r *http.Request) (int, int, error) {
+	logData := log.Data{}
+
+	offsetParameter := r.URL.Query().Get("offset")
+	limitParameter := r.URL.Query().Get("limit")
+
+	offset, err := strconv.Atoi(offsetParameter)
+	if err != nil || offset < 0 {
+		return 0, 0, errors.New("invalid query parameter: offset")
+	}
+
+	limit, err := strconv.Atoi(limitParameter)
+	if err != nil || limit < 0 {
+		return 0, 0, errors.New("invalid query parameter: limit")
+	}
+
+	logData["offset"] = offsetParameter
+	logData["limit"] = limitParameter
+
+	return offset, limit, err
 }
