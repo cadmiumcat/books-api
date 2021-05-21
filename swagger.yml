@@ -57,9 +57,14 @@ paths:
               limit:
                 description: "Number of books requested"
                 type: integer
+                default: 20
+                maximum: 1000
+                minimum: 0
               offset:
                 description: "Number of books into the list that the response starts at"
                 type: integer
+                default: 0
+                minimum: 0
               total_count:
                 description: "Total number of books"
                 type: integer
@@ -156,9 +161,14 @@ paths:
               limit:
                 description: "Number of reviews requested"
                 type: integer
+                default: 20
+                maximum: 1000
+                minimum: 0
               offset:
                 description: "Number of reviews into the list that the response starts at"
                 type: integer
+                default: 0
+                minimum: 0
               total_count:
                 description: "Total number of reviews"
                 type: integer
@@ -189,16 +199,21 @@ paths:
 parameters:
   limit:
     name: limit
-    description: "Maximum number of items that will be returned. A value of zero will return zero items. The default value is 20, and the maximum limit allowed is 1000"
+    description: "Maximum number of items that will be returned. A value of zero will return zero items."
     in: query
     required: false
     type: integer
+    default: 20
+    maximum: 1000
+    minimum: 0
   offset:
     name: offset
-    description: "Starting index of the items array that will be returned. By default it is zero, meaning that the returned items will start from the beginning."
+    description: "Starting index of the items array that will be returned. A value of zero indicates starting from the beginning"
     in: query
     required: false
     type: integer
+    default: 0
+    minimum: 0
   Book_id:
     in: path
     name: id
