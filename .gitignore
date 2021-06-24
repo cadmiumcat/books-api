@@ -3,3 +3,4 @@ build/
 /.blackbox/pubring.gpg~
 /.blackbox/pubring.kbx~
 /.blackbox/secring.gpg
+/file_to_encrypt.txt
