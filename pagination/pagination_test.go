@@ -45,7 +45,7 @@ func TestReadPaginationValues(t *testing.T) {
 		r := httptest.NewRequest("GET", "/endpoint_to_paginate?limit=-13&offset=2", nil)
 		Convey("When SetPaginationValues is called", func() {
 			offset, limit, err := defaultPaginator.SetPaginationValues(r)
-			Convey("Then the default values are overwritten by the ones in the request", func() {
+			Convey("Then the an error is returned saying the limit value is invalid", func() {
 				So(err, ShouldBeError)
 				So(err, ShouldEqual, ErrInvalidLimitParameter)
 				So(limit, ShouldEqual, 0)
@@ -53,6 +53,33 @@ func TestReadPaginationValues(t *testing.T) {
 			})
 		})
 	})
+
+	Convey("Given a request with a negative offset value", t, func() {
+		r := httptest.NewRequest("GET", "/endpoint_to_paginate?limit=13&offset=-2", nil)
+		Convey("When SetPaginationValues is called", func() {
+			offset, limit, err := defaultPaginator.SetPaginationValues(r)
+			Convey("Then the an error is returned saying the offset value is invalid", func() {
+				So(err, ShouldBeError)
+				So(err, ShouldEqual, ErrInvalidOffsetParameter)
+				So(limit, ShouldEqual, 0)
+				So(offset, ShouldEqual, 0)
+			})
+		})
+	})
+
+	Convey("Given a request with a limit value that exceeds the default maximum limit", t, func() {
+		r := httptest.NewRequest("GET", "/endpoint_to_paginate?limit=101&offset=2", nil)
+		Convey("When SetPaginationValues is called", func() {
+			offset, limit, err := defaultPaginator.SetPaginationValues(r)
+			Convey("Then the an error is returned saying the limit value is invalid and is over the maximum value", func() {
+				So(err, ShouldBeError)
+				So(err, ShouldEqual, ErrLimitOverMax)
+				So(limit, ShouldEqual, 0)
+				So(offset, ShouldEqual, 0)
+			})
+		})
+	})
+
 }
 
 func TestNewPaginator(t *testing.T) {
