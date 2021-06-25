@@ -7,11 +7,10 @@ import (
 )
 
 const (
-	defaultLimit  = 10
-	defaultOffset = 1
+	defaultLimit        = 10
+	defaultOffset       = 1
 	defaultMaximumLimit = 100
 )
-
 
 func TestReadPaginationValues(t *testing.T) {
 	defaultPaginator := NewPaginator(defaultLimit, defaultOffset, defaultMaximumLimit)

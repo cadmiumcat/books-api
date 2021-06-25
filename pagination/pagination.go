@@ -18,8 +18,8 @@ var (
 )
 
 type Paginator struct {
-	DefaultLimit int
-	DefaultOffset int
+	DefaultLimit        int
+	DefaultOffset       int
 	DefaultMaximumLimit int
 }
 
