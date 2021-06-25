@@ -38,19 +38,26 @@ func (p *Paginator) SetPaginationValues(r *http.Request) (offset int, limit int,
 	offsetParameter := r.URL.Query().Get("offset")
 	limitParameter := r.URL.Query().Get("limit")
 
+	offset = p.DefaultOffset
+	limit = p.DefaultLimit
+
 	if offsetParameter != "" {
-		p.DefaultOffset, err = strconv.Atoi(offsetParameter)
-		if err != nil {
+		offset, err = strconv.Atoi(offsetParameter)
+		if err != nil || offset < 0 {
 			return 0, 0, ErrInvalidOffsetParameter
 		}
 	}
 
 	if limitParameter != "" {
-		p.DefaultLimit, err = strconv.Atoi(limitParameter)
-		if err != nil {
+		limit, err = strconv.Atoi(limitParameter)
+		if err != nil || limit < 0 {
 			return 0, 0, ErrInvalidLimitParameter
 		}
 	}
 
-	return p.DefaultOffset, p.DefaultLimit, nil
+	if limit > p.DefaultMaximumLimit {
+		return 0, 0, ErrLimitOverMax
+	}
+
+	return
 }

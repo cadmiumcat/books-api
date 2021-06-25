@@ -40,6 +40,19 @@ func TestReadPaginationValues(t *testing.T) {
 			})
 		})
 	})
+
+	Convey("Given a request with a negative limit value", t, func() {
+		r := httptest.NewRequest("GET", "/endpoint_to_paginate?limit=-13&offset=2", nil)
+		Convey("When SetPaginationValues is called", func() {
+			offset, limit, err := defaultPaginator.SetPaginationValues(r)
+			Convey("Then the default values are overwritten by the ones in the request", func() {
+				So(err, ShouldBeError)
+				So(err, ShouldEqual, ErrInvalidLimitParameter)
+				So(limit, ShouldEqual, 0)
+				So(offset, ShouldEqual, 0)
+			})
+		})
+	})
 }
 
 func TestNewPaginator(t *testing.T) {
