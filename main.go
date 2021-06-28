@@ -10,6 +10,7 @@ import (
 	"github.com/cadmiumcat/books-api/config"
 	"github.com/cadmiumcat/books-api/initialiser"
 	"github.com/cadmiumcat/books-api/mongo"
+	"github.com/cadmiumcat/books-api/pagination"
 	"github.com/gorilla/mux"
 	"os"
 )
@@ -78,7 +79,9 @@ func main() {
 	router := mux.NewRouter()
 	svc.Server = initialiser.GetHTTPServer(cfg.BindAddr, router)
 
-	svc.API = api.Setup(ctx, cfg.BindAddr, router, mongodb, &hc)
+	paginator := pagination.NewPaginator(cfg.DefaultLimit, cfg.DefaultOffset, cfg.DefaultMaximumLimit)
+
+	svc.API = api.Setup(ctx, cfg.BindAddr, router, paginator, mongodb, &hc)
 
 	svc.Server.ListenAndServe()
 

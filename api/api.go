@@ -16,15 +16,17 @@ import (
 type API struct {
 	host      string
 	router    *mux.Router
+	paginator interfaces.Paginator
 	dataStore interfaces.DataStore
 	hc        interfaces.HealthChecker
 }
 
 // Setup sets up the endpoints.
-func Setup(ctx context.Context, host string, router *mux.Router, dataStore interfaces.DataStore, hc interfaces.HealthChecker) *API {
+func Setup(ctx context.Context, host string, router *mux.Router, paginator interfaces.Paginator, dataStore interfaces.DataStore, hc interfaces.HealthChecker) *API {
 	api := &API{
 		host:      host,
 		router:    router,
+		paginator: paginator,
 		dataStore: dataStore,
 		hc:        hc,
 	}
