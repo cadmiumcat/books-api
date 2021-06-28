@@ -13,8 +13,8 @@ var (
 	// ErrInvalidLimitParameter represents an error case where an invalid limit value is provided
 	ErrInvalidLimitParameter = errors.New("invalid limit query parameter")
 
-	// ErrLimitOverMax represents an error case where the given limit value is larger than the maximum allowed
-	ErrLimitOverMax = errors.New("limit query parameter is larger than the maximum allowed")
+	// ErrLimitOverMax represents an error case where the given limit value is larger than the allowed maximum
+	ErrLimitOverMax = errors.New("limit query parameter is larger than the allowed maximum")
 )
 
 type Paginator struct {
