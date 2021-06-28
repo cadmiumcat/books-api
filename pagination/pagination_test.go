@@ -53,8 +53,34 @@ func TestReadPaginationValues(t *testing.T) {
 		})
 	})
 
+	Convey("Given a request with a non-numerical limit value", t, func() {
+		r := httptest.NewRequest("GET", "/endpoint_to_paginate?limit=two&offset=2", nil)
+		Convey("When SetPaginationValues is called", func() {
+			offset, limit, err := defaultPaginator.SetPaginationValues(r)
+			Convey("Then the an error is returned saying the limit value is invalid", func() {
+				So(err, ShouldBeError)
+				So(err, ShouldEqual, ErrInvalidLimitParameter)
+				So(limit, ShouldEqual, 0)
+				So(offset, ShouldEqual, 0)
+			})
+		})
+	})
+
 	Convey("Given a request with a negative offset value", t, func() {
 		r := httptest.NewRequest("GET", "/endpoint_to_paginate?limit=13&offset=-2", nil)
+		Convey("When SetPaginationValues is called", func() {
+			offset, limit, err := defaultPaginator.SetPaginationValues(r)
+			Convey("Then the an error is returned saying the offset value is invalid", func() {
+				So(err, ShouldBeError)
+				So(err, ShouldEqual, ErrInvalidOffsetParameter)
+				So(limit, ShouldEqual, 0)
+				So(offset, ShouldEqual, 0)
+			})
+		})
+	})
+
+	Convey("Given a request with a non-numerical offset value", t, func() {
+		r := httptest.NewRequest("GET", "/endpoint_to_paginate?limit=13&offset=two", nil)
 		Convey("When SetPaginationValues is called", func() {
 			offset, limit, err := defaultPaginator.SetPaginationValues(r)
 			Convey("Then the an error is returned saying the offset value is invalid", func() {
