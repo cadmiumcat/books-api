@@ -39,7 +39,7 @@ var _ interfaces.DataStore = &DataStoreMock{}
 //             GetReviewFunc: func(ctx context.Context, reviewID string) (*models.Review, error) {
 // 	               panic("mock out the GetReview method")
 //             },
-//             GetReviewsFunc: func(ctx context.Context, bookID string, offset int, limit int) ([]models.Review, error) {
+//             GetReviewsFunc: func(ctx context.Context, bookID string, offset int, limit int) ([]models.Review, int, error) {
 // 	               panic("mock out the GetReviews method")
 //             },
 //             InitFunc: func(in1 config.MongoConfig) error {
@@ -74,7 +74,7 @@ type DataStoreMock struct {
 	GetReviewFunc func(ctx context.Context, reviewID string) (*models.Review, error)
 
 	// GetReviewsFunc mocks the GetReviews method.
-	GetReviewsFunc func(ctx context.Context, bookID string, offset int, limit int) ([]models.Review, error)
+	GetReviewsFunc func(ctx context.Context, bookID string, offset int, limit int) ([]models.Review, int, error)
 
 	// InitFunc mocks the Init method.
 	InitFunc func(in1 config.MongoConfig) error
@@ -374,7 +374,7 @@ func (mock *DataStoreMock) GetReviewCalls() []struct {
 }
 
 // GetReviews calls GetReviewsFunc.
-func (mock *DataStoreMock) GetReviews(ctx context.Context, bookID string, offset int, limit int) ([]models.Review, error) {
+func (mock *DataStoreMock) GetReviews(ctx context.Context, bookID string, offset int, limit int) ([]models.Review, int, error) {
 	if mock.GetReviewsFunc == nil {
 		panic("DataStoreMock.GetReviewsFunc: method is nil but DataStore.GetReviews was just called")
 	}

@@ -49,11 +49,6 @@ var bookReview2 = models.Review{
 	},
 }
 
-var emptyReviews = models.Reviews{
-	Count: 0,
-	Items: nil,
-}
-
 var reviewUpdated = models.Review{
 	ID: reviewID1,
 	User: models.User{
@@ -286,7 +281,9 @@ func TestGetReviewsHandler(t *testing.T) {
 	Convey("Given an HTTP GET request to the /books/{id}/reviews endpoint", t, func() {
 
 		Convey("When the {id} is empty", func() {
-			api := &API{}
+			paginator := mockPaginator()
+
+			api := &API{paginator: paginator}
 			request := httptest.NewRequest("GET", "/books/"+emptyID+"/reviews", nil)
 
 			expectedUrlVars := map[string]string{"id": emptyID}
@@ -306,17 +303,17 @@ func TestGetReviewsHandler(t *testing.T) {
 			GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
 				return &models.Book{ID: bookID1}, nil
 			},
-			GetReviewsFunc: func(ctx context.Context, bookID string) (models.Reviews, error) {
-				return models.Reviews{
-					Count: 2,
-					Items: []models.Review{
-						bookReview1,
-						bookReview2,
-					}}, nil
+			GetReviewsFunc: func(ctx context.Context, bookID string, offset int, limit int) ([]models.Review, int, error) {
+				return []models.Review{
+					bookReview1,
+					bookReview2,
+				}, 2, nil
 			},
 		}
 
-		api := &API{dataStore: mockDataStore}
+		paginator := mockPaginator()
+
+		api := &API{dataStore: mockDataStore, paginator: paginator}
 
 		Convey("When a http get request is sent to /books/1/reviews", func() {
 
@@ -336,7 +333,7 @@ func TestGetReviewsHandler(t *testing.T) {
 			Convey("And the response body contains the right number of reviews", func() {
 				payload, err := ioutil.ReadAll(response.Body)
 				So(err, ShouldBeNil)
-				reviews := models.Reviews{}
+				reviews := models.ReviewsResponse{}
 				err = json.Unmarshal(payload, &reviews)
 				So(reviews.Count, ShouldEqual, 2)
 			})
@@ -348,14 +345,13 @@ func TestGetReviewsHandler(t *testing.T) {
 			GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
 				return &models.Book{ID: bookID1}, nil
 			},
-			GetReviewsFunc: func(ctx context.Context, bookID string) (models.Reviews, error) {
-				return emptyReviews, nil
+			GetReviewsFunc: func(ctx context.Context, bookID string, offset int, limit int) ([]models.Review, int, error) {
+				return []models.Review{}, 0, nil
 			},
 		}
 
-		api := &API{
-			dataStore: mockDataStore,
-		}
+		paginator := mockPaginator()
+		api := &API{dataStore: mockDataStore, paginator: paginator}
 
 		Convey("When a HTTP GET request is sent to /books/1/reviews", func() {
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
@@ -375,10 +371,10 @@ func TestGetReviewsHandler(t *testing.T) {
 			Convey("And the response contains a count of zero and no review items", func() {
 				payload, err := ioutil.ReadAll(response.Body)
 				So(err, ShouldBeNil)
-				reviews := models.Reviews{}
+				reviews := models.ReviewsResponse{}
 				err = json.Unmarshal(payload, &reviews)
 				So(reviews.Count, ShouldEqual, 0)
-				So(reviews.Items, ShouldBeNil)
+				So(reviews.Items, ShouldHaveLength, 0)
 			})
 		})
 	})
@@ -392,7 +388,8 @@ func TestGetReviewsHandler(t *testing.T) {
 				},
 			}
 
-			api := &API{dataStore: mockDataStore}
+			paginator := mockPaginator()
+			api := &API{dataStore: mockDataStore, paginator: paginator}
 
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
 
@@ -418,12 +415,13 @@ func TestGetReviewsHandler(t *testing.T) {
 				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
 					return &models.Book{ID: bookID1}, nil
 				},
-				GetReviewsFunc: func(ctx context.Context, bookID string) (models.Reviews, error) {
-					return models.Reviews{}, errors.Wrap(errMongoDB, "unexpected error when getting a review")
+				GetReviewsFunc: func(ctx context.Context, bookID string, offset int, limit int) ([]models.Review, int, error) {
+					return []models.Review{}, 0, errors.Wrap(errMongoDB, "unexpected error when getting a review")
 				},
 			}
 
-			api := &API{dataStore: mockDataStore}
+			paginator := mockPaginator()
+			api := &API{dataStore: mockDataStore, paginator: paginator}
 
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
 
@@ -449,7 +447,8 @@ func TestGetReviewsHandler(t *testing.T) {
 				},
 			}
 
-			api := &API{dataStore: mockDataStore}
+			paginator := mockPaginator()
+			api := &API{dataStore: mockDataStore, paginator: paginator}
 
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
 
@@ -844,5 +843,4 @@ func TestUpdateReviewHandler(t *testing.T) {
 			})
 		})
 	})
-
 }
