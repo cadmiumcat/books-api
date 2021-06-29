@@ -146,8 +146,9 @@ func TestGetBooksHandler(t *testing.T) {
 				return []models.Book{}, 0, nil
 			},
 		}
+		paginator := mockPaginator()
 
-		api := &API{dataStore: mockDataStore, paginator: mockPaginator()}
+		api := &API{dataStore: mockDataStore, paginator: paginator}
 
 		Convey("When a http get request is sent to /books", func() {
 
@@ -158,9 +159,17 @@ func TestGetBooksHandler(t *testing.T) {
 			Convey("then the HTTP response code is 200", func() {
 				So(response.Code, ShouldEqual, http.StatusOK)
 			})
-			Convey("And the GetBooks function is called once", func() {
+			Convey("And the GetBooks function is called once, and the pagination parameters passed to it", func() {
 				So(mockDataStore.GetBooksCalls(), ShouldHaveLength, 1)
+				So(mockDataStore.GetBooksCalls()[0].Limit, ShouldEqual, limit)
+				So(mockDataStore.GetBooksCalls()[0].Offset, ShouldEqual, offset)
 			})
+
+			Convey("And the paginator is called to extract the pagination parameters ", func() {
+				So(paginator.SetPaginationValuesCalls(), ShouldHaveLength, 1)
+				So(paginator.SetPaginationValuesCalls()[0].R, ShouldEqual, request)
+			})
+
 			Convey("And the response contains a count of zero and no book items", func() {
 				payload, err := ioutil.ReadAll(response.Body)
 				So(err, ShouldBeNil)
@@ -185,7 +194,8 @@ func TestGetBooksHandler(t *testing.T) {
 			},
 		}
 
-		api := &API{dataStore: mockDataStore, paginator: mockPaginator()}
+		paginator := mockPaginator()
+		api := &API{dataStore: mockDataStore, paginator: paginator}
 
 		Convey("When a http get request is sent to /books", func() {
 			request := httptest.NewRequest(http.MethodGet, "/books", nil)
@@ -197,8 +207,16 @@ func TestGetBooksHandler(t *testing.T) {
 			})
 			Convey("And the GetBooks function is called once", func() {
 				So(mockDataStore.GetBooksCalls(), ShouldHaveLength, 1)
+				So(mockDataStore.GetBooksCalls()[0].Limit, ShouldEqual, limit)
+				So(mockDataStore.GetBooksCalls()[0].Offset, ShouldEqual, offset)
 			})
-			Convey("And the response contains a count of zero and no book items", func() {
+
+			Convey("And the paginator is called to extract the pagination parameters ", func() {
+				So(paginator.SetPaginationValuesCalls(), ShouldHaveLength, 1)
+				So(paginator.SetPaginationValuesCalls()[0].R, ShouldEqual, request)
+			})
+
+			Convey("And the response contains the paginated response", func() {
 				payload, err := ioutil.ReadAll(response.Body)
 				So(err, ShouldBeNil)
 				page := models.BooksResponse{}
@@ -223,14 +241,27 @@ func TestGetBooksHandler(t *testing.T) {
 				},
 			}
 
-			api := &API{dataStore: mockDataStore, paginator: mockPaginator()}
+			paginator := mockPaginator()
+			api := &API{dataStore: mockDataStore, paginator: paginator}
 
 			request := httptest.NewRequest(http.MethodGet, "/books", nil)
 			response := httptest.NewRecorder()
 
 			api.getBooksHandler(response, request)
 
-			Convey("Then 500 InternalServerError status code is returned", func() {
+
+			Convey("Then the GetBooks function is called once", func() {
+				So(mockDataStore.GetBooksCalls(), ShouldHaveLength, 1)
+				So(mockDataStore.GetBooksCalls()[0].Limit, ShouldEqual, limit)
+				So(mockDataStore.GetBooksCalls()[0].Offset, ShouldEqual, offset)
+			})
+
+			Convey("And the paginator is called to extract the pagination parameters ", func() {
+				So(paginator.SetPaginationValuesCalls(), ShouldHaveLength, 1)
+				So(paginator.SetPaginationValuesCalls()[0].R, ShouldEqual, request)
+			})
+
+			Convey("And a 500 InternalServerError status code is returned", func() {
 				So(response.Code, ShouldEqual, http.StatusInternalServerError)
 				So(response.Body.String(), ShouldEqual, internalSeverErrorMessage)
 			})
