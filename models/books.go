@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"github.com/cadmiumcat/books-api/apierrors"
+	"github.com/cadmiumcat/books-api/pagination"
 	uuid "github.com/satori/go.uuid"
 	"time"
 )
@@ -44,10 +45,10 @@ type Link struct {
 	Reviews      string `json:"reviews" bson:"reviews"`
 }
 
-// Books contains all the items (Book) in the library and a total count of those items
-type Books struct {
-	Count int    `json:"totalCount"`
+// BooksResponse represents a paginated list of Books
+type BooksResponse struct {
 	Items []Book `json:"items"`
+	pagination.Page
 }
 
 // NewBook returns a Book structure

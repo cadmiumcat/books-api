@@ -7,6 +7,7 @@ import (
 	"github.com/cadmiumcat/books-api/interfaces/mock"
 	"github.com/cadmiumcat/books-api/models"
 	"github.com/cadmiumcat/books-api/mongo"
+	"github.com/cadmiumcat/books-api/pagination"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	. "github.com/smartystreets/goconvey/convey"
@@ -15,6 +16,11 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+)
+
+var (
+	offset = 0
+	limit  = 3
 )
 
 var book1 = models.Book{
@@ -136,12 +142,12 @@ func TestGetBooksHandler(t *testing.T) {
 	Convey("Given a datastore with no books", t, func() {
 
 		mockDataStore := &mock.DataStoreMock{
-			GetBooksFunc: func(ctx context.Context) (models.Books, error) {
-				return models.Books{}, nil
+			GetBooksFunc: func(ctx context.Context, offset int, limit int) ([]models.Book, int, error) {
+				return []models.Book{}, 0, nil
 			},
 		}
 
-		api := &API{dataStore: mockDataStore}
+		api := &API{dataStore: mockDataStore, paginator: mockPaginator()}
 
 		Convey("When a http get request is sent to /books", func() {
 
@@ -158,25 +164,28 @@ func TestGetBooksHandler(t *testing.T) {
 			Convey("And the response contains a count of zero and no book items", func() {
 				payload, err := ioutil.ReadAll(response.Body)
 				So(err, ShouldBeNil)
-				books := models.Books{}
-				err = json.Unmarshal(payload, &books)
-				So(books.Count, ShouldEqual, 0)
-				So(books.Items, ShouldBeNil)
+				page := models.BooksResponse{}
+				err = json.Unmarshal(payload, &page)
+				So(err, ShouldBeNil)
+				expectedPage := pagination.Page{Count: 0, Offset: offset, Limit: limit, TotalCount: 0}
+
+				So(page.TotalCount, ShouldBeZeroValue)
+				So(page.Count, ShouldEqual, len(page.Items))
+				So(page.Offset, ShouldEqual, offset)
+				So(page.Limit, ShouldEqual, limit)
+				So(page.Page, ShouldResemble, expectedPage)
 			})
 		})
 	})
 
 	Convey("Given a datastore with 2 books", t, func() {
 		mockDataStore := &mock.DataStoreMock{
-			GetBooksFunc: func(ctx context.Context) (models.Books, error) {
-				return models.Books{
-					Count: 2,
-					Items: []models.Book{book1, book2},
-				}, nil
+			GetBooksFunc: func(ctx context.Context, offset int, limit int) ([]models.Book, int, error) {
+				return []models.Book{book1, book2}, 2, nil
 			},
 		}
 
-		api := &API{dataStore: mockDataStore}
+		api := &API{dataStore: mockDataStore, paginator: mockPaginator()}
 
 		Convey("When a http get request is sent to /books", func() {
 			request := httptest.NewRequest(http.MethodGet, "/books", nil)
@@ -192,10 +201,16 @@ func TestGetBooksHandler(t *testing.T) {
 			Convey("And the response contains a count of zero and no book items", func() {
 				payload, err := ioutil.ReadAll(response.Body)
 				So(err, ShouldBeNil)
-				books := models.Books{}
-				err = json.Unmarshal(payload, &books)
-				So(books.Count, ShouldEqual, 2)
-				So(books.Items, ShouldHaveLength, 2)
+				page := models.BooksResponse{}
+				err = json.Unmarshal(payload, &page)
+				So(err, ShouldBeNil)
+				expectedPage := pagination.Page{Count: 2, Offset: offset, Limit: limit, TotalCount: 2}
+
+				So(page.TotalCount, ShouldEqual, 2)
+				So(page.Count, ShouldEqual, len(page.Items))
+				So(page.Offset, ShouldEqual, offset)
+				So(page.Limit, ShouldEqual, limit)
+				So(page.Page, ShouldResemble, expectedPage)
 			})
 		})
 	})
@@ -203,11 +218,12 @@ func TestGetBooksHandler(t *testing.T) {
 	Convey("Given a GET request for a list of books", t, func() {
 		Convey("When GetBooks returns an unexpected database error", func() {
 			mockDataStore := &mock.DataStoreMock{
-				GetBooksFunc: func(ctx context.Context) (models.Books, error) {
-					return models.Books{}, errors.Wrap(errMongoDB, "unexpected error when getting books")
+				GetBooksFunc: func(ctx context.Context, offset int, limit int) ([]models.Book, int, error) {
+					return []models.Book{}, 0, errors.Wrap(errMongoDB, "unexpected error when getting books")
 				},
 			}
-			api := &API{dataStore: mockDataStore}
+
+			api := &API{dataStore: mockDataStore, paginator: mockPaginator()}
 
 			request := httptest.NewRequest(http.MethodGet, "/books", nil)
 			response := httptest.NewRecorder()
@@ -290,4 +306,13 @@ func TestAddBookHandler(t *testing.T) {
 			})
 		})
 	})
+}
+
+func mockPaginator() *mock.PaginatorMock {
+	paginator := &mock.PaginatorMock{
+		SetPaginationValuesFunc: func(r *http.Request) (int, int, error) {
+			return offset, limit, nil
+		},
+	}
+	return paginator
 }

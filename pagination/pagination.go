@@ -32,6 +32,14 @@ func NewPaginator(limit, offset, maximumLimit int) *Paginator {
 	}
 }
 
+// A Page is a section of paginated items, as well as the parameters used to determine the items that belong to the it
+type Page struct {
+	Count      int `json:"count"`
+	Offset     int `json:"offset"`
+	Limit      int `json:"limit"`
+	TotalCount int `json:"total_count"`
+}
+
 // SetPaginationValues returns pagination parameters based on a request, or the default values if the request does not specify them.
 // It returns an error if the parameters are not valid
 func (p *Paginator) SetPaginationValues(r *http.Request) (offset int, limit int, err error) {

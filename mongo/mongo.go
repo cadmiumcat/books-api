@@ -93,9 +93,9 @@ func (m *Mongo) GetBook(ctx context.Context, ID string) (*models.Book, error) {
 	return &book, nil
 }
 
-// GetBooks returns all the existing models.Books.
-// It returns an error if the models.Books cannot be listed.
-func (m *Mongo) GetBooks(ctx context.Context) (models.Books, error) {
+// GetBooks returns all the existing []models.Book.
+// It returns an error if the []models.Book cannot be listed.
+func (m *Mongo) GetBooks(ctx context.Context, offset, limit int) ([]models.Book, int, error) {
 
 	session := m.Session.Copy()
 	defer session.Close()
@@ -105,14 +105,38 @@ func (m *Mongo) GetBooks(ctx context.Context) (models.Books, error) {
 		"collection": m.BooksCollection}
 
 	list := session.DB(m.Database).C(m.BooksCollection).Find(nil)
+	var books []models.Book
 
-	books := &models.Books{}
-	if err := list.All(&books.Items); err != nil {
-		log.Event(ctx, "unable to retrieve books", log.ERROR, log.Error(err), logData)
-		return models.Books{}, errors.Wrap(err, "unexpected error when getting books")
+	totalCount, err := list.Count()
+	if err != nil {
+		if err == mgo.ErrNotFound {
+			log.Event(ctx, "no book resources found", log.WARN, log.Error(err))
+			return []models.Book{}, totalCount, nil
+		}
+		log.Event(ctx, "failure to retrieve lis tof books", log.ERROR, log.Error(err))
+		return nil, totalCount, err
 	}
 
-	return *books, nil
+	if limit > 0 {
+		iter := list.Skip(offset).Limit(limit).Iter()
+
+		defer func() {
+			err := iter.Close()
+			if err != nil {
+				log.Event(ctx, "error closing iterator", log.ERROR, log.Error(err), logData)
+			}
+		}()
+
+		if err := iter.All(&books); err != nil {
+			if err == mgo.ErrNotFound {
+				return []models.Book{}, totalCount, nil
+			}
+			log.Event(ctx, "unable to retrieve books", log.ERROR, log.Error(err), logData)
+			return []models.Book{}, totalCount, errors.Wrap(err, "unexpected error when getting books")
+		}
+	}
+
+	return books, totalCount, nil
 }
 
 // AddReview adds a Review to a Book
