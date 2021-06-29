@@ -7,6 +7,7 @@ import (
 	"github.com/cadmiumcat/books-api/interfaces/mock"
 	"github.com/cadmiumcat/books-api/models"
 	"github.com/cadmiumcat/books-api/mongo"
+	"github.com/cadmiumcat/books-api/pagination"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	. "github.com/smartystreets/goconvey/convey"
@@ -327,15 +328,28 @@ func TestGetReviewsHandler(t *testing.T) {
 			Convey("Then the HTTP response code is 200", func() {
 				So(response.Code, ShouldEqual, http.StatusOK)
 			})
-			Convey("And the GetReviews function is called once", func() {
+			Convey("And the GetReviews function is called once, and the pagination parameters passed to it", func() {
 				So(mockDataStore.GetReviewsCalls(), ShouldHaveLength, 1)
+				So(mockDataStore.GetReviewsCalls()[0].Limit, ShouldEqual, limit)
+				So(mockDataStore.GetReviewsCalls()[0].Offset, ShouldEqual, offset)
+			})
+			Convey("And the paginator is called to extract the pagination parameters ", func() {
+				So(paginator.SetPaginationValuesCalls(), ShouldHaveLength, 1)
+				So(paginator.SetPaginationValuesCalls()[0].R, ShouldEqual, request)
 			})
 			Convey("And the response body contains the right number of reviews", func() {
 				payload, err := ioutil.ReadAll(response.Body)
 				So(err, ShouldBeNil)
-				reviews := models.ReviewsResponse{}
-				err = json.Unmarshal(payload, &reviews)
-				So(reviews.Count, ShouldEqual, 2)
+				page := models.ReviewsResponse{}
+				err = json.Unmarshal(payload, &page)
+				So(err, ShouldBeNil)
+				expectedPage := pagination.Page{Count: 2, Offset: offset, Limit: limit, TotalCount: 2}
+
+				So(page.TotalCount, ShouldEqual, expectedPage.TotalCount)
+				So(page.Count, ShouldEqual, len(page.Items))
+				So(page.Offset, ShouldEqual, offset)
+				So(page.Limit, ShouldEqual, limit)
+				So(page.Page, ShouldResemble, expectedPage)
 			})
 		})
 	})
@@ -364,17 +378,29 @@ func TestGetReviewsHandler(t *testing.T) {
 			Convey("Then the HTTP response code is 200", func() {
 				So(response.Code, ShouldEqual, http.StatusOK)
 			})
-			Convey("And the GetReviews function is called once", func() {
+			Convey("And the GetReviews function is called once, and the pagination parameters passed to it", func() {
 				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
 				So(mockDataStore.GetReviewsCalls(), ShouldHaveLength, 1)
+				So(mockDataStore.GetReviewsCalls()[0].Limit, ShouldEqual, limit)
+				So(mockDataStore.GetReviewsCalls()[0].Offset, ShouldEqual, offset)
+			})
+			Convey("And the paginator is called to extract the pagination parameters ", func() {
+				So(paginator.SetPaginationValuesCalls(), ShouldHaveLength, 1)
+				So(paginator.SetPaginationValuesCalls()[0].R, ShouldEqual, request)
 			})
 			Convey("And the response contains a count of zero and no review items", func() {
 				payload, err := ioutil.ReadAll(response.Body)
 				So(err, ShouldBeNil)
-				reviews := models.ReviewsResponse{}
-				err = json.Unmarshal(payload, &reviews)
-				So(reviews.Count, ShouldEqual, 0)
-				So(reviews.Items, ShouldHaveLength, 0)
+				page := models.ReviewsResponse{}
+				err = json.Unmarshal(payload, &page)
+				So(err, ShouldBeNil)
+				expectedPage := pagination.Page{Count: 0, Offset: offset, Limit: limit, TotalCount: 0}
+
+				So(page.TotalCount, ShouldEqual, expectedPage.TotalCount)
+				So(page.Count, ShouldEqual, len(page.Items))
+				So(page.Offset, ShouldEqual, offset)
+				So(page.Limit, ShouldEqual, limit)
+				So(page.Page, ShouldResemble, expectedPage)
 			})
 		})
 	})
@@ -437,6 +463,12 @@ func TestGetReviewsHandler(t *testing.T) {
 			Convey("And the GetBook and GetReviews functions are called", func() {
 				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
 				So(mockDataStore.GetReviewsCalls(), ShouldHaveLength, 1)
+				So(mockDataStore.GetReviewsCalls()[0].Limit, ShouldEqual, limit)
+				So(mockDataStore.GetReviewsCalls()[0].Offset, ShouldEqual, offset)
+			})
+			Convey("And the paginator is called to extract the pagination parameters ", func() {
+				So(paginator.SetPaginationValuesCalls(), ShouldHaveLength, 1)
+				So(paginator.SetPaginationValuesCalls()[0].R, ShouldEqual, request)
 			})
 		})
 
