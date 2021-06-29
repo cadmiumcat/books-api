@@ -249,7 +249,6 @@ func TestGetBooksHandler(t *testing.T) {
 
 			api.getBooksHandler(response, request)
 
-
 			Convey("Then the GetBooks function is called once", func() {
 				So(mockDataStore.GetBooksCalls(), ShouldHaveLength, 1)
 				So(mockDataStore.GetBooksCalls()[0].Limit, ShouldEqual, limit)
