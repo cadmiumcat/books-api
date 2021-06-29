@@ -39,7 +39,7 @@ var _ interfaces.DataStore = &DataStoreMock{}
 //             GetReviewFunc: func(ctx context.Context, reviewID string) (*models.Review, error) {
 // 	               panic("mock out the GetReview method")
 //             },
-//             GetReviewsFunc: func(ctx context.Context, bookID string) (models.Reviews, error) {
+//             GetReviewsFunc: func(ctx context.Context, bookID string, offset int, limit int) ([]models.Review, error) {
 // 	               panic("mock out the GetReviews method")
 //             },
 //             InitFunc: func(in1 config.MongoConfig) error {
@@ -74,7 +74,7 @@ type DataStoreMock struct {
 	GetReviewFunc func(ctx context.Context, reviewID string) (*models.Review, error)
 
 	// GetReviewsFunc mocks the GetReviews method.
-	GetReviewsFunc func(ctx context.Context, bookID string) (models.Reviews, error)
+	GetReviewsFunc func(ctx context.Context, bookID string, offset int, limit int) ([]models.Review, error)
 
 	// InitFunc mocks the Init method.
 	InitFunc func(in1 config.MongoConfig) error
@@ -132,6 +132,10 @@ type DataStoreMock struct {
 			Ctx context.Context
 			// BookID is the bookID argument value.
 			BookID string
+			// Offset is the offset argument value.
+			Offset int
+			// Limit is the limit argument value.
+			Limit int
 		}
 		// Init holds details about calls to the Init method.
 		Init []struct {
@@ -370,21 +374,25 @@ func (mock *DataStoreMock) GetReviewCalls() []struct {
 }
 
 // GetReviews calls GetReviewsFunc.
-func (mock *DataStoreMock) GetReviews(ctx context.Context, bookID string) (models.Reviews, error) {
+func (mock *DataStoreMock) GetReviews(ctx context.Context, bookID string, offset int, limit int) ([]models.Review, error) {
 	if mock.GetReviewsFunc == nil {
 		panic("DataStoreMock.GetReviewsFunc: method is nil but DataStore.GetReviews was just called")
 	}
 	callInfo := struct {
 		Ctx    context.Context
 		BookID string
+		Offset int
+		Limit  int
 	}{
 		Ctx:    ctx,
 		BookID: bookID,
+		Offset: offset,
+		Limit:  limit,
 	}
 	mock.lockGetReviews.Lock()
 	mock.calls.GetReviews = append(mock.calls.GetReviews, callInfo)
 	mock.lockGetReviews.Unlock()
-	return mock.GetReviewsFunc(ctx, bookID)
+	return mock.GetReviewsFunc(ctx, bookID, offset, limit)
 }
 
 // GetReviewsCalls gets all the calls that were made to GetReviews.
@@ -393,10 +401,14 @@ func (mock *DataStoreMock) GetReviews(ctx context.Context, bookID string) (model
 func (mock *DataStoreMock) GetReviewsCalls() []struct {
 	Ctx    context.Context
 	BookID string
+	Offset int
+	Limit  int
 } {
 	var calls []struct {
 		Ctx    context.Context
 		BookID string
+		Offset int
+		Limit  int
 	}
 	mock.lockGetReviews.RLock()
 	calls = mock.calls.GetReviews

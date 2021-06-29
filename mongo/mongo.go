@@ -113,7 +113,7 @@ func (m *Mongo) GetBooks(ctx context.Context, offset, limit int) ([]models.Book,
 			log.Event(ctx, "no book resources found", log.WARN, log.Error(err))
 			return []models.Book{}, totalCount, nil
 		}
-		log.Event(ctx, "failure to retrieve lis tof books", log.ERROR, log.Error(err))
+		log.Event(ctx, "failure to retrieve list of books", log.ERROR, log.Error(err))
 		return nil, totalCount, err
 	}
 
@@ -230,7 +230,7 @@ func (m *Mongo) GetReview(ctx context.Context, reviewID string) (*models.Review,
 
 // GetReviews returns all the existing models.Reviews.
 // It returns an error if the models.Reviews cannot be listed.
-func (m *Mongo) GetReviews(ctx context.Context, bookID string) (models.Reviews, error) {
+func (m *Mongo) GetReviews(ctx context.Context, bookID string, offset, limit int) ([]models.Review, int, error) {
 
 	session := m.Session.Copy()
 	defer session.Close()
@@ -240,12 +240,36 @@ func (m *Mongo) GetReviews(ctx context.Context, bookID string) (models.Reviews, 
 		"collection": m.ReviewsCollection}
 
 	list := session.DB(m.Database).C(m.ReviewsCollection).Find(bson.M{"links.book": fmt.Sprintf("/books/%s", bookID)})
+	var reviews []models.Review
 
-	review := &models.Reviews{}
-	if err := list.All(&review.Items); err != nil {
-		log.Event(ctx, "unable to retrieve reviews", log.ERROR, log.Error(err), logData)
-		return models.Reviews{}, errors.Wrap(err, "unexpected error when getting reviews")
+	totalCount, err := list.Count()
+	if err != nil {
+		if err == mgo.ErrNotFound {
+			log.Event(ctx, "no reviews resources found for the book", log.WARN, log.Error(err))
+			return []models.Review{}, totalCount, nil
+		}
+		log.Event(ctx, "failure to retrieve list of reviews", log.ERROR, log.Error(err))
+		return nil, totalCount, err
 	}
 
-	return *review, nil
+	if limit > 0 {
+		iter := list.Skip(offset).Limit(limit).Iter()
+
+		defer func() {
+			err := iter.Close()
+			if err != nil {
+				log.Event(ctx, "error closing iterator", log.ERROR, log.Error(err), logData)
+			}
+		}()
+
+		if err := iter.All(&reviews); err != nil {
+			if err == mgo.ErrNotFound {
+				return []models.Review{}, totalCount, nil
+			}
+			log.Event(ctx, "unable to retrieve reviews", log.ERROR, log.Error(err), logData)
+			return []models.Review{}, totalCount, errors.Wrap(err, "unexpected error when getting reviews")
+		}
+	}
+
+	return reviews, totalCount, nil
 }
