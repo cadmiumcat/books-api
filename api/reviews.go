@@ -83,7 +83,6 @@ func (api *API) getReviewsHandler(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
-	//reviews.Count = len(reviews.Items)
 	response := models.ReviewsResponse{
 		Items: reviews,
 		Page: pagination.Page{
