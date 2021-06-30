@@ -19,8 +19,8 @@ var _ interfaces.Paginator = &PaginatorMock{}
 //
 //         // make and configure a mocked interfaces.Paginator
 //         mockedPaginator := &PaginatorMock{
-//             SetPaginationValuesFunc: func(r *http.Request) (int, int, error) {
-// 	               panic("mock out the SetPaginationValues method")
+//             GetPaginationValuesFunc: func(r *http.Request) (int, int, error) {
+// 	               panic("mock out the GetPaginationValues method")
 //             },
 //         }
 //
@@ -29,47 +29,47 @@ var _ interfaces.Paginator = &PaginatorMock{}
 //
 //     }
 type PaginatorMock struct {
-	// SetPaginationValuesFunc mocks the SetPaginationValues method.
-	SetPaginationValuesFunc func(r *http.Request) (int, int, error)
+	// GetPaginationValuesFunc mocks the GetPaginationValues method.
+	GetPaginationValuesFunc func(r *http.Request) (int, int, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// SetPaginationValues holds details about calls to the SetPaginationValues method.
-		SetPaginationValues []struct {
+		// GetPaginationValues holds details about calls to the GetPaginationValues method.
+		GetPaginationValues []struct {
 			// R is the r argument value.
 			R *http.Request
 		}
 	}
-	lockSetPaginationValues sync.RWMutex
+	lockGetPaginationValues sync.RWMutex
 }
 
-// SetPaginationValues calls SetPaginationValuesFunc.
-func (mock *PaginatorMock) SetPaginationValues(r *http.Request) (int, int, error) {
-	if mock.SetPaginationValuesFunc == nil {
-		panic("PaginatorMock.SetPaginationValuesFunc: method is nil but Paginator.SetPaginationValues was just called")
+// GetPaginationValues calls GetPaginationValuesFunc.
+func (mock *PaginatorMock) GetPaginationValues(r *http.Request) (int, int, error) {
+	if mock.GetPaginationValuesFunc == nil {
+		panic("PaginatorMock.GetPaginationValuesFunc: method is nil but Paginator.GetPaginationValues was just called")
 	}
 	callInfo := struct {
 		R *http.Request
 	}{
 		R: r,
 	}
-	mock.lockSetPaginationValues.Lock()
-	mock.calls.SetPaginationValues = append(mock.calls.SetPaginationValues, callInfo)
-	mock.lockSetPaginationValues.Unlock()
-	return mock.SetPaginationValuesFunc(r)
+	mock.lockGetPaginationValues.Lock()
+	mock.calls.GetPaginationValues = append(mock.calls.GetPaginationValues, callInfo)
+	mock.lockGetPaginationValues.Unlock()
+	return mock.GetPaginationValuesFunc(r)
 }
 
-// SetPaginationValuesCalls gets all the calls that were made to SetPaginationValues.
+// GetPaginationValuesCalls gets all the calls that were made to GetPaginationValues.
 // Check the length with:
-//     len(mockedPaginator.SetPaginationValuesCalls())
-func (mock *PaginatorMock) SetPaginationValuesCalls() []struct {
+//     len(mockedPaginator.GetPaginationValuesCalls())
+func (mock *PaginatorMock) GetPaginationValuesCalls() []struct {
 	R *http.Request
 } {
 	var calls []struct {
 		R *http.Request
 	}
-	mock.lockSetPaginationValues.RLock()
-	calls = mock.calls.SetPaginationValues
-	mock.lockSetPaginationValues.RUnlock()
+	mock.lockGetPaginationValues.RLock()
+	calls = mock.calls.GetPaginationValues
+	mock.lockGetPaginationValues.RUnlock()
 	return calls
 }

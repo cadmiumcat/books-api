@@ -40,9 +40,9 @@ type Page struct {
 	TotalCount int `json:"total_count"`
 }
 
-// SetPaginationValues returns pagination parameters based on a request, or the default values if the request does not specify them.
+// GetPaginationValues returns pagination parameters based on a request, or the default values if the request does not specify them.
 // It returns an error if the parameters are not valid
-func (p *Paginator) SetPaginationValues(r *http.Request) (offset int, limit int, err error) {
+func (p *Paginator) GetPaginationValues(r *http.Request) (offset int, limit int, err error) {
 	offsetParameter := r.URL.Query().Get("offset")
 	limitParameter := r.URL.Query().Get("limit")
 

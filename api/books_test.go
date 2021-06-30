@@ -166,8 +166,8 @@ func TestGetBooksHandler(t *testing.T) {
 			})
 
 			Convey("And the paginator is called to extract the pagination parameters ", func() {
-				So(paginator.SetPaginationValuesCalls(), ShouldHaveLength, 1)
-				So(paginator.SetPaginationValuesCalls()[0].R, ShouldEqual, request)
+				So(paginator.GetPaginationValuesCalls(), ShouldHaveLength, 1)
+				So(paginator.GetPaginationValuesCalls()[0].R, ShouldEqual, request)
 			})
 
 			Convey("And the response contains a count of zero and no book items", func() {
@@ -212,8 +212,8 @@ func TestGetBooksHandler(t *testing.T) {
 			})
 
 			Convey("And the paginator is called to extract the pagination parameters ", func() {
-				So(paginator.SetPaginationValuesCalls(), ShouldHaveLength, 1)
-				So(paginator.SetPaginationValuesCalls()[0].R, ShouldEqual, request)
+				So(paginator.GetPaginationValuesCalls(), ShouldHaveLength, 1)
+				So(paginator.GetPaginationValuesCalls()[0].R, ShouldEqual, request)
 			})
 
 			Convey("And the response contains the paginated response", func() {
@@ -256,8 +256,8 @@ func TestGetBooksHandler(t *testing.T) {
 			})
 
 			Convey("And the paginator is called to extract the pagination parameters ", func() {
-				So(paginator.SetPaginationValuesCalls(), ShouldHaveLength, 1)
-				So(paginator.SetPaginationValuesCalls()[0].R, ShouldEqual, request)
+				So(paginator.GetPaginationValuesCalls(), ShouldHaveLength, 1)
+				So(paginator.GetPaginationValuesCalls()[0].R, ShouldEqual, request)
 			})
 
 			Convey("And a 500 InternalServerError status code is returned", func() {
@@ -340,7 +340,7 @@ func TestAddBookHandler(t *testing.T) {
 
 func mockPaginator() *mock.PaginatorMock {
 	paginator := &mock.PaginatorMock{
-		SetPaginationValuesFunc: func(r *http.Request) (int, int, error) {
+		GetPaginationValuesFunc: func(r *http.Request) (int, int, error) {
 			return offset, limit, nil
 		},
 	}

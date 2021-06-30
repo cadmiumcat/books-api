@@ -62,7 +62,7 @@ func (api *API) getReviewsHandler(writer http.ResponseWriter, request *http.Requ
 
 	logData := log.Data{"book_id": bookID}
 
-	offset, limit, err := api.paginator.SetPaginationValues(request)
+	offset, limit, err := api.paginator.GetPaginationValues(request)
 	logData["offset"] = offset
 	logData["limit"] = limit
 	if bookID == "" {

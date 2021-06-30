@@ -334,8 +334,8 @@ func TestGetReviewsHandler(t *testing.T) {
 				So(mockDataStore.GetReviewsCalls()[0].Offset, ShouldEqual, offset)
 			})
 			Convey("And the paginator is called to extract the pagination parameters ", func() {
-				So(paginator.SetPaginationValuesCalls(), ShouldHaveLength, 1)
-				So(paginator.SetPaginationValuesCalls()[0].R, ShouldEqual, request)
+				So(paginator.GetPaginationValuesCalls(), ShouldHaveLength, 1)
+				So(paginator.GetPaginationValuesCalls()[0].R, ShouldEqual, request)
 			})
 			Convey("And the response body contains the right number of reviews", func() {
 				payload, err := ioutil.ReadAll(response.Body)
@@ -385,8 +385,8 @@ func TestGetReviewsHandler(t *testing.T) {
 				So(mockDataStore.GetReviewsCalls()[0].Offset, ShouldEqual, offset)
 			})
 			Convey("And the paginator is called to extract the pagination parameters ", func() {
-				So(paginator.SetPaginationValuesCalls(), ShouldHaveLength, 1)
-				So(paginator.SetPaginationValuesCalls()[0].R, ShouldEqual, request)
+				So(paginator.GetPaginationValuesCalls(), ShouldHaveLength, 1)
+				So(paginator.GetPaginationValuesCalls()[0].R, ShouldEqual, request)
 			})
 			Convey("And the response contains a count of zero and no review items", func() {
 				payload, err := ioutil.ReadAll(response.Body)
@@ -467,8 +467,8 @@ func TestGetReviewsHandler(t *testing.T) {
 				So(mockDataStore.GetReviewsCalls()[0].Offset, ShouldEqual, offset)
 			})
 			Convey("And the paginator is called to extract the pagination parameters ", func() {
-				So(paginator.SetPaginationValuesCalls(), ShouldHaveLength, 1)
-				So(paginator.SetPaginationValuesCalls()[0].R, ShouldEqual, request)
+				So(paginator.GetPaginationValuesCalls(), ShouldHaveLength, 1)
+				So(paginator.GetPaginationValuesCalls()[0].R, ShouldEqual, request)
 			})
 		})
 

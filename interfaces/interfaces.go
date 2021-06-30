@@ -16,7 +16,7 @@ import (
 
 // Paginator defines the required methods from the paginator package
 type Paginator interface {
-	SetPaginationValues(r *http.Request) (offset int, limit int, err error)
+	GetPaginationValues(r *http.Request) (offset int, limit int, err error)
 }
 
 // DataStore implements the methods required to interact with the database

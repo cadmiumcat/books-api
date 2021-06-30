@@ -43,7 +43,7 @@ func (api *API) getBooksHandler(writer http.ResponseWriter, request *http.Reques
 	ctx := request.Context()
 	logData := log.Data{}
 
-	offset, limit, err := api.paginator.SetPaginationValues(request)
+	offset, limit, err := api.paginator.GetPaginationValues(request)
 	logData["offset"] = offset
 	logData["limit"] = limit
 	if err != nil {
