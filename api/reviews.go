@@ -65,6 +65,11 @@ func (api *API) getReviewsHandler(writer http.ResponseWriter, request *http.Requ
 	offset, limit, err := api.paginator.GetPaginationValues(request)
 	logData["offset"] = offset
 	logData["limit"] = limit
+	if err != nil {
+		handleError(ctx, writer, err, logData)
+		return
+	}
+
 	if bookID == "" {
 		handleError(ctx, writer, apierrors.ErrEmptyBookID, logData)
 		return
