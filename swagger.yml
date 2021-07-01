@@ -192,12 +192,14 @@ parameters:
     description: "Maximum number of items that will be returned. A value of zero will return zero items. The default value is 20, and the maximum limit allowed is 1000"
     in: query
     required: false
+    default: 20
     type: integer
   offset:
     name: offset
     description: "Starting index of the items array that will be returned. By default it is zero, meaning that the returned items will start from the beginning."
     in: query
     required: false
+    default: 0
     type: integer
   Book_id:
     in: path
