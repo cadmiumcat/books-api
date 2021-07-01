@@ -7,6 +7,7 @@ import (
 	"github.com/cadmiumcat/books-api/apierrors"
 	"github.com/cadmiumcat/books-api/interfaces"
 	"github.com/cadmiumcat/books-api/mongo"
+	"github.com/cadmiumcat/books-api/pagination"
 	"github.com/gorilla/mux"
 	"io"
 	"io/ioutil"
@@ -104,7 +105,10 @@ func handleError(ctx context.Context, w http.ResponseWriter, err error, data log
 			apierrors.ErrInvalidReview,
 			apierrors.ErrEmptyReviewMessage,
 			apierrors.ErrEmptyReviewUser,
-			apierrors.ErrLongReviewMessage:
+			apierrors.ErrLongReviewMessage,
+			pagination.ErrInvalidLimitParameter,
+			pagination.ErrInvalidOffsetParameter,
+			pagination.ErrLimitOverMax:
 			status = http.StatusBadRequest
 		default:
 			apiError = apierrors.ErrInternalServer
