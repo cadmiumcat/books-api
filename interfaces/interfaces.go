@@ -8,10 +8,16 @@ import (
 	"net/http"
 )
 
+//go:generate moq -out mock/paginator.go -pkg mock . Paginator
 //go:generate moq -out mock/datastore.go -pkg mock . DataStore
 //go:generate moq -out mock/healthcheck.go -pkg mock . HealthChecker
 //go:generate moq -out mock/server.go -pkg mock . HTTPServer
 //go:generate moq -out mock/initaliser.go -pkg mock . Initialiser
+
+// Paginator defines the required methods from the paginator package
+type Paginator interface {
+	GetPaginationValues(r *http.Request) (offset int, limit int, err error)
+}
 
 // DataStore implements the methods required to interact with the database
 type DataStore interface {
@@ -19,9 +25,9 @@ type DataStore interface {
 	Close(ctx context.Context) (err error)
 	AddBook(ctx context.Context, book *models.Book) (err error)
 	GetBook(ctx context.Context, id string) (*models.Book, error)
-	GetBooks(ctx context.Context) (models.Books, error)
+	GetBooks(ctx context.Context, offset, limit int) ([]models.Book, int, error)
 	GetReview(ctx context.Context, reviewID string) (*models.Review, error)
-	GetReviews(ctx context.Context, bookID string) (models.Reviews, error)
+	GetReviews(ctx context.Context, bookID string, offset, limit int) ([]models.Review, int, error)
 	AddReview(ctx context.Context, review *models.Review) (err error)
 	UpdateReview(ctx context.Context, reviewID string, review *models.Review) (err error)
 }

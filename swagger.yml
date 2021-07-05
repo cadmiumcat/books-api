@@ -40,14 +40,28 @@ paths:
     get:
       summary: "Returns a list of all books"
       description: "Returns a list of all books and the total number of books"
+      produces:
+        - application/json
+      parameters:
+        - $ref: "#/parameters/limit"
+        - $ref: "#/parameters/offset"
       responses:
         200:
           description: "Successfully returned a list of all books"
           schema:
             type: object
             properties:
+              count:
+                description: "Number of books in the response"
+                type: integer
+              limit:
+                description: "Number of books requested"
+                type: integer
+              offset:
+                description: "Number of books into the list that the response starts at"
+                type: integer
               total_count:
-                description: "Total number of books in the list"
+                description: "Total number of books"
                 type: integer
               items:
                 description: "list of books"
@@ -128,14 +142,25 @@ paths:
         - application/json
       parameters:
         - $ref: "#/parameters/Book_id"
+        - $ref: "#/parameters/limit"
+        - $ref: "#/parameters/offset"
       responses:
         200:
           description: "Successfully returns a list of reviews for the book with the given id"
           schema:
             type: object
             properties:
+              count:
+                description: "Number of reviews in the response"
+                type: integer
+              limit:
+                description: "Number of reviews requested"
+                type: integer
+              offset:
+                description: "Number of reviews into the list that the response starts at"
+                type: integer
               total_count:
-                description: "Total number of reviews in the list"
+                description: "Total number of reviews"
                 type: integer
               items:
                 description: "list of reviews"
@@ -162,6 +187,20 @@ paths:
         500:
           $ref: "#/definitions/500_error"
 parameters:
+  limit:
+    name: limit
+    description: "Maximum number of items that will be returned. A value of zero will return zero items. The default value is 20, and the maximum limit allowed is 1000"
+    in: query
+    required: false
+    default: 20
+    type: integer
+  offset:
+    name: offset
+    description: "Starting index of the items array that will be returned. By default it is zero, meaning that the returned items will start from the beginning."
+    in: query
+    required: false
+    default: 0
+    type: integer
   Book_id:
     in: path
     name: id

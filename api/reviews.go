@@ -4,6 +4,7 @@ import (
 	"github.com/ONSdigital/log.go/log"
 	"github.com/cadmiumcat/books-api/apierrors"
 	"github.com/cadmiumcat/books-api/models"
+	"github.com/cadmiumcat/books-api/pagination"
 	"github.com/gorilla/mux"
 	"net/http"
 )
@@ -61,27 +62,43 @@ func (api *API) getReviewsHandler(writer http.ResponseWriter, request *http.Requ
 
 	logData := log.Data{"book_id": bookID}
 
+	offset, limit, err := api.paginator.GetPaginationValues(request)
+	logData["offset"] = offset
+	logData["limit"] = limit
+	if err != nil {
+		handleError(ctx, writer, err, logData)
+		return
+	}
+
 	if bookID == "" {
 		handleError(ctx, writer, apierrors.ErrEmptyBookID, logData)
 		return
 	}
 
 	// Confirm that book exists. If bookID not found, then do not check for the reviews
-	_, err := api.dataStore.GetBook(ctx, bookID)
+	_, err = api.dataStore.GetBook(ctx, bookID)
 	if err != nil {
 		handleError(ctx, writer, err, logData)
 		return
 	}
 
-	reviews, err := api.dataStore.GetReviews(ctx, bookID)
+	reviews, totalCount, err := api.dataStore.GetReviews(ctx, bookID, offset, limit)
 	if err != nil {
 		handleError(ctx, writer, err, logData)
 		return
 	}
 
-	reviews.Count = len(reviews.Items)
+	response := models.ReviewsResponse{
+		Items: reviews,
+		Page: pagination.Page{
+			Count:      len(reviews),
+			Offset:     offset,
+			Limit:      limit,
+			TotalCount: totalCount,
+		},
+	}
 
-	if err := WriteJSONBody(reviews, writer, http.StatusOK); err != nil {
+	if err := WriteJSONBody(response, writer, http.StatusOK); err != nil {
 		handleError(ctx, writer, err, logData)
 		return
 	}

@@ -7,6 +7,7 @@ import (
 	"github.com/cadmiumcat/books-api/interfaces/mock"
 	"github.com/cadmiumcat/books-api/models"
 	"github.com/cadmiumcat/books-api/mongo"
+	"github.com/cadmiumcat/books-api/pagination"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	. "github.com/smartystreets/goconvey/convey"
@@ -47,11 +48,6 @@ var bookReview2 = models.Review{
 	Links: &models.ReviewLink{
 		Book: bookID1,
 	},
-}
-
-var emptyReviews = models.Reviews{
-	Count: 0,
-	Items: nil,
 }
 
 var reviewUpdated = models.Review{
@@ -286,7 +282,9 @@ func TestGetReviewsHandler(t *testing.T) {
 	Convey("Given an HTTP GET request to the /books/{id}/reviews endpoint", t, func() {
 
 		Convey("When the {id} is empty", func() {
-			api := &API{}
+			paginator := mockPaginator()
+
+			api := &API{paginator: paginator}
 			request := httptest.NewRequest("GET", "/books/"+emptyID+"/reviews", nil)
 
 			expectedUrlVars := map[string]string{"id": emptyID}
@@ -306,17 +304,17 @@ func TestGetReviewsHandler(t *testing.T) {
 			GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
 				return &models.Book{ID: bookID1}, nil
 			},
-			GetReviewsFunc: func(ctx context.Context, bookID string) (models.Reviews, error) {
-				return models.Reviews{
-					Count: 2,
-					Items: []models.Review{
-						bookReview1,
-						bookReview2,
-					}}, nil
+			GetReviewsFunc: func(ctx context.Context, bookID string, offset int, limit int) ([]models.Review, int, error) {
+				return []models.Review{
+					bookReview1,
+					bookReview2,
+				}, 2, nil
 			},
 		}
 
-		api := &API{dataStore: mockDataStore}
+		paginator := mockPaginator()
+
+		api := &API{dataStore: mockDataStore, paginator: paginator}
 
 		Convey("When a http get request is sent to /books/1/reviews", func() {
 
@@ -330,15 +328,28 @@ func TestGetReviewsHandler(t *testing.T) {
 			Convey("Then the HTTP response code is 200", func() {
 				So(response.Code, ShouldEqual, http.StatusOK)
 			})
-			Convey("And the GetReviews function is called once", func() {
+			Convey("And the GetReviews function is called once, and the pagination parameters passed to it", func() {
 				So(mockDataStore.GetReviewsCalls(), ShouldHaveLength, 1)
+				So(mockDataStore.GetReviewsCalls()[0].Limit, ShouldEqual, limit)
+				So(mockDataStore.GetReviewsCalls()[0].Offset, ShouldEqual, offset)
+			})
+			Convey("And the paginator is called to extract the pagination parameters ", func() {
+				So(paginator.GetPaginationValuesCalls(), ShouldHaveLength, 1)
+				So(paginator.GetPaginationValuesCalls()[0].R, ShouldEqual, request)
 			})
 			Convey("And the response body contains the right number of reviews", func() {
 				payload, err := ioutil.ReadAll(response.Body)
 				So(err, ShouldBeNil)
-				reviews := models.Reviews{}
-				err = json.Unmarshal(payload, &reviews)
-				So(reviews.Count, ShouldEqual, 2)
+				page := models.ReviewsResponse{}
+				err = json.Unmarshal(payload, &page)
+				So(err, ShouldBeNil)
+				expectedPage := pagination.Page{Count: 2, Offset: offset, Limit: limit, TotalCount: 2}
+
+				So(page.TotalCount, ShouldEqual, expectedPage.TotalCount)
+				So(page.Count, ShouldEqual, len(page.Items))
+				So(page.Offset, ShouldEqual, offset)
+				So(page.Limit, ShouldEqual, limit)
+				So(page.Page, ShouldResemble, expectedPage)
 			})
 		})
 	})
@@ -348,14 +359,13 @@ func TestGetReviewsHandler(t *testing.T) {
 			GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
 				return &models.Book{ID: bookID1}, nil
 			},
-			GetReviewsFunc: func(ctx context.Context, bookID string) (models.Reviews, error) {
-				return emptyReviews, nil
+			GetReviewsFunc: func(ctx context.Context, bookID string, offset int, limit int) ([]models.Review, int, error) {
+				return []models.Review{}, 0, nil
 			},
 		}
 
-		api := &API{
-			dataStore: mockDataStore,
-		}
+		paginator := mockPaginator()
+		api := &API{dataStore: mockDataStore, paginator: paginator}
 
 		Convey("When a HTTP GET request is sent to /books/1/reviews", func() {
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
@@ -368,17 +378,29 @@ func TestGetReviewsHandler(t *testing.T) {
 			Convey("Then the HTTP response code is 200", func() {
 				So(response.Code, ShouldEqual, http.StatusOK)
 			})
-			Convey("And the GetReviews function is called once", func() {
+			Convey("And the GetReviews function is called once, and the pagination parameters passed to it", func() {
 				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
 				So(mockDataStore.GetReviewsCalls(), ShouldHaveLength, 1)
+				So(mockDataStore.GetReviewsCalls()[0].Limit, ShouldEqual, limit)
+				So(mockDataStore.GetReviewsCalls()[0].Offset, ShouldEqual, offset)
+			})
+			Convey("And the paginator is called to extract the pagination parameters ", func() {
+				So(paginator.GetPaginationValuesCalls(), ShouldHaveLength, 1)
+				So(paginator.GetPaginationValuesCalls()[0].R, ShouldEqual, request)
 			})
 			Convey("And the response contains a count of zero and no review items", func() {
 				payload, err := ioutil.ReadAll(response.Body)
 				So(err, ShouldBeNil)
-				reviews := models.Reviews{}
-				err = json.Unmarshal(payload, &reviews)
-				So(reviews.Count, ShouldEqual, 0)
-				So(reviews.Items, ShouldBeNil)
+				page := models.ReviewsResponse{}
+				err = json.Unmarshal(payload, &page)
+				So(err, ShouldBeNil)
+				expectedPage := pagination.Page{Count: 0, Offset: offset, Limit: limit, TotalCount: 0}
+
+				So(page.TotalCount, ShouldEqual, expectedPage.TotalCount)
+				So(page.Count, ShouldEqual, len(page.Items))
+				So(page.Offset, ShouldEqual, offset)
+				So(page.Limit, ShouldEqual, limit)
+				So(page.Page, ShouldResemble, expectedPage)
 			})
 		})
 	})
@@ -392,7 +414,8 @@ func TestGetReviewsHandler(t *testing.T) {
 				},
 			}
 
-			api := &API{dataStore: mockDataStore}
+			paginator := mockPaginator()
+			api := &API{dataStore: mockDataStore, paginator: paginator}
 
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
 
@@ -418,12 +441,13 @@ func TestGetReviewsHandler(t *testing.T) {
 				GetBookFunc: func(ctx context.Context, id string) (*models.Book, error) {
 					return &models.Book{ID: bookID1}, nil
 				},
-				GetReviewsFunc: func(ctx context.Context, bookID string) (models.Reviews, error) {
-					return models.Reviews{}, errors.Wrap(errMongoDB, "unexpected error when getting a review")
+				GetReviewsFunc: func(ctx context.Context, bookID string, offset int, limit int) ([]models.Review, int, error) {
+					return []models.Review{}, 0, errors.Wrap(errMongoDB, "unexpected error when getting a review")
 				},
 			}
 
-			api := &API{dataStore: mockDataStore}
+			paginator := mockPaginator()
+			api := &API{dataStore: mockDataStore, paginator: paginator}
 
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
 
@@ -439,6 +463,12 @@ func TestGetReviewsHandler(t *testing.T) {
 			Convey("And the GetBook and GetReviews functions are called", func() {
 				So(mockDataStore.GetBookCalls(), ShouldHaveLength, 1)
 				So(mockDataStore.GetReviewsCalls(), ShouldHaveLength, 1)
+				So(mockDataStore.GetReviewsCalls()[0].Limit, ShouldEqual, limit)
+				So(mockDataStore.GetReviewsCalls()[0].Offset, ShouldEqual, offset)
+			})
+			Convey("And the paginator is called to extract the pagination parameters ", func() {
+				So(paginator.GetPaginationValuesCalls(), ShouldHaveLength, 1)
+				So(paginator.GetPaginationValuesCalls()[0].R, ShouldEqual, request)
 			})
 		})
 
@@ -449,7 +479,8 @@ func TestGetReviewsHandler(t *testing.T) {
 				},
 			}
 
-			api := &API{dataStore: mockDataStore}
+			paginator := mockPaginator()
+			api := &API{dataStore: mockDataStore, paginator: paginator}
 
 			request := httptest.NewRequest(http.MethodGet, "/books/"+bookID1+"/reviews", nil)
 
@@ -844,5 +875,4 @@ func TestUpdateReviewHandler(t *testing.T) {
 			})
 		})
 	})
-
 }

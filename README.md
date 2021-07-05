@@ -33,9 +33,12 @@ Install and run a mongoDB
 | HEALTHCHECK_INTERVAL         | 30s             | Time between self-healthchecks (`time.Duration` format)                                                            |
 | HEALTHCHECK_CRITICAL_TIMEOUT | 90s             | Time to wait until an unhealthy dependent propagates its state to make this app unhealthy (`time.Duration` format) |
 | MONGODB_BIND_ADDR            | localhost:27017 | The MongoDB bind address                                                                                           |
-| MONGODB_BOOKS_COLLECTION     | books           | The MongoDB books collection                                                                                        |
-| MONGODB_REVIEWS_COLLECTION   | reviews         | The MongoDB reviews collection                                                                                        |
-| MONGODB_DATABASE             | bookStore       | MongoDB database                                                                                                 |
+| MONGODB_BOOKS_COLLECTION     | books           | The MongoDB books collection                                                                                       |
+| MONGODB_REVIEWS_COLLECTION   | reviews         | The MongoDB reviews collection                                                                                     |
+| MONGODB_DATABASE             | bookStore       | MongoDB database                                                                                                   |
+| DEFAULT_MAXIMUM_LIMIT        | 1000            | Pagination: maximum number of items returned                                                                       |
+| DEFAULT_LIMIT                | 20              | Pagination: default number of items returned                                                                       |
+| DEFAULT_OFFSET               | 0               | Pagination: default number of documents into the full list that a response starts at                               |
 
 ### Electronic Library Design
 

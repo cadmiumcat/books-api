@@ -7,6 +7,7 @@ import (
 	"github.com/cadmiumcat/books-api/apierrors"
 	"github.com/cadmiumcat/books-api/interfaces"
 	"github.com/cadmiumcat/books-api/mongo"
+	"github.com/cadmiumcat/books-api/pagination"
 	"github.com/gorilla/mux"
 	"io"
 	"io/ioutil"
@@ -16,15 +17,17 @@ import (
 type API struct {
 	host      string
 	router    *mux.Router
+	paginator interfaces.Paginator
 	dataStore interfaces.DataStore
 	hc        interfaces.HealthChecker
 }
 
 // Setup sets up the endpoints.
-func Setup(ctx context.Context, host string, router *mux.Router, dataStore interfaces.DataStore, hc interfaces.HealthChecker) *API {
+func Setup(ctx context.Context, host string, router *mux.Router, paginator interfaces.Paginator, dataStore interfaces.DataStore, hc interfaces.HealthChecker) *API {
 	api := &API{
 		host:      host,
 		router:    router,
+		paginator: paginator,
 		dataStore: dataStore,
 		hc:        hc,
 	}
@@ -102,7 +105,10 @@ func handleError(ctx context.Context, w http.ResponseWriter, err error, data log
 			apierrors.ErrInvalidReview,
 			apierrors.ErrEmptyReviewMessage,
 			apierrors.ErrEmptyReviewUser,
-			apierrors.ErrLongReviewMessage:
+			apierrors.ErrLongReviewMessage,
+			pagination.ErrInvalidLimitParameter,
+			pagination.ErrInvalidOffsetParameter,
+			pagination.ErrLimitOverMax:
 			status = http.StatusBadRequest
 		default:
 			apiError = apierrors.ErrInternalServer

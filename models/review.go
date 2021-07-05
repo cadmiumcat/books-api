@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"github.com/cadmiumcat/books-api/apierrors"
+	"github.com/cadmiumcat/books-api/pagination"
 	uuid "github.com/satori/go.uuid"
 	"time"
 )
@@ -21,12 +22,6 @@ type Review struct {
 type ReviewLink struct {
 	Self string `json:"self" bson:"self"`
 	Book string `json:"book" bson:"book"`
-}
-
-// Reviews contains all the items (Review) in the library and a total count of those items
-type Reviews struct {
-	Count int      `json:"totalCount"`
-	Items []Review `json:"items"`
 }
 
 func (r Review) Validate() error {
@@ -48,6 +43,12 @@ func (r Review) Validate() error {
 type User struct {
 	Forenames string `json:"forenames,omitempty" bson:"forenames,omitempty"`
 	Surname   string `json:"surname,omitempty" bson:"surname,omitempty"`
+}
+
+// ReviewsResponse represents a paginated list of Books
+type ReviewsResponse struct {
+	Items []Review `json:"items"`
+	pagination.Page
 }
 
 // NewReview returns a Review structure based on a bookID

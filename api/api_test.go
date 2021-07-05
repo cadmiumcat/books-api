@@ -26,7 +26,7 @@ func TestSetup(t *testing.T) {
 	Convey("Given an API instance", t, func() {
 		r := mux.NewRouter()
 		ctx := context.Background()
-		api := Setup(ctx, "", r, &mock.DataStoreMock{}, &mock.HealthCheckerMock{})
+		api := Setup(ctx, "", r, &mock.PaginatorMock{}, &mock.DataStoreMock{}, &mock.HealthCheckerMock{})
 
 		Convey("When created the following routes should have been added", func() {
 			So(hasRoute(t, api.router, "/books", "GET"), ShouldBeTrue)
