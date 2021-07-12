@@ -9,3 +9,4 @@ build/
 /./develop_blackbox/pubring.kbx~
 /./develop_blackbox/secring.gpg
 /secret_prod_file.txt
+/secret_dev_file.txt
