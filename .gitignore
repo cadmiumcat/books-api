@@ -5,3 +5,6 @@ build/
 /.blackbox/secring.gpg
 /file_to_encrypt.txt
 /my-file.txt
+/./develop_blackbox/pubring.gpg~
+/./develop_blackbox/pubring.kbx~
+/./develop_blackbox/secring.gpg
