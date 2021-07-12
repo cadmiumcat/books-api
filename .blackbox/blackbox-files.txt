@@ -1,2 +1,0 @@
-file_to_encrypt.txt
-my-file.txt
